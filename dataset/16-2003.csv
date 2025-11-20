@@ -1,0 +1,331 @@
+REGIONE,PROVINCIA,QUESITO,SUM of ELETTORI_TOT,SUM of ELETTORI_M,SUM of ELETTORI_F,SUM of VOTANTI,SUM of VOTANTI_M,SUM of VOTANTI_F,SUM of VOTI_SI,SUM of VOTI_NO,SUM of SKBIANCHE,Calculated Field 1
+ABRUZZO,Chieti,Reintegrazione dei lavoratori illegittimamente licenziati,323183,0,0,89386,0,0,75512,10319,2308,27.66%
+,,Servitu' coattiva di elettrodotto,323183,0,0,89507,0,0,74456,11374,2360,27.70%
+,Chieti Total,,646366,0,0,178893,0,0,149968,21693,4668,27.68%
+,L'Aquila,Reintegrazione dei lavoratori illegittimamente licenziati,248621,0,0,63972,0,0,53257,7907,1575,25.73%
+,,Servitu' coattiva di elettrodotto,248621,0,0,64058,0,0,53401,7763,1657,25.77%
+,L'Aquila Total,,497242,0,0,128030,0,0,106658,15670,3232,25.75%
+,Pescara,Reintegrazione dei lavoratori illegittimamente licenziati,251475,0,0,66630,0,0,56016,8220,1472,26.50%
+,,Servitu' coattiva di elettrodotto,251475,0,0,66724,0,0,56275,7883,1591,26.53%
+,Pescara Total,,502950,0,0,133354,0,0,112291,16103,3063,26.51%
+,Teramo,Reintegrazione dei lavoratori illegittimamente licenziati,240905,0,0,60911,0,0,51208,7320,1569,25.28%
+,,Servitu' coattiva di elettrodotto,240905,0,0,60956,0,0,50318,8019,1756,25.30%
+,Teramo Total,,481810,0,0,121867,0,0,101526,15339,3325,25.29%
+ABRUZZO Total,,,2128368,0,0,562144,0,0,470443,68805,14288,26.41%
+BASILICATA,Matera,Reintegrazione dei lavoratori illegittimamente licenziati,163755,0,0,37795,0,0,31947,4252,781,23.08%
+,,Servitu' coattiva di elettrodotto,163755,0,0,37840,0,0,31715,4455,809,23.11%
+,Matera Total,,327510,0,0,75635,0,0,63662,8707,1590,23.09%
+,Potenza,Reintegrazione dei lavoratori illegittimamente licenziati,321862,0,0,82244,0,0,68476,9528,2358,25.55%
+,,Servitu' coattiva di elettrodotto,321862,0,0,82429,0,0,69357,9144,2093,25.61%
+,Potenza Total,,643724,0,0,164673,0,0,137833,18672,4451,25.58%
+BASILICATA Total,,,971234,0,0,240308,0,0,201495,27379,6041,24.74%
+CALABRIA,Catanzaro,Reintegrazione dei lavoratori illegittimamente licenziati,295771,0,0,59115,0,0,50875,5837,1463,19.99%
+,,Servitu' coattiva di elettrodotto,295771,0,0,59235,0,0,50510,6305,1532,20.03%
+,Catanzaro Total,,591542,0,0,118350,0,0,101385,12142,2995,20.01%
+,Cosenza,Reintegrazione dei lavoratori illegittimamente licenziati,593206,0,0,125489,0,0,106665,13028,3524,21.15%
+,,Servitu' coattiva di elettrodotto,593206,0,0,125775,0,0,108206,12042,2995,21.20%
+,Cosenza Total,,1186412,0,0,251264,0,0,214871,25070,6519,21.18%
+,Crotone,Reintegrazione dei lavoratori illegittimamente licenziati,134171,0,0,19263,0,0,16580,1991,440,14.36%
+,,Servitu' coattiva di elettrodotto,134171,0,0,19271,0,0,16609,1979,432,14.36%
+,Crotone Total,,268342,0,0,38534,0,0,33189,3970,872,14.36%
+,Reggio di Calabria,Reintegrazione dei lavoratori illegittimamente licenziati,446941,0,0,76066,0,0,64830,7959,1941,17.02%
+,,Servitu' coattiva di elettrodotto,446941,0,0,76287,0,0,64204,8386,1992,17.07%
+,Reggio di Calabria Total,,893882,0,0,152353,0,0,129034,16345,3933,17.04%
+,Vibo Valentia,Reintegrazione dei lavoratori illegittimamente licenziati,134145,0,0,25675,0,0,21245,2891,945,19.14%
+,,Servitu' coattiva di elettrodotto,134145,0,0,25714,0,0,21650,2714,823,19.17%
+,Vibo Valentia Total,,268290,0,0,51389,0,0,42895,5605,1768,19.15%
+CALABRIA Total,,,3208468,0,0,611890,0,0,521374,63132,16087,19.07%
+CAMPANIA,Avellino,Reintegrazione dei lavoratori illegittimamente licenziati,350709,0,0,80271,0,0,68430,9036,1956,22.89%
+,,Servitu' coattiva di elettrodotto,350709,0,0,80474,0,0,67472,9959,1925,22.95%
+,Avellino Total,,701418,0,0,160745,0,0,135902,18995,3881,22.92%
+,Benevento,Reintegrazione dei lavoratori illegittimamente licenziati,235579,0,0,54126,0,0,45306,6410,1505,22.98%
+,,Servitu' coattiva di elettrodotto,235579,0,0,54206,0,0,45241,6811,1415,23.01%
+,Benevento Total,,471158,0,0,108332,0,0,90547,13221,2920,22.99%
+,Caserta,Reintegrazione dei lavoratori illegittimamente licenziati,671730,0,0,132734,0,0,113288,14542,2955,19.76%
+,,Servitu' coattiva di elettrodotto,671730,0,0,132795,0,0,110358,17091,3339,19.77%
+,Caserta Total,,1343460,0,0,265529,0,0,223646,31633,6294,19.76%
+,Napoli,Reintegrazione dei lavoratori illegittimamente licenziati,2413380,0,0,549538,0,0,487579,45003,6508,22.77%
+,,Servitu' coattiva di elettrodotto,2413380,0,0,550782,0,0,464438,65788,8690,22.82%
+,Napoli Total,,4826760,0,0,1100320,0,0,952017,110791,15198,22.80%
+,Salerno,Reintegrazione dei lavoratori illegittimamente licenziati,869432,0,0,202388,0,0,167964,24870,5370,23.28%
+,,Servitu' coattiva di elettrodotto,869432,0,0,202363,0,0,166638,26924,5258,23.28%
+,Salerno Total,,1738864,0,0,404751,0,0,334602,51794,10628,23.28%
+CAMPANIA Total,,,9081660,0,0,2039677,0,0,1736714,226434,38921,22.46%
+EMILIA R.,Bologna,Reintegrazione dei lavoratori illegittimamente licenziati,770478,0,0,258188,0,0,220745,29478,5736,33.51%
+,,Servitu' coattiva di elettrodotto,770478,0,0,259355,0,0,216383,33537,6562,33.66%
+,Bologna Total,,1540956,0,0,517543,0,0,437128,63015,12298,33.59%
+,Ferrara,Reintegrazione dei lavoratori illegittimamente licenziati,300210,0,0,106317,0,0,88022,12968,2392,35.41%
+,,Servitu' coattiva di elettrodotto,300210,0,0,106638,0,0,87060,14063,2567,35.52%
+,Ferrara Total,,600420,0,0,212955,0,0,175082,27031,4959,35.47%
+,Forlì -Cesena,Reintegrazione dei lavoratori illegittimamente licenziati,297800,0,0,84288,0,0,71364,10299,1717,28.30%
+,,Servitu' coattiva di elettrodotto,297800,0,0,84588,0,0,71981,10135,1547,28.40%
+,Forlì -Cesena Total,,595600,0,0,168876,0,0,143345,20434,3264,28.35%
+,Modena,Reintegrazione dei lavoratori illegittimamente licenziati,518016,0,0,159554,0,0,132149,21510,4271,30.80%
+,,Servitu' coattiva di elettrodotto,518016,0,0,159935,0,0,130695,23316,4677,30.87%
+,Modena Total,,1036032,0,0,319489,0,0,262844,44826,8948,30.84%
+,Parma,Reintegrazione dei lavoratori illegittimamente licenziati,334275,0,0,89431,0,0,74304,12172,2024,26.75%
+,,Servitu' coattiva di elettrodotto,334275,0,0,89686,0,0,73051,13351,2357,26.83%
+,Parma Total,,668550,0,0,179117,0,0,147355,25523,4381,26.79%
+,Piacenza,Reintegrazione dei lavoratori illegittimamente licenziati,223628,0,0,54350,0,0,43972,8458,1440,24.30%
+,,Servitu' coattiva di elettrodotto,223628,0,0,54470,0,0,42380,9646,1751,24.36%
+,Piacenza Total,,447256,0,0,108820,0,0,86352,18104,3191,24.33%
+,Ravenna,Reintegrazione dei lavoratori illegittimamente licenziati,296851,0,0,91250,0,0,76979,10303,2080,30.74%
+,,Servitu' coattiva di elettrodotto,296851,0,0,91579,0,0,76361,10889,2246,30.85%
+,Ravenna Total,,593702,0,0,182829,0,0,153340,21192,4326,30.79%
+,Reggio nell'Emilia,Reintegrazione dei lavoratori illegittimamente licenziati,376632,0,0,136025,0,0,115881,15705,3381,36.12%
+,,Servitu' coattiva di elettrodotto,376632,0,0,136391,0,0,112957,18513,3829,36.21%
+,Reggio nell'Emilia Total,,753264,0,0,272416,0,0,228838,34218,7210,36.16%
+,Rimini,Reintegrazione dei lavoratori illegittimamente licenziati,229416,0,0,60536,0,0,51690,7082,1259,26.39%
+,,Servitu' coattiva di elettrodotto,229416,0,0,60819,0,0,53365,5996,973,26.51%
+,Rimini Total,,458832,0,0,121355,0,0,105055,13078,2232,26.45%
+EMILIA R. Total,,,6694612,0,0,2083400,0,0,1739339,267421,50809,31.12%
+FRIULI V.G.,Gorizia,Reintegrazione dei lavoratori illegittimamente licenziati,117198,0,0,39411,0,0,33106,5054,854,33.63%
+,,Servitu' coattiva di elettrodotto,117198,0,0,39603,0,0,33822,4628,764,33.79%
+,Gorizia Total,,234396,0,0,79014,0,0,66928,9682,1618,33.71%
+,Pordenone,Reintegrazione dei lavoratori illegittimamente licenziati,237040,0,0,60429,0,0,47362,10975,1426,25.49%
+,,Servitu' coattiva di elettrodotto,237040,0,0,60844,0,0,50036,9109,1102,25.67%
+,Pordenone Total,,474080,0,0,121273,0,0,97398,20084,2528,25.58%
+,Trieste,Reintegrazione dei lavoratori illegittimamente licenziati,205645,0,0,49169,0,0,40094,7438,1581,23.91%
+,,Servitu' coattiva di elettrodotto,205645,0,0,49349,0,0,42110,5968,1345,24.00%
+,Trieste Total,,411290,0,0,98518,0,0,82204,13406,2926,23.95%
+,Udine,Reintegrazione dei lavoratori illegittimamente licenziati,433798,0,0,108502,0,0,85124,18731,2430,25.01%
+,,Servitu' coattiva di elettrodotto,433798,0,0,109050,0,0,88638,16273,2059,25.14%
+,Udine Total,,867596,0,0,217552,0,0,173762,35004,4489,25.08%
+FRIULI V.G. Total,,,1987362,0,0,516357,0,0,420292,78176,11561,25.98%
+LAZIO,Frosinone,Reintegrazione dei lavoratori illegittimamente licenziati,403969,0,0,116578,0,0,99428,12536,2646,28.86%
+,,Servitu' coattiva di elettrodotto,403969,0,0,116686,0,0,97767,14372,2827,28.88%
+,Frosinone Total,,807938,0,0,233264,0,0,197195,26908,5473,28.87%
+,Latina,Reintegrazione dei lavoratori illegittimamente licenziati,427106,0,0,93343,0,0,78106,12200,1845,21.85%
+,,Servitu' coattiva di elettrodotto,427106,0,0,93427,0,0,78024,12432,1826,21.87%
+,Latina Total,,854212,0,0,186770,0,0,156130,24632,3671,21.86%
+,Rieti,Reintegrazione dei lavoratori illegittimamente licenziati,124945,0,0,37774,0,0,30736,4585,908,30.23%
+,,Servitu' coattiva di elettrodotto,124945,0,0,37736,0,0,30331,5003,938,30.20%
+,Rieti Total,,249890,0,0,75510,0,0,61067,9588,1846,30.22%
+,Roma,Reintegrazione dei lavoratori illegittimamente licenziati,3186649,0,0,949166,0,0,803310,105249,12563,29.79%
+,,Servitu' coattiva di elettrodotto,3186649,0,0,936194,0,0,786644,119800,15122,29.38%
+,Roma Total,,6373298,0,0,1885360,0,0,1589954,225049,27685,29.58%
+,Viterbo,Reintegrazione dei lavoratori illegittimamente licenziati,244760,0,0,63289,0,0,53315,7495,1510,25.86%
+,,Servitu' coattiva di elettrodotto,244760,0,0,63346,0,0,52291,8425,1635,25.88%
+,Viterbo Total,,489520,0,0,126635,0,0,105606,15920,3145,25.87%
+LAZIO Total,,,8774858,0,0,2507539,0,0,2109952,302097,41820,28.58%
+LIGURIA,Genova,Reintegrazione dei lavoratori illegittimamente licenziati,757138,0,0,210804,0,0,185357,19989,3454,27.84%
+,,Servitu' coattiva di elettrodotto,757138,0,0,211245,0,0,181327,23783,4414,27.90%
+,Genova Total,,1514276,0,0,422049,0,0,366684,43772,7868,27.87%
+,Imperia,Reintegrazione dei lavoratori illegittimamente licenziati,178626,0,0,32076,0,0,26235,4452,837,17.96%
+,,Servitu' coattiva di elettrodotto,178626,0,0,32254,0,0,27760,3549,561,18.06%
+,Imperia Total,,357252,0,0,64330,0,0,53995,8001,1398,18.01%
+,La Spezia,Reintegrazione dei lavoratori illegittimamente licenziati,188183,0,0,57243,0,0,50558,5156,1064,30.42%
+,,Servitu' coattiva di elettrodotto,188183,0,0,57411,0,0,50564,5191,1088,30.51%
+,La Spezia Total,,376366,0,0,114654,0,0,101122,10347,2152,30.46%
+,Savona,Reintegrazione dei lavoratori illegittimamente licenziati,238445,0,0,61048,0,0,51467,7455,1477,25.60%
+,,Servitu' coattiva di elettrodotto,238445,0,0,61269,0,0,52100,7007,1457,25.70%
+,Savona Total,,476890,0,0,122317,0,0,103567,14462,2934,25.65%
+LIGURIA Total,,,2724784,0,0,723350,0,0,625368,76582,14352,26.55%
+LOMBARDIA,Bergamo,Reintegrazione dei lavoratori illegittimamente licenziati,783462,0,0,179223,0,0,143400,29103,4687,22.88%
+,,Servitu' coattiva di elettrodotto,783462,0,0,179918,0,0,142566,30546,4814,22.96%
+,Bergamo Total,,1566924,0,0,359141,0,0,285966,59649,9501,22.92%
+,Brescia,Reintegrazione dei lavoratori illegittimamente licenziati,882489,0,0,198934,0,0,167704,26058,4078,22.54%
+,,Servitu' coattiva di elettrodotto,882489,0,0,199328,0,0,160190,32230,5321,22.59%
+,Brescia Total,,1764978,0,0,398262,0,0,327894,58288,9399,22.56%
+,Como,Reintegrazione dei lavoratori illegittimamente licenziati,445535,0,0,97496,0,0,74989,18548,2612,21.88%
+,,Servitu' coattiva di elettrodotto,445535,0,0,97942,0,0,77042,17211,2403,21.98%
+,Como Total,,891070,0,0,195438,0,0,152031,35759,5015,21.93%
+,Cremona,Reintegrazione dei lavoratori illegittimamente licenziati,278407,0,0,73552,0,0,60517,10005,2015,26.42%
+,,Servitu' coattiva di elettrodotto,278407,0,0,73574,0,0,56431,13351,2658,26.43%
+,Cremona Total,,556814,0,0,147126,0,0,116948,23356,4673,26.42%
+,Lecco,Reintegrazione dei lavoratori illegittimamente licenziati,255995,0,0,58243,0,0,47461,8730,1343,22.75%
+,,Servitu' coattiva di elettrodotto,255995,0,0,58480,0,0,47618,8739,1436,22.84%
+,Lecco Total,,511990,0,0,116723,0,0,95079,17469,2779,22.80%
+,Lodi,Reintegrazione dei lavoratori illegittimamente licenziati,165151,0,0,49151,0,0,41367,6193,1004,29.76%
+,,Servitu' coattiva di elettrodotto,165151,0,0,49192,0,0,38110,8885,1474,29.79%
+,Lodi Total,,330302,0,0,98343,0,0,79477,15078,2478,29.77%
+,Mantova,Reintegrazione dei lavoratori illegittimamente licenziati,312536,0,0,87071,0,0,71985,11727,2224,27.86%
+,,Servitu' coattiva di elettrodotto,312536,0,0,87333,0,0,70388,13208,2556,27.94%
+,Mantova Total,,625072,0,0,174404,0,0,142373,24935,4780,27.90%
+,Milano,Reintegrazione dei lavoratori illegittimamente licenziati,3076902,0,0,816272,0,0,693811,102236,12589,26.53%
+,,Servitu' coattiva di elettrodotto,3076902,0,0,818021,0,0,676200,117661,15985,26.59%
+,Milano Total,,6153804,0,0,1634293,0,0,1370011,219897,28574,26.56%
+,Pavia,Reintegrazione dei lavoratori illegittimamente licenziati,419393,0,0,114804,0,0,92204,16961,3691,27.37%
+,,Servitu' coattiva di elettrodotto,419393,0,0,114899,0,0,88725,19635,3591,27.40%
+,Pavia Total,,838786,0,0,229703,0,0,180929,36596,7282,27.39%
+,Sondrio,Reintegrazione dei lavoratori illegittimamente licenziati,146123,0,0,23969,0,0,18594,4128,880,16.40%
+,,Servitu' coattiva di elettrodotto,146123,0,0,24232,0,0,20239,3087,590,16.58%
+,Sondrio Total,,292246,0,0,48201,0,0,38833,7215,1470,16.49%
+,Varese,Reintegrazione dei lavoratori illegittimamente licenziati,676418,0,0,168586,0,0,136626,26224,3516,24.92%
+,,Servitu' coattiva di elettrodotto,676418,0,0,169121,0,0,136699,26755,3458,25.00%
+,Varese Total,,1352836,0,0,337707,0,0,273325,52979,6974,24.96%
+LOMBARDIA Total,,,14884822,0,0,3739341,0,0,3062866,551221,82925,25.12%
+MARCHE,Ancona,Reintegrazione dei lavoratori illegittimamente licenziati,372935,0,0,114168,0,0,97271,12631,2957,30.61%
+,,Servitu' coattiva di elettrodotto,372935,0,0,114381,0,0,95301,14308,3360,30.67%
+,Ancona Total,,745870,0,0,228549,0,0,192572,26939,6317,30.64%
+,Ascoli Piceno,Reintegrazione dei lavoratori illegittimamente licenziati,300723,0,0,80852,0,0,65791,10027,2013,26.89%
+,,Servitu' coattiva di elettrodotto,300723,0,0,81017,0,0,65090,10715,2149,26.94%
+,Ascoli Piceno Total,,601446,0,0,161869,0,0,130881,20742,4162,26.91%
+,Macerata,Reintegrazione dei lavoratori illegittimamente licenziati,248302,0,0,59667,0,0,48402,8483,1870,24.03%
+,,Servitu' coattiva di elettrodotto,248302,0,0,59800,0,0,47267,9457,2132,24.08%
+,Macerata Total,,496604,0,0,119467,0,0,95669,17940,4002,24.06%
+,Pesaro e Urbino,Reintegrazione dei lavoratori illegittimamente licenziati,290501,0,0,76107,0,0,63481,9649,1977,26.20%
+,,Servitu' coattiva di elettrodotto,290501,0,0,76276,0,0,64261,9420,1752,26.26%
+,Pesaro e Urbino Total,,581002,0,0,152383,0,0,127742,19069,3729,26.23%
+MARCHE Total,,,2424922,0,0,662268,0,0,546864,84690,18210,27.31%
+MOLISE,Campobasso,Reintegrazione dei lavoratori illegittimamente licenziati,192693,0,0,52277,0,0,43801,6051,1579,27.13%
+,,Servitu' coattiva di elettrodotto,192693,0,0,52354,0,0,43027,6748,1681,27.17%
+,Campobasso Total,,385386,0,0,104631,0,0,86828,12799,3260,27.15%
+,Isernia,Reintegrazione dei lavoratori illegittimamente licenziati,75127,0,0,17434,0,0,14271,2317,633,23.21%
+,,Servitu' coattiva di elettrodotto,75127,0,0,17473,0,0,14255,2393,598,23.26%
+,Isernia Total,,150254,0,0,34907,0,0,28526,4710,1231,23.23%
+MOLISE Total,,,535640,0,0,139538,0,0,115354,17509,4491,26.05%
+PIEMONTE,Alessandria,Reintegrazione dei lavoratori illegittimamente licenziati,363405,0,0,103035,0,0,83276,14792,2692,28.35%
+,,Servitu' coattiva di elettrodotto,363405,0,0,103544,0,0,83216,15085,2693,28.49%
+,Alessandria Total,,726810,0,0,206579,0,0,166492,29877,5385,28.42%
+,Asti,Reintegrazione dei lavoratori illegittimamente licenziati,162904,0,0,45034,0,0,35492,7448,1400,27.64%
+,,Servitu' coattiva di elettrodotto,162904,0,0,45342,0,0,35953,7364,1245,27.83%
+,Asti Total,,325808,0,0,90376,0,0,71445,14812,2645,27.74%
+,Biella,Reintegrazione dei lavoratori illegittimamente licenziati,158252,0,0,42304,0,0,33381,6943,1248,26.73%
+,,Servitu' coattiva di elettrodotto,158252,0,0,42493,0,0,34042,6565,1180,26.85%
+,Biella Total,,316504,0,0,84797,0,0,67423,13508,2428,26.79%
+,Cuneo,Reintegrazione dei lavoratori illegittimamente licenziati,454917,0,0,106954,0,0,81218,19722,3974,23.51%
+,,Servitu' coattiva di elettrodotto,454917,0,0,107302,0,0,82394,19108,3766,23.59%
+,Cuneo Total,,909834,0,0,214256,0,0,163612,38830,7740,23.55%
+,Novara,Reintegrazione dei lavoratori illegittimamente licenziati,286095,0,0,73572,0,0,59812,11003,1780,25.72%
+,,Servitu' coattiva di elettrodotto,286095,0,0,73768,0,0,58943,12162,1834,25.78%
+,Novara Total,,572190,0,0,147340,0,0,118755,23165,3614,25.75%
+,Torino,Reintegrazione dei lavoratori illegittimamente licenziati,1834343,0,0,580264,0,0,489296,74466,9768,31.63%
+,,Servitu' coattiva di elettrodotto,1834343,0,0,581488,0,0,481412,82536,10625,31.70%
+,Torino Total,,3668686,0,0,1161752,0,0,970708,157002,20393,31.67%
+,Verbano-Cusio-Ossola,Reintegrazione dei lavoratori illegittimamente licenziati,133066,0,0,29912,0,0,23451,4696,824,22.48%
+,,Servitu' coattiva di elettrodotto,133066,0,0,30179,0,0,24161,4364,609,22.68%
+,Verbano-Cusio-Ossola Total,,266132,0,0,60091,0,0,47612,9060,1433,22.58%
+,Vercelli,Reintegrazione dei lavoratori illegittimamente licenziati,150333,0,0,42161,0,0,33297,6672,1426,28.05%
+,,Servitu' coattiva di elettrodotto,150333,0,0,42240,0,0,32271,7635,1537,28.10%
+,Vercelli Total,,300666,0,0,84401,0,0,65568,14307,2963,28.07%
+PIEMONTE Total,,,7086630,0,0,2049592,0,0,1671615,300561,46601,28.92%
+PUGLIA,Bari,Reintegrazione dei lavoratori illegittimamente licenziati,1267875,0,0,302452,0,0,257731,35745,5212,23.86%
+,,Servitu' coattiva di elettrodotto,1267875,0,0,303160,0,0,250725,42178,5928,23.91%
+,Bari Total,,2535750,0,0,605612,0,0,508456,77923,11140,23.88%
+,Brindisi,Reintegrazione dei lavoratori illegittimamente licenziati,325960,0,0,72528,0,0,63083,6899,1530,22.25%
+,,Servitu' coattiva di elettrodotto,325960,0,0,72585,0,0,61692,8223,1744,22.27%
+,Brindisi Total,,651920,0,0,145113,0,0,124775,15122,3274,22.26%
+,Foggia,Reintegrazione dei lavoratori illegittimamente licenziati,538755,0,0,127137,0,0,108244,13556,2300,23.60%
+,,Servitu' coattiva di elettrodotto,538755,0,0,126692,0,0,104883,16487,2665,23.52%
+,Foggia Total,,1077510,0,0,253829,0,0,213127,30043,4965,23.56%
+,Lecce,Reintegrazione dei lavoratori illegittimamente licenziati,656736,0,0,117992,0,0,99103,12869,3080,17.97%
+,,Servitu' coattiva di elettrodotto,656736,0,0,118024,0,0,98830,13456,2948,17.97%
+,Lecce Total,,1313472,0,0,236016,0,0,197933,26325,6028,17.97%
+,Taranto,Reintegrazione dei lavoratori illegittimamente licenziati,480120,0,0,113196,0,0,99062,10642,2046,23.58%
+,,Servitu' coattiva di elettrodotto,480120,0,0,113159,0,0,94595,14521,2562,23.57%
+,Taranto Total,,960240,0,0,226355,0,0,193657,25163,4608,23.57%
+PUGLIA Total,,,6538892,0,0,1466925,0,0,1237948,174576,30015,22.43%
+SARDEGNA,Cagliari,Reintegrazione dei lavoratori illegittimamente licenziati,637392,0,0,160298,0,0,142523,14851,1867,25.15%
+,,Servitu' coattiva di elettrodotto,637392,0,0,160437,0,0,139540,17138,2443,25.17%
+,Cagliari Total,,1274784,0,0,320735,0,0,282063,31989,4310,25.16%
+,Nuoro,Reintegrazione dei lavoratori illegittimamente licenziati,219081,0,0,46952,0,0,41734,4297,576,21.43%
+,,Servitu' coattiva di elettrodotto,219081,0,0,47013,0,0,41556,4440,633,21.46%
+,Nuoro Total,,438162,0,0,93965,0,0,83290,8737,1209,21.45%
+,Oristano,Reintegrazione dei lavoratori illegittimamente licenziati,129588,0,0,26173,0,0,22047,3435,415,20.20%
+,,Servitu' coattiva di elettrodotto,129588,0,0,26208,0,0,22141,3326,447,20.22%
+,Oristano Total,,259176,0,0,52381,0,0,44188,6761,862,20.21%
+,Sassari,Reintegrazione dei lavoratori illegittimamente licenziati,387120,0,0,81730,0,0,71621,8451,1097,21.11%
+,,Servitu' coattiva di elettrodotto,387120,0,0,81843,0,0,71130,8909,1149,21.14%
+,Sassari Total,,774240,0,0,163573,0,0,142751,17360,2246,21.13%
+SARDEGNA Total,,,2746362,0,0,630654,0,0,552292,64847,8627,22.96%
+SICILIA,Agrigento,Reintegrazione dei lavoratori illegittimamente licenziati,371748,0,0,77426,0,0,66145,7668,2027,20.83%
+,,Servitu' coattiva di elettrodotto,371748,0,0,77484,0,0,65841,7937,2071,20.84%
+,Agrigento Total,,743496,0,0,154910,0,0,131986,15605,4098,20.84%
+,Caltanissetta,Reintegrazione dei lavoratori illegittimamente licenziati,224839,0,0,58474,0,0,49535,6309,1376,26.01%
+,,Servitu' coattiva di elettrodotto,224839,0,0,58448,0,0,48481,7183,1510,26.00%
+,Caltanissetta Total,,449678,0,0,116922,0,0,98016,13492,2886,26.00%
+,Catania,Reintegrazione dei lavoratori illegittimamente licenziati,860589,0,0,202056,0,0,167269,25861,4695,23.48%
+,,Servitu' coattiva di elettrodotto,860589,0,0,202060,0,0,167133,25990,4809,23.48%
+,Catania Total,,1721178,0,0,404116,0,0,334402,51851,9504,23.48%
+,Enna,Reintegrazione dei lavoratori illegittimamente licenziati,146946,0,0,42882,0,0,36842,4089,957,29.18%
+,,Servitu' coattiva di elettrodotto,146946,0,0,42913,0,0,36116,4755,1019,29.20%
+,Enna Total,,293892,0,0,85795,0,0,72958,8844,1976,29.19%
+,Messina,Reintegrazione dei lavoratori illegittimamente licenziati,534937,0,0,122114,0,0,99299,15332,4428,22.83%
+,,Servitu' coattiva di elettrodotto,534937,0,0,122130,0,0,100629,14440,4102,22.83%
+,Messina Total,,1069874,0,0,244244,0,0,199928,29772,8530,22.83%
+,Palermo,Reintegrazione dei lavoratori illegittimamente licenziati,1005701,0,0,232016,0,0,193950,27285,5296,23.07%
+,,Servitu' coattiva di elettrodotto,1005701,0,0,232178,0,0,189229,31681,5606,23.09%
+,Palermo Total,,2011402,0,0,464194,0,0,383179,58966,10902,23.08%
+,Ragusa,Reintegrazione dei lavoratori illegittimamente licenziati,237310,0,0,53151,0,0,43650,6636,1539,22.40%
+,,Servitu' coattiva di elettrodotto,237310,0,0,53160,0,0,43421,6734,1578,22.40%
+,Ragusa Total,,474620,0,0,106311,0,0,87071,13370,3117,22.40%
+,Siracusa,Reintegrazione dei lavoratori illegittimamente licenziati,321588,0,0,84595,0,0,73348,8624,1428,26.31%
+,,Servitu' coattiva di elettrodotto,321588,0,0,84668,0,0,73491,8478,1447,26.33%
+,Siracusa Total,,643176,0,0,169263,0,0,146839,17102,2875,26.32%
+,Trapani,Reintegrazione dei lavoratori illegittimamente licenziati,351040,0,0,83775,0,0,66872,11576,2989,23.86%
+,,Servitu' coattiva di elettrodotto,351040,0,0,83741,0,0,68182,10558,2790,23.86%
+,Trapani Total,,702080,0,0,167516,0,0,135054,22134,5779,23.86%
+SICILIA Total,,,8109396,0,0,1913271,0,0,1589433,231136,49667,23.59%
+TOSCANA,Arezzo,Reintegrazione dei lavoratori illegittimamente licenziati,267188,0,0,83842,0,0,72605,7728,1719,31.38%
+,,Servitu' coattiva di elettrodotto,267188,0,0,82874,0,0,68410,10975,2607,31.02%
+,Arezzo Total,,534376,0,0,166716,0,0,141015,18703,4326,31.20%
+,Firenze,Reintegrazione dei lavoratori illegittimamente licenziati,777094,0,0,272635,0,0,238469,25072,5513,35.08%
+,,Servitu' coattiva di elettrodotto,777094,0,0,273776,0,0,226619,34425,7733,35.23%
+,Firenze Total,,1554188,0,0,546411,0,0,465088,59497,13246,35.16%
+,Grosseto,Reintegrazione dei lavoratori illegittimamente licenziati,180209,0,0,49984,0,0,42684,5493,1031,27.74%
+,,Servitu' coattiva di elettrodotto,180209,0,0,50042,0,0,41374,6635,1298,27.77%
+,Grosseto Total,,360418,0,0,100026,0,0,84058,12128,2329,27.75%
+,Livorno,Reintegrazione dei lavoratori illegittimamente licenziati,281123,0,0,103253,0,0,92272,8600,1652,36.73%
+,,Servitu' coattiva di elettrodotto,281123,0,0,103330,0,0,89821,10741,2058,36.76%
+,Livorno Total,,562246,0,0,206583,0,0,182093,19341,3710,36.74%
+,Lucca,Reintegrazione dei lavoratori illegittimamente licenziati,312107,0,0,96737,0,0,81907,11567,2049,30.99%
+,,Servitu' coattiva di elettrodotto,312107,0,0,97070,0,0,82666,11195,2006,31.10%
+,Lucca Total,,624214,0,0,193807,0,0,164573,22762,4055,31.05%
+,Massa-Carrara,Reintegrazione dei lavoratori illegittimamente licenziati,168833,0,0,58295,0,0,51899,4936,970,34.53%
+,,Servitu' coattiva di elettrodotto,168833,0,0,58469,0,0,51562,5229,1080,34.63%
+,Massa-Carrara Total,,337666,0,0,116764,0,0,103461,10165,2050,34.58%
+,Pisa,Reintegrazione dei lavoratori illegittimamente licenziati,324584,0,0,111623,0,0,98251,10187,2294,34.39%
+,,Servitu' coattiva di elettrodotto,324584,0,0,111705,0,0,95027,12814,2985,34.41%
+,Pisa Total,,649168,0,0,223328,0,0,193278,23001,5279,34.40%
+,Pistoia,Reintegrazione dei lavoratori illegittimamente licenziati,226626,0,0,70778,0,0,60243,7359,1545,31.23%
+,,Servitu' coattiva di elettrodotto,226626,0,0,70897,0,0,58916,8494,1881,31.28%
+,Pistoia Total,,453252,0,0,141675,0,0,119159,15853,3426,31.26%
+,Prato,Reintegrazione dei lavoratori illegittimamente licenziati,187632,0,0,56257,0,0,49348,5460,929,29.98%
+,,Servitu' coattiva di elettrodotto,187632,0,0,56362,0,0,47344,6991,1376,30.04%
+,Prato Total,,375264,0,0,112619,0,0,96692,12451,2305,30.01%
+,Siena,Reintegrazione dei lavoratori illegittimamente licenziati,213218,0,0,70217,0,0,61276,6650,1574,32.93%
+,,Servitu' coattiva di elettrodotto,213218,0,0,70289,0,0,56097,10320,2825,32.97%
+,Siena Total,,426436,0,0,140506,0,0,117373,16970,4399,32.95%
+TOSCANA Total,,,5877228,0,0,1948435,0,0,1666790,210871,45125,33.15%
+TRENTINO A. A.,Bolzano,Reintegrazione dei lavoratori illegittimamente licenziati,364939,0,0,44952,0,0,31247,10315,2816,12.32%
+,,Servitu' coattiva di elettrodotto,364939,0,0,45121,0,0,35265,7470,1854,12.36%
+,Bolzano Total,,729878,0,0,90073,0,0,66512,17785,4670,12.34%
+,Trento,Reintegrazione dei lavoratori illegittimamente licenziati,377613,0,0,96258,0,0,72745,15226,3127,25.49%
+,,Servitu' coattiva di elettrodotto,377613,0,0,96588,0,0,75018,13825,2616,25.58%
+,Trento Total,,755226,0,0,192846,0,0,147763,29051,5743,25.53%
+TRENTINO A. A. Total,,,1485104,0,0,282919,0,0,214275,46836,10413,19.05%
+UMBRIA,Perugia,Reintegrazione dei lavoratori illegittimamente licenziati,506019,0,0,142041,0,0,122564,15156,2784,28.07%
+,,Servitu' coattiva di elettrodotto,506019,0,0,142275,0,0,119165,18049,3326,28.12%
+,Perugia Total,,1012038,0,0,284316,0,0,241729,33205,6110,28.09%
+,Terni,Reintegrazione dei lavoratori illegittimamente licenziati,187517,0,0,54473,0,0,47169,5578,1079,29.05%
+,,Servitu' coattiva di elettrodotto,187517,0,0,54556,0,0,45482,7088,1304,29.09%
+,Terni Total,,375034,0,0,109029,0,0,92651,12666,2383,29.07%
+UMBRIA Total,,,1387072,0,0,393345,0,0,334380,45871,8493,28.36%
+VALLE D'AOSTA,Aosta,Reintegrazione dei lavoratori illegittimamente licenziati,100346,0,0,23982,0,0,18868,3857,948,23.90%
+,,Servitu' coattiva di elettrodotto,100346,0,0,24184,0,0,20596,2651,655,24.10%
+,Aosta Total,,200692,0,0,48166,0,0,39464,6508,1603,24.00%
+VALLE D'AOSTA Total,,,200692,0,0,48166,0,0,39464,6508,1603,24.00%
+VENETO,Belluno,Reintegrazione dei lavoratori illegittimamente licenziati,172655,0,0,39539,0,0,30621,7107,1388,22.90%
+,,Servitu' coattiva di elettrodotto,172655,0,0,39866,0,0,34390,4697,652,23.09%
+,Belluno Total,,345310,0,0,79405,0,0,65011,11804,2040,23.00%
+,Padova,Reintegrazione dei lavoratori illegittimamente licenziati,703416,0,0,188365,0,0,155400,27025,4121,26.78%
+,,Servitu' coattiva di elettrodotto,703416,0,0,189666,0,0,161886,22657,3058,26.96%
+,Padova Total,,1406832,0,0,378031,0,0,317286,49682,7179,26.87%
+,Rovigo,Reintegrazione dei lavoratori illegittimamente licenziati,205996,0,0,57602,0,0,48929,6830,1331,27.96%
+,,Servitu' coattiva di elettrodotto,205996,0,0,57711,0,0,48753,7140,1275,28.02%
+,Rovigo Total,,411992,0,0,115313,0,0,97682,13970,2606,27.99%
+,Treviso,Reintegrazione dei lavoratori illegittimamente licenziati,638193,0,0,150136,0,0,118509,25590,4108,23.53%
+,,Servitu' coattiva di elettrodotto,638193,0,0,150757,0,0,126245,20801,2675,23.62%
+,Treviso Total,,1276386,0,0,300893,0,0,244754,46391,6783,23.57%
+,Venezia,Reintegrazione dei lavoratori illegittimamente licenziati,683992,0,0,191141,0,0,162431,23465,3417,27.94%
+,,Servitu' coattiva di elettrodotto,683992,0,0,191940,0,0,164944,22412,2861,28.06%
+,Venezia Total,,1367984,0,0,383081,0,0,327375,45877,6278,28.00%
+,Verona,Reintegrazione dei lavoratori illegittimamente licenziati,665277,0,0,132480,0,0,108122,19818,2819,19.91%
+,,Servitu' coattiva di elettrodotto,665277,0,0,132927,0,0,107247,20912,2905,19.98%
+,Verona Total,,1330554,0,0,265407,0,0,215369,40730,5724,19.95%
+,Vicenza,Reintegrazione dei lavoratori illegittimamente licenziati,621551,0,0,148782,0,0,119350,23313,5,23.94%
+,,Servitu' coattiva di elettrodotto,621551,0,0,150105,0,0,123450,21035,3073,24.15%
+,Vicenza Total,,1243102,0,0,298887,0,0,242800,44348,3078,24.04%
+VENETO Total,,,7382160,0,0,1821017,0,0,1510277,252802,33688,24.67%
+Grand Total,,,94230266,0,0,24380136,0,0,20366535,3097454,533737,25.87%

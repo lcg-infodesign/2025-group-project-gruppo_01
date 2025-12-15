@@ -1,0 +1,53 @@
+═══════════════════════════════════════════════════════════════════
+  COME VISUALIZZARE IL SITO
+═══════════════════════════════════════════════════════════════════
+
+METODO PIÙ SEMPLICE (consigliato):
+─────────────────────────────────────
+
+1. Fai DOPPIO CLICK sul file:
+   → AVVIA_SERVER.command
+
+2. Si aprirà una finestra del Terminale con il server avviato
+
+3. Apri il browser e vai a:
+   → http://localhost:8000
+   oppure
+   → http://localhost:8000/home.html
+
+4. Per fermare il server, premi CTRL+C nella finestra del Terminale
+
+
+METODO ALTERNATIVO (da Terminale):
+─────────────────────────────────────
+
+1. Apri il Terminale
+
+2. Copia e incolla questo comando:
+   
+   cd "/Users/chiara_moretti/Library/Mobile Documents/com~apple~CloudDocs/POLIMI/A.A. 25-26/Info Design/SITO COMPLETO 15:12" && python3 server.py
+
+3. Premi INVIO
+
+4. Apri il browser e vai a:
+   → http://localhost:8000
+
+
+PAGINE DISPONIBILI:
+─────────────────────────────────────
+
+• http://localhost:8000/home.html
+• http://localhost:8000/overview.html
+• http://localhost:8000/dettaglio.html
+• http://localhost:8000/informazioni.html
+
+
+PROBLEMI?
+─────────────────────────────────────
+
+Se la porta 8000 è già in uso, modifica PORT = 8001 nel file server.py
+
+Se Python non è installato, scaricalo da: https://www.python.org/
+
+═══════════════════════════════════════════════════════════════════
+

@@ -1,0 +1,741 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Home - Sketch</title>
+
+    <link rel="stylesheet" type="text/css" href="styleoverview.css">
+    <script src="libraries/p5.min.js"></script>
+    <script src="libraries/p5.sound.min.js"></script>
+  </head>
+
+  <body>
+
+    <div id="navbar">
+      <div class="navbar-wrapper">
+        <!-- RIGA ALTA -->
+        <div class="navbar-top">
+          <div id="current-date" class="navbar-date"></div>
+    
+          <div class="navbar-right">
+            <a href="home.html" class="nav-link">home</a>
+            <a href="overview.html" class="nav-link active">overview</a>
+            <a href="dettaglio.html" class="nav-link">dettaglio</a>
+            <a href="informazioni.html" class="nav-link">info</a>
+          </div>
+        </div>
+    
+        <!-- LINEA BLU -->
+        <div class="linea-parallela-top"></div>
+    
+        <!-- TITOLO CENTRALE -->
+        <div class="navbar-bottom">
+          <div class="navbar-title">AFFLUENZA dei REFERENDUM</div>
+        </div>
+    
+        <!-- SECONDA LINEA BLU -->
+        <div class="linea-parallela-bottom"></div>
+    
+      </div>
+    </div>
+    
+
+      <button id="help-toggle" title="Aiuto" style="
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background-color: #163264;
+          color: #f5f0dc;
+          border: none;
+          cursor: pointer;
+          font-family: 'STIX Two Text', serif;
+          font-weight: bold;
+          font-size: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-left: 10px;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        ">?</button>
+        
+        <div id="help-status" style="display:none;">OFF</div>
+    </div>
+    
+  </div>
+  <div class="legend-icon">
+    <img src="img/Senza titolo-1.svg" alt="Icona referendum">
+
+  </div>
+ 
+  </div>
+
+
+  
+
+  <script>
+    // Dati di affluenza per i 25 referendum
+    let affluenceData = [];
+    let years = [];
+    let quorumStatus = {}; 
+    let numReferendums = 25;
+    let hoveredIndex = -1;  // Indice della colonna su cui si passa il mouse
+    
+    // --- Colori Basati sull'Immagine ---
+    
+    
+const COLORS = {
+  INK: '#1E52A6', 
+  RAGGIUNTO: '#1E52A6', 
+  // 🎯 MODIFICA QUI per le barre del grafico
+  NON_RAGGIUNTO: '#ADBAD2', 
+  NON_RICHIESTO: '#F6ECE1', 
+  BACKGROUND_PAPER: '#F6F0E0', 
+  LINE_RULE: '#D9D9D9',       
+  QUORUM_LINE: '#FFB905',
+  HOVER_HIGHLIGHT: '#FFB905' // Oro brillante per l'
+};
+// ...
+    
+    // Raggio di curvatura per le barre (Top & Bottom)
+    const BAR_RADIUS = 10; 
+    // Offset e Margini
+    const CHART_PADDING = 100; // Increased for more side margins
+    const TOP_MARGIN = 180; 
+    const BOTTOM_MARGIN = 120; // Increased to accommodate timeline higher position 
+    
+    // Costante per la dimensione del marker quadrato sulla timeline
+    const TIMELINE_SQUARE_SIZE = 20; 
+
+    function preload(){
+      bg = loadImage("img/background.png");
+    }
+    
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      textFont('sans-serif'); 
+      
+      years = [
+        '1946', '1974', '1978', '1981', '1985', '1987', '1989', '1990', '1991', '1993',
+        '1995', '1997', '1999', '2000', '2001', '2003', '2005', '2006', '2009', '2011',
+        '2016(1)', '2016(2)', '2020', '2022', '2025'
+      ];
+      
+      affluenceData = [
+        88.82, 87.7, 81.2, 79.4, 77.96, 65.11, 80.31, 43.13, 62.50, 76.81,
+        57.49, 30.16, 49.58, 32.17, 34.05, 25.87, 25.98, 53.84, 23.70, 57.03,
+        32.16, 68.49, 53.84, 20.93, 30.59
+      ];
+      
+      const quorumStatesList = [
+        'NON_RICHIESTO', 'RAGGIUNTO', 'RAGGIUNTO', 'RAGGIUNTO', 'RAGGIUNTO', 
+        'RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'RAGGIUNTO', 'RAGGIUNTO', 
+        'RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RICHIESTO', 
+        'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RICHIESTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 
+        'NON_RAGGIUNTO', 'NON_RICHIESTO', 'NON_RICHIESTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO'
+      ];
+    
+      for (let i = 0; i < years.length; i++) {
+        quorumStatus[years[i]] = quorumStatesList[i].trim().replace(/\s/g, '_'); 
+      }
+    }
+    
+    function draw() {
+      // 1. Logica Hover
+      background(245, 240, 220);
+      updateHoverState();
+      
+      // 2. Disegno;
+      drawLegend(); 
+      drawHistogram();
+      // drawTimeline(); // Removed - using HTML timeline instead (same as dettaglio)
+      drawHoverInfo(); 
+    }
+    
+    /**
+     * Aggiorna l'indice della colonna su cui si sta passando il mouse,
+     * includendo l'area della linea del tempo.
+     */
+    function updateHoverState() {
+      let chartX = CHART_PADDING;
+      let chartWidth = width - 2 * CHART_PADDING;
+      let chartY = TOP_MARGIN;
+      let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
+      let timelineY = chartY + chartHeight + 20;
+    
+      // Calculate positions aligned with timeline dots (same as histogram)
+      const yearToPosition = {};
+      years.forEach((year, index) => {
+        const position = (years.length > 1) 
+          ? (index / (years.length - 1)) * 100 
+          : 0;
+        yearToPosition[year] = position;
+      });
+      
+      hoveredIndex = -1;
+      
+      // Bar width as percentage of chart width (same as in drawHistogram)
+      const barWidthPercent = 2.5;
+      const barWidth = (chartWidth * barWidthPercent) / 100;
+      
+      for (let i = 0; i < numReferendums; i++) {
+        // Calculate x position aligned with timeline dots
+        const percentage = yearToPosition[years[i]];
+        const centerX = (chartX -40) + (percentage / 100) * (chartWidth+85);
+        const x = centerX - barWidth / 2;
+        
+        if ( (mouseX >= x && mouseX < x + barWidth && mouseY >= chartY && mouseY <= chartY + chartHeight) ||
+             (mouseX >= centerX - 15 && mouseX < centerX + 15 && mouseY >= timelineY - 15 && mouseY <= timelineY + 50) ) {
+          hoveredIndex = i;
+          break;
+        }
+      }
+    }
+    
+    function drawPaperBackground() {
+  noStroke();                          // niente bordo
+  fill(245, 240, 220, 90);             // colore con alpha (trasparenza)
+  rect(0, 0, width, height);  
+  background(bg)         // rettangolo che copre tutto il canvas
+}
+    
+function drawLegend() {
+  const legendX = width - CHART_PADDING-220; // posizione X della legenda
+  let legendY = TOP_MARGIN - 35;               // posizione Y iniziale
+  const spacing = 30;                          // spazio tra le voci
+  const markerX = legendX + 10;  
+                // posizione X dei marker
+
+  // Oggetti della legenda
+  const legendItems = [
+    { text: 'Quorum non richiesto', color: COLORS.NON_RICHIESTO },
+    { text: 'Quorum non raggiunto', color: COLORS.NON_RAGGIUNTO },
+    { text: 'Quorum raggiunto', color: COLORS.RAGGIUNTO }
+  ];
+  
+  textSize(19);
+  textFont('STIX Two Text', 'serif');
+  textAlign(LEFT, LEFT);
+
+  for (let i = 0; i < legendItems.length; i++) {
+    let item = legendItems[i];
+    let y = legendY + i * spacing;
+
+    // Disegna testo
+    fill(COLORS.INK);
+    noStroke();
+    text(item.text, markerX + 20, y);
+
+    // Disegna marker cerchio
+    fill(item.color);
+    stroke(COLORS.INK);
+    strokeWeight(1);
+    circle(markerX, y, 12);
+  }
+}
+
+function getBarColor(year) {
+      const status = quorumStatus[year];
+      if (status === 'RAGGIUNTO') return COLORS.RAGGIUNTO;
+      else if (status === 'NON_RAGGIUNTO') return COLORS.NON_RAGGIUNTO;
+      else return COLORS.NON_RICHIESTO;
+}
+    
+function drawHistogram() {
+      let chartX = CHART_PADDING-40;
+      let chartY = TOP_MARGIN;
+      let chartWidth = width - 2 * CHART_PADDING + 85;
+      let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
+      let baselineY = chartY + chartHeight;
+      
+      // Calculate positions aligned with timeline dots (uniform distribution)
+      const yearToPosition = {};
+      years.forEach((year, index) => {
+        const position = (years.length > 1) 
+          ? (index / (years.length - 1)) * 100 
+          : 0;
+        yearToPosition[year] = position;
+      });
+      
+      const quorumY = baselineY - (50 / 100) * chartHeight;
+      stroke(COLORS.QUORUM_LINE);
+      strokeWeight(3);
+      line(chartX, quorumY, chartX + chartWidth, quorumY);
+      
+      fill(COLORS.QUORUM_LINE);
+      noStroke();
+      textSize(24);
+      textAlign(RIGHT, CENTER);
+      text('50+1', chartX +1400, quorumY-20);
+      textSize(14);
+      text('QUORUM', chartX +1400, quorumY + 15);
+      
+      
+      // Bar width as percentage of chart width
+      const barWidthPercent = 2; // Width of each bar as % of total chart width
+      const barWidth = (chartWidth * barWidthPercent) / 100;
+      
+      for (let i = 0; i < numReferendums; i++) {
+        // Calculate x position aligned with timeline dots
+        const percentage = yearToPosition[years[i]];
+        const x = chartX + (percentage / 100) * chartWidth - barWidth / 2;
+        
+        let affluence = affluenceData[i];
+        let barHeight = (affluence / 100) * chartHeight;
+        let barTopY = baselineY - barHeight;
+        let barColor = getBarColor(years[i]);
+        
+        if (barColor === COLORS.NON_RICHIESTO || barColor === COLORS.NON_RAGGIUNTO) {
+          fill(barColor);
+          stroke(COLORS.INK);
+          strokeWeight(1.5);
+        } else {
+          fill(barColor);
+          noStroke();
+        }
+        
+        rect(x, barTopY, barWidth, barHeight, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS);
+    
+        if (hoveredIndex === i) {
+            stroke(COLORS.HOVER_HIGHLIGHT);
+            strokeWeight(3.5);
+            noFill();
+            rect(x, barTopY, barWidth, barHeight, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS);
+        }
+      }
+}
+
+
+    
+function drawTimeline() {
+        let chartX = CHART_PADDING;
+        let chartWidth = width - 2 * CHART_PADDING;
+        let totalBarWidth = chartWidth / numReferendums;
+        let baselineY = TOP_MARGIN + (height - TOP_MARGIN - BOTTOM_MARGIN);
+        let timelineY = baselineY + 0; 
+        
+        stroke(COLORS.INK);
+        strokeWeight(2);
+        line(chartX, timelineY, chartX + chartWidth, timelineY); 
+        
+        for (let i = 0; i < numReferendums; i++) {
+            let x = chartX + i * totalBarWidth + totalBarWidth / 2;
+            let barColor = getBarColor(years[i]);
+            
+            let markerSize = 20;
+            let squareSize = TIMELINE_SQUARE_SIZE; 
+            
+            fill(barColor);
+            stroke(COLORS.INK);
+            strokeWeight(1);
+            rectMode(CENTER);
+            rect(x, timelineY + 20, squareSize, squareSize, 5, 5, 5, 5); 
+            rectMode(CORNER);
+            
+            if (hoveredIndex === i) markerSize = 12;
+    
+            if (quorumStatus[years[i]] === 'RAGGIUNTO') {
+                fill(COLORS.INK);
+                noStroke();
+                circle(x, timelineY, markerSize);
+            } else {
+                noFill(COLORS.BACKGROUND_PAPER);
+                stroke(COLORS.INK);
+                strokeWeight(2);
+                circle(x, timelineY, markerSize);
+            }
+        }
+}
+    
+function drawHoverInfo() {
+        if (hoveredIndex === -1) return;
+    
+        let chartX = CHART_PADDING;
+        let chartWidth = width - 2 * CHART_PADDING;
+        let chartY = TOP_MARGIN;
+        let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
+        
+        // Calculate positions aligned with timeline dots (same as histogram)
+        const yearToPosition = {};
+        years.forEach((year, index) => {
+          const position = (years.length > 1) 
+            ? (index / (years.length - 1)) * 100 
+            : 0;
+          yearToPosition[year] = position;
+        });
+        
+        let i = hoveredIndex;
+        const percentage = yearToPosition[years[i]];
+        const centerX = (chartX -40) + (percentage / 100) * (chartWidth+85) ;
+        let affluence = affluenceData[i];
+        let year = years[i];
+        let barHeight = (affluence / 100) * chartHeight;
+        let barTopY = chartY + chartHeight - barHeight;
+    
+        stroke(COLORS.INK);
+        drawingContext.setLineDash([6, 6]);
+        line(centerX, barTopY , centerX, barTopY-20);
+        drawingContext.setLineDash([]);
+    
+        // Display percentage without box - bold, STIX Two Text, blue, large
+       
+        fill(COLORS.INK); // Blue color
+        textFont('STIX Two Text');
+        textSize(25); // Large size
+        textAlign(CENTER, CENTER);
+        textStyle(normal);
+        text(`${affluence.toFixed(2)}%`, centerX, barTopY-30);
+ }
+    
+function mouseMoved() {
+        redraw();
+}
+    
+function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+}
+
+
+</script>
+
+
+<script>
+  function updateCurrentDate() {
+    const dateElement = document.getElementById('current-date');
+    if (dateElement) {
+      const now = new Date();
+      const daysOfWeek = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+      const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 
+                     'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+      const dayOfWeek = daysOfWeek[now.getDay()];
+      const day = now.getDate();
+      const month = months[now.getMonth()];
+      const year = now.getFullYear();
+      dateElement.textContent = `${dayOfWeek} ${day} ${month} ${year}`;
+    }
+  }
+  updateCurrentDate();
+
+  // Intersection Observer per animazioni
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, {
+    threshold: 0.3
+  });
+
+  document.querySelectorAll('.section-row').forEach(section => {
+    observer.observe(section);
+  });
+
+  const navLinks = document.querySelectorAll('.nav-link');
+
+navLinks.forEach(link => {
+  link.addEventListener('click', function(event) {
+    // Evita che la pagina si ricarichi se vuoi restare sulla stessa pagina
+    // event.preventDefault(); 
+
+    // Rimuovi la classe 'active' da tutti i link
+    navLinks.forEach(l => l.classList.remove('active'));
+
+    // Aggiungi la classe 'active' al link cliccato
+    this.classList.add('active');
+  });
+});
+
+
+
+</script>
+
+    <!-- Timeline footer (same as dettaglio.html) -->
+    <div id="footer" style="position:fixed; bottom:40px; left:0; right:0; height:80px; background-color:#f5f0dc00; z-index:1000; display:flex; align-items:center; padding:0px;">
+      <div id="year-slider-container" style="position:relative; width:100%; max-width:1400px; margin:0 auto;">
+        <div style="position:relative; height:40px; display:flex; align-items:center;">
+          <div id="timeline-line" style="position:absolute; left:0; right:0; height:2px; background-color:#0F3D88; top:50%; transform:translateY(-50%);"></div>
+          <div id="year-dots" style="position:relative; width:100%; height:100%;"></div>
+          <input type="range" id="year-slider" min="0" max="100" value="100" step="0.01" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:10;">
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Timeline setup for overview - adapted from sketch_dettaglio.js
+      let selectedYearOverview = '2025'; // Default selected year
+      
+      // Convert overview year format to internal format for quorum lookup
+      function getYearKeyForQuorum(displayYear) {
+        if (displayYear === '2016(1)') return '2016-1';
+        if (displayYear === '2016(2)') return '2016-2';
+        return displayYear;
+      }
+      
+      // Quorum status mapping (same as dettaglio)
+      const quorumStatusByYear = {
+        '1946': 'NON_RICHIESTO',
+        '1974': 'RAGGIUNTO',
+        '1978': 'RAGGIUNTO',
+        '1981': 'RAGGIUNTO',
+        '1985': 'RAGGIUNTO',
+        '1987': 'RAGGIUNTO',
+        '1989': 'NON_RICHIESTO',
+        '1990': 'NON_RAGGIUNTO',
+        '1991': 'RAGGIUNTO',
+        '1993': 'RAGGIUNTO',
+        '1995': 'RAGGIUNTO',
+        '1997': 'NON_RAGGIUNTO',
+        '1999': 'NON_RAGGIUNTO',
+        '2000': 'NON_RAGGIUNTO',
+        '2001': 'NON_RICHIESTO',
+        '2003': 'NON_RAGGIUNTO',
+        '2005': 'NON_RAGGIUNTO',
+        '2006': 'NON_RICHIESTO',
+        '2009': 'NON_RAGGIUNTO',
+        '2011': 'NON_RAGGIUNTO',
+        '2016-1': 'RAGGIUNTO',
+        '2016-2': 'NON_RICHIESTO',
+        '2020': 'NON_RICHIESTO',
+        '2022': 'NON_RAGGIUNTO',
+        '2025': 'NON_RAGGIUNTO'
+      };
+      
+      function setupYearSliderOverview() {
+        const slider = document.getElementById('year-slider');
+        const yearDots = document.getElementById('year-dots');
+        
+        if (!slider || !yearDots) return;
+        
+        // Use years array from overview
+        const overviewYears = years; // ['1946', '1974', ..., '2016(1)', '2016(2)', ...]
+        
+        // Calculate uniform positions
+        const yearToPosition = {};
+        overviewYears.forEach((year, index) => {
+          const position = (overviewYears.length > 1) 
+            ? (index / (overviewYears.length - 1)) * 100 
+            : 0;
+          yearToPosition[year] = position;
+        });
+        
+        // Set slider
+        slider.min = 0;
+        slider.max = 100;
+        slider.step = 0.01;
+        
+        // Find current year position
+        const currentPosition = yearToPosition[selectedYearOverview] || 100;
+        slider.value = currentPosition;
+        
+        // Function to find closest year
+        const findClosestYear = (position) => {
+          let closestYear = overviewYears[0];
+          let minDistance = Infinity;
+          
+          overviewYears.forEach((year) => {
+            const yearPos = yearToPosition[year];
+            const distance = Math.abs(position - yearPos);
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestYear = year;
+            }
+          });
+          
+          return closestYear;
+        };
+        
+        
+        // Create dots
+        const createDots = () => {
+          yearDots.innerHTML = '';
+          
+          // Add connecting line
+          const line = document.createElement('div');
+          line.id = 'year-line';
+          line.style.position = 'absolute';
+          line.style.left = '2%';
+          line.style.right = '2%';
+          line.style.top = '50%';
+          line.style.transform = 'translateY(-50%)';
+          line.style.height = '2px';
+          line.style.background = '#0F3D88';
+          line.style.zIndex = '1';
+          yearDots.appendChild(line);
+          
+          overviewYears.forEach((year, index) => {
+            const dotContainer = document.createElement('div');
+            dotContainer.setAttribute('data-year-key', year);
+            dotContainer.style.position = 'absolute';
+            const percentage = yearToPosition[year];
+            dotContainer.style.left = `${percentage}%`;
+            dotContainer.style.top = '50%';
+            dotContainer.style.transform = 'translate(-50%, -50%)';
+            dotContainer.style.cursor = 'pointer';
+            dotContainer.style.zIndex = '5';
+            
+            // Create square marker
+            const dot = document.createElement('div');
+            const baseSize = 18;
+            dot.style.width = baseSize + 'px';
+            dot.style.height = baseSize + 'px';
+            dot.style.transition = 'all 0.18s ease';
+            dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+            dot.style.borderRadius = '6px';
+            
+            // Colors
+            const FILLED_BLUE = '#1E52A6';
+            const BORDER_BLUE = '#1E52A6';
+            const LIGHT_BLUE = '#a4afc1ff';
+            const NON_RICHIESTO_COLOR = '#F6ECE1'; // Color for NON_RICHIESTO
+            
+            // Get quorum status (convert year format)
+            const yearKey = getYearKeyForQuorum(year);
+            const quorumStatus = quorumStatusByYear[yearKey];
+            
+            // Apply color based on quorum status
+            if (quorumStatus === 'RAGGIUNTO') {
+              dot.style.backgroundColor = FILLED_BLUE;
+              dot.style.border = `2px solid ${BORDER_BLUE}`;
+              dot.style.border = 'none';
+            } else if (quorumStatus === 'NON_RICHIESTO') {
+              dot.style.backgroundColor = NON_RICHIESTO_COLOR;
+              dot.style.border = `2px solid ${BORDER_BLUE}`;
+            } else if (quorumStatus === 'NON_RAGGIUNTO') {
+              dot.style.backgroundColor = LIGHT_BLUE;
+              dot.style.border = 'none';
+            } else {
+              dot.style.backgroundColor = '#E1E1E1';
+              dot.style.border = `2px solid ${BORDER_BLUE}`;
+            }
+            
+            // Create year label - positioned BELOW the timeline
+            const label = document.createElement('div');
+            label.textContent = year;
+            label.style.position = 'absolute';
+            label.style.left = '50%';
+            label.style.transform = 'translateX(-50%)';
+            label.style.top = '30px'; // Below the timeline instead of above
+            label.style.fontFamily = "'STIX Two Text', serif";
+            label.style.fontSize = '16px';
+            label.style.fontWeight = 'bold';
+            label.style.whiteSpace = 'nowrap';
+            label.style.pointerEvents = 'none';
+            label.style.opacity = '1';
+            
+            // Highlight selected year
+            if (year === selectedYearOverview) {
+              const selectedSize = 22;
+              dot.style.width = `${selectedSize}px`;
+              dot.style.height = `${selectedSize}px`;
+              dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+              label.style.opacity = '1';
+              label.style.color = '#255077';
+            } else {
+              label.style.color = '#255096';
+            }
+            
+            // Hover effects
+            dotContainer.addEventListener('mouseenter', () => {
+              const hoverSize = 24;
+              dot.style.width = `${hoverSize}px`;
+              dot.style.height = `${hoverSize}px`;
+              dot.style.boxShadow = '0 6px 12px rgba(0,0,0,0.25)';
+              dot.style.borderRadius = '6px';
+            });
+            
+            dotContainer.addEventListener('mouseleave', () => {
+              if (year !== selectedYearOverview) {
+                dot.style.width = '18px';
+                dot.style.height = '18px';
+                dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+              } else {
+                dot.style.width = '22px';
+                dot.style.height = '22px';
+                dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+              }
+            });
+            
+            // Click handler
+            dotContainer.addEventListener('click', () => {
+              const yearPos = yearToPosition[year];
+              slider.value = yearPos;
+              slider.dispatchEvent(new Event('input'));
+            });
+            
+            dotContainer.appendChild(dot);
+            dotContainer.appendChild(label);
+            yearDots.appendChild(dotContainer);
+          });
+        };
+        
+        // Update dot styles
+        const updateDotStyles = () => {
+          const dotContainers = yearDots.querySelectorAll('[data-year-key]');
+          dotContainers.forEach((container) => {
+            const year = container.getAttribute('data-year-key');
+            const dot = container.querySelector('div');
+            const label = container.querySelectorAll('div')[1];
+            
+            if (year === selectedYearOverview) {
+              dot.style.width = '22px';
+              dot.style.height = '22px';
+              dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+              if (label) {
+                label.style.color = '#255077';
+                label.style.opacity = '1';
+              }
+            } else {
+              dot.style.width = '18px';
+              dot.style.height = '18px';
+              dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+              if (label) {
+                label.style.color = '#255096';
+                label.style.opacity = '1';
+              }
+            }
+          });
+        };
+        
+        // Create dots
+        createDots();
+        
+        // Handle slider change
+        slider.addEventListener('input', (e) => {
+          const position = parseFloat(e.target.value);
+          const year = findClosestYear(position);
+          
+          if (year && year !== selectedYearOverview) {
+            selectedYearOverview = year;
+            updateDotStyles();
+            
+            // Snap slider to exact position
+            const exactPosition = yearToPosition[selectedYearOverview];
+            if (exactPosition !== undefined) {
+              slider.value = exactPosition;
+            }
+            
+            // Update hoveredIndex to match selected year
+            const yearIndex = overviewYears.indexOf(year);
+            if (yearIndex !== -1) {
+              hoveredIndex = yearIndex;
+              redraw();
+            }
+          }
+        });
+      }
+      
+      // Initialize timeline when page loads
+      window.addEventListener('load', () => {
+        // Wait a bit for p5.js setup to complete
+        setTimeout(() => {
+          setupYearSliderOverview();
+        }, 100);
+      });
+    </script>
+
+  </body>
+</html>

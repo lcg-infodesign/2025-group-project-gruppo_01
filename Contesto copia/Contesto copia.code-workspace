@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../dataset"
+		},
+		{
+			"path": "../img"
+		},
+		{
+			"path": "../font"
+		},
+		{
+			"path": "../libraries"
+		},
+		{
+			"path": "../REGIONI"
+		},
+		{
+			"path": "../scripts"
+		},
+		{
+			"path": "../Svg Regioni"
+		}
+	]
+}

@@ -1,0 +1,482 @@
+      /* --- FONT --- */
+      @font-face {
+        font-family: 'STIX Two Text';
+        src: url('font/STIX_Two_Text/static/STIXTwoText-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'STIX Two Text';
+        src: url('font/STIX_Two_Text/static/STIXTwoText-Bold.ttf') format('truetype');
+        font-weight: bold;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: 'STIX Two Text';
+        src: url('font/STIX_Two_Text/static/STIXTwoText-SemiboldItalic.ttf') format('truetype');
+        font-weight: normal;
+        font-style: italic;
+      }
+
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+      /* --- VARIABILI COLORI --- */
+      :root {
+        --bg-color: #f5f0dc;
+        --blue-color: #073789;
+        --yellow-color: #FFB700;
+        --gray-color: #aaaaaa;
+      }
+
+ /* --- NAVBAR --- */
+ #navbar {
+  position: fixed; 
+  top: 0; left: 0; right: 0; 
+  background-color: var(--bg-color);
+  z-index: 1000; 
+  padding-left: 20px;
+  padding-right: 20px; 
+  padding-top: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* Linea blu */
+.linea-parallela-top {
+  height: 4px;
+  background: var(--blue-color);
+  width: 100%;
+  margin: 5px 0px;
+}
+
+.linea-parallela-bottom {
+  height: 4px;
+  background: var(--blue-color);
+  width: 100%;
+  margin: 5px 0px;
+}
+.navbar-wrapper {
+  display: flex;
+  flex-direction: column; /* ← due righe */
+  width: 100%;
+}
+
+/* ------------------------- */
+/*    RIGA ALTA: data + link */
+/* ------------------------- */
+.navbar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Data (sinistra) */
+.navbar-date {
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 0;
+  color: var(--blue-color);
+}
+
+/* Link (destra) */
+.navbar-right {
+  display: flex;
+  gap: 15px;
+  align-items: right;
+}
+
+.nav-link {
+  color: var(--blue-color);
+  font-size: 16px;
+  text-decoration: none;
+  text-transform: lowercase;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+
+/* ------------------------- */
+/*    RIGA CENTRALE: titolo  */
+/* ------------------------- */
+.navbar-bottom {
+  text-align: center;
+
+}
+
+.navbar-title {
+  color: var(--blue-color);
+  font-size: 40px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  font-style: italic;
+}
+/* Hover (PASSAGGIO DEL MOUSE) */
+.nav-link:hover {
+  opacity: 1;                       /* diventa più visibile */
+  color: var(--blue-color);
+  border-bottom: 2px solid var(--blue-color);
+}
+
+/* Pagina ATTIVA (SELEZIONATA) */
+.nav-link.active {
+  font-weight: bold;
+  opacity: 1;
+  border-bottom: 2px solid var(--blue-color);
+}
+
+.nav-spacer { 
+  height: 10px; 
+}
+
+
+/* canvas p5 sotto tutto */
+canvas {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+/*-----------------*/
+/*    YEAR SLIDER  */
+/*-----------------*/
+#year-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+#year-slider::-webkit-slider-track,
+#year-slider::-moz-range-track {
+  background: #0a1e50;
+  height: 3px;
+  border-radius: 0;
+}
+#year-slider::-webkit-slider-thumb,
+#year-slider::-moz-range-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #0a1e50;
+  height: 14px;
+  width: 14px;
+  border-radius: 0;
+  border: 2px solid #0a1e50;
+  box-shadow: none;
+  cursor: pointer;
+  margin-top: -5.5px;
+}
+
+/* --- TIMELINE CONTAINER --- */
+/* Aggiungiamo overflow visibile per non tagliare le date in alto */
+#timeline-container {
+  position: relative;
+  overflow: visible !important; 
+  z-index: 2000; /* Assicurati che stia SOPRA al canvas */
+}
+
+/* timeline */
+#year-dots {
+  transition: opacity 0.1s ease;
+  position: relative;
+  /* L'altezza deve essere sufficiente, ma l'overflow deve essere visible */
+  height: 50px; 
+  overflow: visible !important; /* FONDAMENTALE: permette alle scritte di uscire fuori */
+  z-index: 2000;
+}
+
+#year-dots.blurred,
+#year-dots.visible {
+  opacity: 1;
+  background: transparent;
+  pointer-events: auto;
+}
+
+/* Assicurati che il canvas stia sotto */
+canvas {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0; /* Z-index basso */
+}
+
+
+/*-----------------*/
+/* HELP TOGGLE (dentro navbar) */
+/*-----------------*/
+.help-controls {
+  height: 13px;
+  width: auto;
+  gap: 8px;
+  margin-left: 20px; 
+ /* distacco dal menu */
+}
+
+.help-toggle-btn {
+  display: flex;             /* permette all'icona di essere centrata */
+  justify-content: center;   /* centro orizzontale */
+  align-items: center;    
+  background: var(--color-primary, #1E52A6);
+  color: white;
+  font-family: 'STIX Two text';
+  border: none;
+  height: 20px;
+  width: auto;
+  padding: 8px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  transition: all 0.3s ease;
+
+}
+
+.help-toggle-btn:hover {
+  background: var(--color-primary-hover, #1E52A6);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(30, 82, 166, 0.3);
+}
+
+.help-toggle-btn.active {
+  background: var(--color-yellow, #FFB700);
+  color: #1C2836;
+}
+
+.help-icon {
+  font-size: 16px;
+  font-weight: bold;
+  align-self: center;
+}
+
+.help-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 40px;
+  text-align: center;
+}
+
+.help-status.active {
+  color: var(--color-yellow, #FFB700);
+}
+#help-toggle.active {
+  background-color: #FFB700 !important; /* Giallo del tema */
+  color: #163264 !important;
+  border: 2px solid #163264 !important;
+}
+
+/* Hover effect */
+#help-toggle:hover {
+  transform: scale(1.1);
+}
+/*-----------------*/
+/* SEZIONI HELP (per blur/dim) */
+/*-----------------*/
+
+#map-container,
+#charts-container,
+#presidente-container,
+#timeline-container {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+#map-container.help-dimmed,
+#charts-container.help-dimmed,
+#presidente-container.help-dimmed,
+#timeline-container.help-dimmed {
+  opacity: 0.35;
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+#map-container.help-highlighted,
+#charts-container.help-highlighted,
+#presidente-container.help-highlighted,
+#timeline-container.help-highlighted {
+  opacity: 1;
+  filter: blur(0px);
+}
+
+/* overlay grande (non la bubble) */
+.help-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 183, 0, 0.1);
+  border: 2px solid var(--color-yellow, #FFB700);
+  border-radius: 8px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+}
+.help-overlay.show {
+  display: flex;
+}
+.help-overlay-text {
+  background: var(--color-yellow, #FFB700);
+  color: #1C2836;
+  padding: 16px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 16px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(255, 183, 0, 0.4);
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+
+/*-----------------*/
+/*    MAPPA SVG    */
+/*-----------------*/
+#mappa-regioni {
+  width: 80%;
+  height: auto;
+  overflow: visible;
+  margin-left: 360px;
+  z-index: 3000;
+}
+
+.regione {
+  fill: #1E52A6;
+  cursor: pointer;
+  transition: fill 0.2s ease, filter 0.2s ease, transform 0.2s ease;
+}
+.regione:hover {
+  fill: #FFB700;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+  transform: translateY(-1px);
+}
+.regione.selected {
+  fill: url(#selectedPattern);
+}
+#mappa-regioni defs {
+  pointer-events: none;
+}
+
+
+
+/* BUBBLE + omino che segue il mouse */
+.help-overlay-canvas-label {
+  position: fixed;
+  z-index: 5000;
+  pointer-events: none;
+  background: rgba(255, 247, 220, 0.98);
+  border: 2px solid #FFB700;
+  border-radius: 8px;
+  padding: 14px 16px;
+  max-width: 300px;
+  min-width: 240px;
+  font-size: 13px;
+  color: #163264;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-family: 'STIX Two Text', serif;
+  line-height: 1.5;
+  transition: opacity 0.2s ease;
+  display: none;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+
+/* Colori suggeriti: */
+/* Sfondo footer: #16448dff (Blu Scuro) */
+/* Testo footer: #f2f9d9ff (Beige Chiaro) */
+
+#app-footer {
+  background-color: #1d223d;
+  color: #f2f9d9; /* Testo beige chiaro */
+  padding: 30px 5%; /* Spazio interno */
+  font-family: 'Stix Two Text', serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.footer-content {
+  display: flex; /* Colonne affiancate (Italiano e Inglese) */
+  justify-content: space-between;
+  gap: 40px;
+  max-width: 1200px; /* Limita la larghezza massima per leggibilità */
+  margin: 0 auto 30px auto; /* Centra il contenuto e aggiunge margine in basso */
+  border-bottom: 1px solid rgba(242, 249, 217, 0.2); /* Separatore sottile */
+  padding-bottom: 30px;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 300px;
+}
+
+#app-footer p {
+  margin: 0 0 5px 0;
+}
+
+#app-footer .title {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+#app-footer .sub-title {
+  margin-bottom: 20px;
+}
+
+#app-footer h3 {
+  color: #f2f9d9;
+  font-size: 1em;
+  font-weight: bold;
+  margin: 20px 0 10px 0;
+  text-transform: uppercase;
+}
+
+#app-footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#app-footer ul li {
+  margin-bottom: 3px;
+}
+
+/* Stile specifico per il copyright, lo facciamo risaltare meno */
+.copyright {
+  margin-top: 30px;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+/* LOGHI */
+.footer-logos {
+  text-align: left;
+  padding-top: 10px;
+  margin-left: 30px;
+}
+
+.footer-logos img {
+  height: 70px; /* Dimensione dei loghi */
+  margin: 0 20px;
+  opacity: 0.8;
+}
+
+/* Responsività per schermi più piccoli: le colonne vanno in pila */
+@media (max-width: 768px) {
+  .footer-content {
+      flex-direction: column;
+      gap: 0;
+  }
+  .footer-column {
+      margin-bottom: 20px;
+  }
+}

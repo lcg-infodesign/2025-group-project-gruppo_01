@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Livello_2" data-name="Livello 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72.98 144.52">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fcdf71;
+      }
+
+      .cls-2 {
+        fill: #fbe5b2;
+      }
+
+      .cls-3 {
+        stroke: #fff;
+        stroke-width: 4px;
+      }
+
+      .cls-3, .cls-4 {
+        fill: none;
+        stroke-linecap: round;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-4 {
+        stroke: #efb436;
+        stroke-width: 11px;
+      }
+
+      .cls-5 {
+        fill: #efb436;
+      }
+    </style>
+  </defs>
+  <g id="Livello_1-2" data-name="Livello 1">
+    <path class="cls-1" d="M12.96,68.24c10.71,6.74,35.41,6.11,46.65,1.27S90.59,6.28,39.94.37C-8.27-5.26-6.89,55.76,12.96,68.24Z"/>
+    <g>
+      <circle class="cls-5" cx="36.49" cy="33.22" r="32.61"/>
+      <polyline class="cls-4" points="31.6 51.45 31.6 139.02 17.25 139.02"/>
+      <polyline class="cls-4" points="43.9 51.45 43.9 139.02 58.31 139.02"/>
+    </g>
+    <g>
+      <line class="cls-3" x1="41.44" y1="28.75" x2="50.81" y2="28.75"/>
+      <line class="cls-3" x1="20.2" y1="28.75" x2="29.57" y2="28.75"/>
+    </g>
+    <path class="cls-1" d="M9.64,16.17h53.73S59.34.23,35.89.23s-26.25,15.94-26.25,15.94Z"/>
+    <path class="cls-3" d="M29.08,44.94s7.22,3.92,13.86,0"/>
+    <path class="cls-2" d="M36.49,54c3.22,0,3.22-5,0-5s-3.22,5,0,5h0Z"/>
+  </g>
+</svg>

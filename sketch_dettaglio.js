@@ -106,6 +106,7 @@ let regionQuesitoGender = {}; // { regionName: { quesitoNum: { maschi: number, f
 let quesitoGender = {}; // { quesitoNum: { maschi: number, femmine: number } } - national totals per quesito
 // Selected quesito for pie chart
 let selectedQuesito = null; // null or number (1, 2, 3, 4, 5)
+let hoveredQuesito = null; // null or number (1, 2, 3, 4, 5) - per effetto hover
 let quesitiVotes = {}; // { quesitoNum: { si: number, no: number } }
 let quesitiList = []; // Array of { numero: number, testo: string } - populated from CSV
 
@@ -450,9 +451,93 @@ function mouseMoved() {
   } else {
     // Se la modalità help non è attiva, assicurati che l'overlay sia nascosto
     removeHelpOverlay();
+    
+    // Check hover sui quesiti
+    updateQuesitiHover();
   }
 
   redraw();
+}
+
+// Funzione per aggiornare quale quesito è sotto il mouse
+function updateQuesitiHover() {
+  hoveredQuesito = null;
+  
+  // Calcola le stesse dimensioni usate in drawQuesitiWindow e mousePressed
+  const navbarHeight = 100;
+  const sliderHeight = 80;
+  const cardY = navbarHeight;
+  const cardHeight = height - navbarHeight - sliderHeight;
+  const sectionStartY = cardY + 10;
+  const bottomPadding = 3;
+  const availableTop = sectionStartY;
+  const availableBottom = cardY + cardHeight - bottomPadding;
+  const totalAvailableHeight = availableBottom - availableTop;
+  
+  const windowLeft = 40;
+  const windowWidth = width * 0.34 - 60;
+  const bgPadding = 15;
+  const presidentSliderHeight = 250;
+  const windowSpacing = 20;
+  const totalWindowsHeight = totalAvailableHeight - 20;
+  const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
+  const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
+  
+  const startY = quesitiWindowTop + 30;
+  const circleRadius = 15;
+  const quesitiAreaTopPadding = circleRadius + 5;
+  const quesitiAreaTop = startY + quesitiAreaTopPadding;
+  const quesitiAreaBottom = quesitiWindowTop + quesitiWindowHeight - bgPadding;
+  
+  // Verifica se il mouse è nell'area dei quesiti
+  if (mouseX >= windowLeft + bgPadding && mouseX < windowLeft + windowWidth - bgPadding &&
+      mouseY >= quesitiAreaTop && mouseY < quesitiAreaBottom) {
+    
+    const quesiti2025 = quesitiList.length > 0 ? quesitiList : [];
+    const minQuesitoHeight = 40;
+    const quesitiHeights = [];
+    const textStartX = windowLeft + bgPadding * 2 + 30;
+    const rightPaddingExtra = 30;
+    const textEndX = windowLeft + windowWidth - bgPadding * 2 - rightPaddingExtra;
+    const maxTextWidth = textEndX - textStartX;
+    
+    textSize(18);
+    quesiti2025.forEach((quesito) => {
+      const words = quesito.testo.split(' ');
+      let line = '';
+      let lineCount = 1;
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + (line ? ' ' : '') + words[i];
+        if (textWidth(testLine) > maxTextWidth && line.length > 0) {
+          line = words[i];
+          lineCount++;
+        } else {
+          line = testLine;
+        }
+      }
+      const lineHeight = 23;
+      const quesitoHeight = Math.max(minQuesitoHeight, 20 + lineCount * lineHeight);
+      quesitiHeights.push(quesitoHeight);
+    });
+    
+    const needsScroll = quesitiHeights.reduce((a, b) => a + b, 0) > (quesitiAreaBottom - quesitiAreaTop);
+    const maxScrollOffset = needsScroll ? Math.max(0, quesitiHeights.reduce((a, b) => a + b, 0) - (quesitiAreaBottom - quesitiAreaTop)) : 0;
+    const currentScrollOffset = constrain(quesitiScrollOffset, 0, maxScrollOffset);
+    
+    let currentY = startY - currentScrollOffset;
+    for (let i = 0; i < quesiti2025.length; i++) {
+      const quesitoHeight = quesitiHeights[i];
+      const y = currentY;
+      const quesitoClickTop = y;
+      const quesitoClickBottom = y + quesitoHeight;
+      
+      if (mouseY >= quesitoClickTop && mouseY < quesitoClickBottom) {
+        hoveredQuesito = quesiti2025[i].numero;
+        break;
+      }
+      currentY += quesitoHeight;
+    }
+  }
 }
 
 
@@ -4315,6 +4400,20 @@ pop();
     }
     
     const isSelected = selectedQuesito === quesito.numero;
+    const isHovered = hoveredQuesito === quesito.numero && !isSelected;
+    
+    // Hover background (solo se non è già selezionato)
+    if (isHovered) {
+      push();
+      fill(255, 183, 0, 20); // Sfondo giallo chiaro per hover
+      noStroke();
+      rect(windowLeft + bgPadding, y, windowWidth - bgPadding * 2, quesitoHeight);
+      noFill();
+      stroke(255, 183, 0, 150);
+      strokeWeight(1.5);
+      rect(windowLeft + bgPadding, y, windowWidth - bgPadding * 2, quesitoHeight);
+      pop();
+    }
     
     // Selection background
     if (isSelected) {

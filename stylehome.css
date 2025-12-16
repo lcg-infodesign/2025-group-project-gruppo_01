@@ -355,6 +355,89 @@
       .section-row.visible .omino:nth-child(9) { animation-delay: 1.0s; }
       .section-row.visible .omino:nth-child(10) { animation-delay: 1.1s; }
 
+      /* Sezioni con freccia */
+      .section-with-arrow {
+        position: relative;
+      }
+
+      /* Scroll indicator arrow */
+      .scroll-indicator {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        animation: fadeInScroll 1s ease-in-out;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .scroll-arrow {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--blue-color);
+        animation: bounceArrow 2s infinite;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .scroll-arrow:hover {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+
+      .scroll-arrow svg {
+        width: 60px;
+        height: 60px;
+        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
+      }
+
+      /* Animazione per le frecce del carosello - movimento sequenziale */
+      .scroll-arrow svg path:first-child {
+        animation: fadeArrow 2s infinite;
+      }
+
+      .scroll-arrow svg path:last-child {
+        animation: fadeArrow 2s infinite 0.3s;
+      }
+
+      @keyframes fadeArrow {
+        0%, 100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes bounceArrow {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(15px);
+        }
+      }
+
+      @keyframes fadeInScroll {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 0.8;
+        }
+      }
+
+      /* Nascondi la freccia quando l'utente scrolla */
+      .scroll-indicator.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease;
+      }
+
       @keyframes popIn {
         to { opacity: 1; transform: scale(1); }
       }

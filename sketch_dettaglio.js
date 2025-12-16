@@ -65,31 +65,31 @@ const yearAvailability = {};
 // Quorum status per year: 'RAGGIUNTO' | 'NON_RICHIESTO' | 'NON_RAGGIUNTO'
 // Valori di default presi da quorum.csv (verranno eventualmente sovrascritti da loadQuorumData)
 let quorumStatusByYear = {
-  '1946': 'NON_RICHIESTO',
-  '1974': 'RAGGIUNTO',
-  '1978': 'RAGGIUNTO',
-  '1981': 'RAGGIUNTO',
-  '1985': 'RAGGIUNTO',
-  '1987': 'RAGGIUNTO',
-  '1989': 'NON_RICHIESTO',
-  '1990': 'NON_RAGGIUNTO',
-  '1991': 'RAGGIUNTO',
-  '1993': 'RAGGIUNTO',
-  '1995': 'RAGGIUNTO',
-  '1997': 'NON_RAGGIUNTO',
-  '1999': 'NON_RAGGIUNTO',
-  '2000': 'NON_RAGGIUNTO',
-  '2001': 'NON_RICHIESTO',
-  '2003': 'NON_RAGGIUNTO',
-  '2005': 'NON_RAGGIUNTO',
-  '2006': 'NON_RICHIESTO',
-  '2009': 'NON_RAGGIUNTO',
-  '2011': 'NON_RAGGIUNTO',
-  '2016-1': 'RAGGIUNTO',
-  '2016-2': 'NON_RICHIESTO',
-  '2020': 'NON_RICHIESTO',
-  '2022': 'NON_RAGGIUNTO',
-  '2025': 'NON_RAGGIUNTO'
+   '1946': 'NON_RICHIESTO',
+        '1974': 'RAGGIUNTO',
+        '1978': 'RAGGIUNTO',
+        '1981': 'RAGGIUNTO',
+        '1985': 'RAGGIUNTO',
+        '1987': 'RAGGIUNTO',
+        '1989': 'NON_RICHIESTO',
+        '1990': 'NON_RAGGIUNTO',
+        '1991': 'RAGGIUNTO',
+        '1993': 'RAGGIUNTO',
+        '1995': 'RAGGIUNTO',
+        '1997': 'NON_RAGGIUNTO',
+        '1999': 'NON_RAGGIUNTO',
+        '2000': 'NON_RAGGIUNTO',
+        '2001': 'NON_RICHIESTO',
+        '2003': 'NON_RAGGIUNTO',
+        '2005': 'NON_RAGGIUNTO',
+        '2006': 'NON_RICHIESTO',
+        '2009': 'NON_RAGGIUNTO',
+        '2011': 'RAGGIUNTO',
+        '2016-1': 'NON_RAGGIUNTO',
+        '2016-2': 'NON_RICHIESTO',
+        '2020': 'NON_RICHIESTO',
+        '2022': 'NON_RAGGIUNTO',
+        '2025': 'NON_RAGGIUNTO'
 }; // { yearKey: status }
 // Total votes for pie chart
 let totalVotiSi = 0;
@@ -949,7 +949,7 @@ function updateTimelineColors() {
       console.warn(`No quorum status for ${yearKey}, checking defaults...`);
       // Try to use default value if available
       const defaultStatus = {
-        '1946': 'NON_RICHIESTO',
+         '1946': 'NON_RICHIESTO',
         '1974': 'RAGGIUNTO',
         '1978': 'RAGGIUNTO',
         '1981': 'RAGGIUNTO',
@@ -968,9 +968,9 @@ function updateTimelineColors() {
         '2005': 'NON_RAGGIUNTO',
         '2006': 'NON_RICHIESTO',
         '2009': 'NON_RAGGIUNTO',
-        '2011': 'NON_RAGGIUNTO',
-        '2016-1': 'NON-RICHIESTO',
-        '2016-2': 'RAGGIUNTO',
+        '2011': 'RAGGIUNTO',
+        '2016-1': 'NON_RAGGIUNTO',
+        '2016-2': 'NON_RICHIESTO',
         '2020': 'NON_RICHIESTO',
         '2022': 'NON_RAGGIUNTO',
         '2025': 'NON_RAGGIUNTO'
@@ -2905,8 +2905,8 @@ function setupYearSlider() {
              '1985': 'RAGGIUNTO', '1987': 'RAGGIUNTO', '1989': 'NON_RICHIESTO', '1990': 'NON_RAGGIUNTO',
              '1991': 'RAGGIUNTO', '1993': 'RAGGIUNTO', '1995': 'RAGGIUNTO', '1997': 'NON_RAGGIUNTO',
              '1999': 'NON_RAGGIUNTO', '2000': 'NON_RAGGIUNTO', '2001': 'NON_RICHIESTO', '2003': 'NON_RAGGIUNTO',
-             '2005': 'NON_RAGGIUNTO', '2006': 'NON_RICHIESTO', '2009': 'NON_RAGGIUNTO', '2011': 'NON_RAGGIUNTO',
-             '2016-1': 'RAGGIUNTO', '2016-2': 'NON_RICHIESTO', '2020': 'NON_RICHIESTO', '2022': 'NON_RAGGIUNTO',
+             '2005': 'NON_RAGGIUNTO', '2006': 'NON_RICHIESTO', '2009': 'NON_RAGGIUNTO', '2011': 'RAGGIUNTO',
+             '2016-1': 'NON_RAGGIUNTO', '2016-2': 'NON_RICHIESTO', '2020': 'NON_RICHIESTO', '2022': 'NON_RAGGIUNTO',
              '2025': 'NON_RAGGIUNTO'
           };
           const status = qStatus || fallbackMap[yKey];

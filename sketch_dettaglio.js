@@ -648,6 +648,26 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   console.log('p5 setup running â€" canvas created');
 
+  
+function setup() {
+  // --- LOGICA DI RICEZIONE ANNO DALL'URL ---
+  const urlParams = new URLSearchParams(window.location.search);
+  const yearFromUrl = urlParams.get('year');
+  
+  // Se esiste un parametro 'year' e quell'anno è previsto nel nostro oggetto REFERENDUM_YEARS
+  if (yearFromUrl && REFERENDUM_YEARS[yearFromUrl]) {
+    selectedYear = yearFromUrl;
+    dataFile = REFERENDUM_YEARS[yearFromUrl]; // Imposta il percorso del CSV corrispondente
+    console.log("Anno caricato dall'URL:", selectedYear);
+  }
+  // -----------------------------------------
+
+  createCanvas(windowWidth, windowHeight);
+  // ... resto del codice esistente (setupHelpMode, fonts, ecc.) ...
+  
+  // IMPORTANTE: Assicurati che lo slider della timeline si posizioni sull'anno corretto
+  // aggiungeremo una chiamata a setupYearSlider() che tenga conto dell'anno iniziale.
+}
   setupHelpMode();
   
 

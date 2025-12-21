@@ -467,6 +467,42 @@ navLinks.forEach(link => {
     <script>
       // Timeline setup for overview - adapted from sketch_dettaglio.js
       let selectedYearOverview = '2025'; // Default selected year
+
+
+// Aggiungi questa mappa all'inizio dello script per gestire i casi particolari
+const YEAR_MAP_FOR_LINK = {
+  '2016(1)': '2016-1',
+  '2016(2)': '2016-2'
+};
+
+function draw() {
+  background(245, 240, 220);
+  updateHoverState();
+  
+  // --- CAMBIO CURSORE ---
+  if (hoveredIndex !== -1) {
+    cursor(HAND); // Cambia in manina se siamo sopra una barra
+  } else {
+    cursor(ARROW); // Torna freccia normale
+  }
+  
+  drawLegend(); 
+  drawHistogram();
+  drawHoverInfo(); 
+}
+
+// --- FUNZIONE DI CLIC PER IL REINDIRIZZAMENTO ---
+function mousePressed() {
+  if (hoveredIndex !== -1) {
+    let selectedYear = years[hoveredIndex];
+    
+    // Converte il formato (es. 2016(1) -> 2016-1) usando la mappa o mantenendo l'anno
+    let targetYear = YEAR_MAP_FOR_LINK[selectedYear] || selectedYear;
+    
+    // Naviga alla pagina dettaglio passando l'anno come parametro nell'URL
+    window.location.href = `dettaglio.html?year=${targetYear}`;
+  }
+}
       
       // Convert overview year format to internal format for quorum lookup
       function getYearKeyForQuorum(displayYear) {

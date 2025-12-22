@@ -493,15 +493,58 @@ function draw() {
 
 // --- FUNZIONE DI CLIC PER IL REINDIRIZZAMENTO ---
 function mousePressed() {
+  // If we're hovering a bar or timeline, navigate directly
   if (hoveredIndex !== -1) {
     let selectedYear = years[hoveredIndex];
-    
-    // Converte il formato (es. 2016(1) -> 2016-1) usando la mappa o mantenendo l'anno
     let targetYear = YEAR_MAP_FOR_LINK[selectedYear] || selectedYear;
-    
-    // Naviga alla pagina dettaglio passando l'anno come parametro nell'URL
     window.location.href = `dettaglio.html?year=${targetYear}`;
+    return;
   }
+
+  // Fallback: compute the year from the click/tap position
+  // Use same layout math as updateHoverState to map x -> year
+  const w = (typeof width !== 'undefined') ? width : window.innerWidth;
+  const h = (typeof height !== 'undefined') ? height : window.innerHeight;
+  const chartX = CHART_PADDING;
+  const chartWidth = w - 2 * CHART_PADDING;
+  const chartY = TOP_MARGIN;
+  const chartHeight = h - TOP_MARGIN - BOTTOM_MARGIN;
+  const timelineY = chartY + chartHeight + 20;
+
+  // Compute percentage position based on the same offsets used in updateHoverState
+  const relativeX = mouseX - (chartX - 40);
+  const posPercent = (relativeX / (chartWidth + 85)) * 100;
+
+  // Build small lookup for year positions
+  const yearToPosition = {};
+  years.forEach((year, index) => {
+    const position = (years.length > 1) ? (index / (years.length - 1)) * 100 : 0;
+    yearToPosition[year] = position;
+  });
+
+  // Find closest year
+  let closestYear = years[0];
+  let minDistance = Infinity;
+  for (let i = 0; i < years.length; i++) {
+    const y = years[i];
+    const distance = Math.abs(posPercent - yearToPosition[y]);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestYear = y;
+    }
+  }
+
+  // Only navigate if the click was within the chart or timeline vertical bounds
+  if ((mouseY >= chartY && mouseY <= chartY + chartHeight) || (mouseY >= timelineY - 30 && mouseY <= timelineY + 50)) {
+    const mapped = YEAR_MAP_FOR_LINK[closestYear] || closestYear;
+    window.location.href = `dettaglio.html?year=${mapped}`;
+  }
+}
+
+// Support touch on mobile
+function touchStarted() {
+  mousePressed();
+  return false;
 }
       
       // Convert overview year format to internal format for quorum lookup
@@ -695,11 +738,15 @@ function mousePressed() {
               }
             });
             
-            // Click handler
+            // Click handler: move slider to the year AND navigate to dettaglio
             dotContainer.addEventListener('click', () => {
               const yearPos = yearToPosition[year];
               slider.value = yearPos;
               slider.dispatchEvent(new Event('input'));
+
+              // Dopo l'aggiornamento, vai alla pagina di dettaglio per l'anno selezionato
+              const mapped = YEAR_MAP_FOR_LINK[year] || year;
+              window.location.href = `dettaglio.html?year=${mapped}`;
             });
             
             dotContainer.appendChild(dot);
@@ -762,6 +809,69 @@ function mousePressed() {
             }
           }
         });
+
+        // When user finishes interacting with the slider, navigate to the dettaglio page for the selected year
+        slider.addEventListener('change', (e) => {
+          const position = parseFloat(e.target.value);
+          const year = findClosestYear(position);
+          if (year) {
+            const mapped = YEAR_MAP_FOR_LINK[year] || year;
+            window.location.href = `dettaglio.html?year=${mapped}`;
+          }
+        });
+
+        // Add click/touch handling on the canvas so clicking a bar navigates to its dettaglio page
+        const canvasEl = document.querySelector("canvas");
+        if (canvasEl) {
+          const handlePoint = (x, y) => {
+            const rect = canvasEl.getBoundingClientRect();
+            // Compute chart geometry consistent with drawHistogram
+            const chartX = CHART_PADDING - 40;
+            const chartWidth = rect.width - 2 * CHART_PADDING + 85;
+            const chartY = TOP_MARGIN;
+            const chartHeight = rect.height - TOP_MARGIN - BOTTOM_MARGIN;
+            const timelineY = chartY + chartHeight + 20;
+
+            // Build center positions for each year (in pixels)
+            const centers = years.map((yr, idx) => {
+              const pct = (years.length > 1) ? (idx / (years.length - 1)) : 0;
+              return chartX + pct * chartWidth;
+            });
+
+            // Find closest center
+            let minDist = Infinity;
+            let minIdx = -1;
+            for (let i = 0; i < centers.length; i++) {
+              const d = Math.abs(x - centers[i]);
+              if (d < minDist) { minDist = d; minIdx = i; }
+            }
+
+            // Consider click valid only if vertical position is within chart or near the timeline
+            if (minIdx !== -1 && ((y >= chartY && y <= chartY + chartHeight) || (y >= timelineY - 30 && y <= timelineY + 50))) {
+              const clickedYear = years[minIdx];
+              const mapped = YEAR_MAP_FOR_LINK[clickedYear] || clickedYear;
+              console.log('Canvas clicked at', x.toFixed(0), y.toFixed(0), '-> nearest year:', clickedYear, 'mapped:', mapped, 'distance:', Math.round(minDist));
+              window.location.href = `dettaglio.html?year=${mapped}`;
+            }
+          };
+
+          canvasEl.addEventListener('click', (ev) => {
+            const rect = canvasEl.getBoundingClientRect();
+            const x = ev.clientX - rect.left;
+            const y = ev.clientY - rect.top;
+            handlePoint(x, y);
+          });
+
+          canvasEl.addEventListener('touchstart', (ev) => {
+            if (ev.touches && ev.touches.length) {
+              const t = ev.touches[0];
+              const rect = canvasEl.getBoundingClientRect();
+              const x = t.clientX - rect.left;
+              const y = t.clientY - rect.top;
+              handlePoint(x, y);
+            }
+          }, {passive: true});
+        }
       }
       
       // Initialize timeline when page loads

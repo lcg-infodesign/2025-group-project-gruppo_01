@@ -1,10 +1,17 @@
 let tableRows = null;
 let regionValues = {};
 let geojsonData = null; // loaded GeoJSON FeatureCollection
+// Current selected year (can be a number or string like '2016-1' or '2016-2')
+// Leggi dall'URL se disponibile, altrimenti usa il default
+let selectedYear = (typeof window !== 'undefined' && window.__INITIAL_YEAR__ !== undefined) 
+  ? window.__INITIAL_YEAR__ 
+  : 2025;
+
+console.log('selectedYear inizializzato:', selectedYear, typeof selectedYear);
+
 // Fallback dataset path (only used if the page is served via HTTP and you want the default loaded)
 let dataFile = 'dataset/25-2025.csv';
-// Current selected year (can be a number or string like '2016-1' or '2016-2')
-let selectedYear = 2025;
+
 // Available referendum years mapped to CSV files
 // Note: 2016 has two separate datasets, labeled as 2016-1 and 2016-2
 const REFERENDUM_YEARS = {
@@ -48,6 +55,22 @@ function getYearNumeric(yearKey) {
   const keyStr = String(yearKey);
   if (keyStr === '2016-1' || keyStr === '2016-2') return 2016;
   return parseInt(keyStr) || 0;
+}
+
+// Aggiorna dataFile in base all'anno selezionato dall'URL (dopo che REFERENDUM_YEARS è definito)
+// Prova sia come numero che come stringa per compatibilità
+if (REFERENDUM_YEARS[selectedYear]) {
+  dataFile = REFERENDUM_YEARS[selectedYear];
+  console.log('dataFile impostato da selectedYear:', selectedYear, '->', dataFile);
+} else if (REFERENDUM_YEARS[String(selectedYear)]) {
+  dataFile = REFERENDUM_YEARS[String(selectedYear)];
+  console.log('dataFile impostato da selectedYear (stringa):', String(selectedYear), '->', dataFile);
+} else if (typeof selectedYear === 'string' && REFERENDUM_YEARS[parseInt(selectedYear)]) {
+  dataFile = REFERENDUM_YEARS[parseInt(selectedYear)];
+  console.log('dataFile impostato da selectedYear (numero):', parseInt(selectedYear), '->', dataFile);
+} else {
+  console.warn('Anno non trovato in REFERENDUM_YEARS:', selectedYear, 'tipo:', typeof selectedYear);
+  console.log('Chiavi disponibili:', Object.keys(REFERENDUM_YEARS));
 }
 
 // Array of year keys sorted by numeric year, with 2016-1 before 2016-2
@@ -792,11 +815,11 @@ function setup() {
   // Load contesto.csv for president data
   loadContestoData();
 
-  // attempt to fetch default CSV for 2025 when page is served
-  console.log('Loading 2025 affluenza data from:', dataFile);
+  // attempt to fetch default CSV for selected year when page is served
+  console.log('Loading affluenza data for year', selectedYear, 'from:', dataFile);
   fetch(dataFile).then(r => {
     if (r.ok) {
-      console.log('Successfully fetched 2025 CSV file');
+      console.log('Successfully fetched CSV file for year', selectedYear);
       return r.text();
     }
     throw new Error('no default');
@@ -804,12 +827,12 @@ function setup() {
     // parse fetched CSV text
     tableRows = parseCSV(txt);
     parseTableTotals();
-    debugLog('CSV 2025 loaded: ' + dataFile);
+    debugLog('CSV loaded for year ' + selectedYear + ': ' + dataFile);
     console.log('2025 affluenza data loaded successfully');
     redraw();
   }).catch(err => {
     console.warn('Could not load default 2025 CSV:', err);
-    debugLog('No default CSV 2025 loaded automatically â€" waiting user file selection', true);
+    debugLog('No default CSV loaded automatically for year ' + selectedYear + ' â€" waiting user file selection', true);
     // Load GeoJSON even without CSV so map can be displayed
     loadAndJoinGeoJSON();
     // no default loaded; wait for user file selection
@@ -2956,7 +2979,24 @@ function setupYearSlider() {
   slider.min = 0;
   slider.max = 100;
   slider.step = 0.01;
-  slider.value = yearToPosition[selectedYear] || 100;
+  
+  // Normalizza selectedYear per trovare la posizione corretta
+  let normalizedYear = selectedYear;
+  // Prova come stringa prima
+  if (typeof selectedYear === 'number') {
+    normalizedYear = String(selectedYear);
+  }
+  // Se non trovato, prova come numero
+  if (!yearToPosition[normalizedYear] && typeof selectedYear === 'string' && !selectedYear.includes('-')) {
+    const numYear = parseInt(selectedYear);
+    if (yearToPosition[numYear] !== undefined) {
+      normalizedYear = numYear;
+    }
+  }
+  
+  const sliderValue = yearToPosition[normalizedYear] || yearToPosition[String(selectedYear)] || yearToPosition[selectedYear] || 100;
+  slider.value = sliderValue;
+  console.log('Slider impostato - selectedYear:', selectedYear, 'tipo:', typeof selectedYear, 'normalized:', normalizedYear, 'value:', sliderValue);
 
   const findClosestYear = (pos) => {
     let closest = REFERENDUM_YEARS_ARRAY[0];

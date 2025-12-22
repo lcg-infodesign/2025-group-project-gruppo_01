@@ -53,10 +53,10 @@
           <div id="current-date" class="navbar-date"></div>
     
           <div class="navbar-right">
-            <a href="home.html" class="nav-link">home</a>
-            <a href="overview.html" class="nav-link">overview</a>
-            <a href="dettaglio.html" class="nav-link active">dettaglio</a>
-            <a href="informazioni.html" class="nav-link">info</a>
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="overview.html" class="nav-link">Overview</a>
+            <a href="dettaglio.html" class="nav-link active">Dettaglio</a>
+            <a href="informazioni.html" class="nav-link">Info</a>
     
             <!-- HELP BUTTON QUI!!! -->
             <div class="help-controls">
@@ -263,6 +263,32 @@
     <!-- FINE GESTIONE CLICK -->
 
 
+    <script>
+      // Leggi il parametro year dall'URL e imposta selectedYear prima di caricare lo sketch
+      (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const yearParam = urlParams.get('year');
+        
+        if (yearParam) {
+          // Converti il parametro in un formato valido per REFERENDUM_YEARS
+          let yearValue = yearParam;
+          
+          // Gestisci i casi speciali per 2016
+          if (yearParam === '2016-1' || yearParam === '2016-2') {
+            yearValue = yearParam; // Mantieni come stringa
+          } else if (!isNaN(yearParam) && !yearParam.includes('-')) {
+            // Se è un numero puro, convertilo in numero
+            yearValue = parseInt(yearParam);
+          }
+          
+          // Imposta selectedYear prima che lo sketch venga caricato
+          window.__INITIAL_YEAR__ = yearValue;
+          console.log('Anno selezionato dall\'URL:', yearParam, '->', yearValue);
+        } else {
+          console.log('Nessun parametro year nell\'URL, uso default');
+        }
+      })();
+    </script>
     <script src="sketch_dettaglio.js?v=1734298500"></script>
   </body>
 </html>

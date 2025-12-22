@@ -756,6 +756,26 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   console.log('p5 setup running â€" canvas created');
 
+  
+function setup() {
+  // --- LOGICA DI RICEZIONE ANNO DALL'URL ---
+  const urlParams = new URLSearchParams(window.location.search);
+  const yearFromUrl = urlParams.get('year');
+  
+  // Se esiste un parametro 'year' e quell'anno è previsto nel nostro oggetto REFERENDUM_YEARS
+  if (yearFromUrl && REFERENDUM_YEARS[yearFromUrl]) {
+    selectedYear = yearFromUrl;
+    dataFile = REFERENDUM_YEARS[yearFromUrl]; // Imposta il percorso del CSV corrispondente
+    console.log("Anno caricato dall'URL:", selectedYear);
+  }
+  // -----------------------------------------
+
+  createCanvas(windowWidth, windowHeight);
+  // ... resto del codice esistente (setupHelpMode, fonts, ecc.) ...
+  
+  // IMPORTANTE: Assicurati che lo slider della timeline si posizioni sull'anno corretto
+  // aggiungeremo una chiamata a setupYearSlider() che tenga conto dell'anno iniziale.
+}
   setupHelpMode();
   
 
@@ -4055,13 +4075,13 @@ function drawGenderChart() {
   // Se non ci sono dati, mostra messaggio
   if (maschi === 0 && femmine === 0) {
     push();
-    fill(50, 50, 100);
+    fill(50, 50, 70);
     noStroke();
     textSize(20);
     textFont('Stix Two Text');
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
-    text('Dati non disponibili', chartX, windowTop + windowHeight / 2);
+    text('Dati non disponibili', chartX, windowTop + windowHeight / 2-30);
     textSize(11);
     textStyle(NORMAL);
     fill(100, 100, 100, 200);
@@ -4099,8 +4119,8 @@ function drawGenderChart() {
   let subtitle = 'Italia';
   if (selectedQuesito !== null) {
     subtitle = `Quesito ${selectedQuesito}`;
-    if (regionName) subtitle += ` â€" ${regionName}`;
-    else subtitle += ` â€" Italia`;
+    if (regionName) subtitle += ` " ${regionName}`;
+    else subtitle += ` Italia`;
   } else if (regionName) {
     subtitle = regionName;
   }

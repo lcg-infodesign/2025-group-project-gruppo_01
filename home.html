@@ -83,19 +83,29 @@
           <p class="txt-intro">Nel</p>
           <h2 class="txt-year">2025</h2>
           <p class="txt-stat">
-            <span class="highlight-blue">meno di</span> <span class="highlight-yellow">1 persona su 3</span><br>
-            è andata a votare
+            <span class="highlight-blue">meno di</span> <span class="highlight-yellow">3 persone su 10</span><br>
+            sono andate a votare.
           </p>
         </div>
 
         <div class="visual-col">
+          
+          <img src="omino1.svg" class="omino filter-blue" alt="omino">
+          <img src="omino1.svg" class="omino filter-blue" alt="omino">
+          <img src="omino1.svg" class="omino filter-blue" alt="omino">
+          <p>
           <img src="omino3.svg" class="omino filter-blue" alt="omino saluta"> 
           <img src="omino3.svg" class="omino filter-blue" alt="omino">
-          <img src="omino1.svg" class="omino filter-blue" alt="omino">
+          <img src="omino3.svg" class="omino filter-blue" alt="omino saluta"> 
+          <img src="omino3.svg" class="omino filter-blue" alt="omino">
+          <img src="omino3.svg" class="omino filter-blue" alt="omino saluta"> 
+          <img src="omino3.svg" class="omino filter-blue" alt="omino">
+          <img src="omino3.svg" class="omino filter-blue" alt="omino saluta"> 
+          </p>
         </div>
 
-        <!-- Seconda freccia scroll indicator -->
-        <div class="scroll-indicator scroll-indicator-2">
+        <!-- Freccia per scrollare alla sezione successiva (terza) -->
+        <div class="scroll-indicator">
           <div class="scroll-arrow">
             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <!-- Doppia freccia per carosello verticale -->
@@ -105,6 +115,7 @@
           </div>
         </div>
       </section>
+      
 
       <section class="section-row hidden-section" style="min-height: 80vh;">
         <div class="text-col">
@@ -162,9 +173,17 @@
       const scrollIndicators = document.querySelectorAll('.scroll-indicator');
       let scrollTimeout;
       
+      function findAncestorSection(el) {
+        let node = el;
+        while (node && !node.classList.contains('section-row')) {
+          node = node.parentElement;
+        }
+        return node;
+      }
+
       window.addEventListener('scroll', () => {
-        scrollIndicators.forEach((indicator, index) => {
-          const section = indicator.closest('.section-row');
+        scrollIndicators.forEach((indicator) => {
+          const section = (typeof indicator.closest === 'function') ? indicator.closest('.section-row') : findAncestorSection(indicator);
           if (section) {
             const rect = section.getBoundingClientRect();
             // Nascondi la freccia se la sezione è fuori dalla vista
@@ -178,11 +197,17 @@
       });
 
       // Click sulle frecce per scrollare alla sezione successiva
-      scrollIndicators.forEach((indicator, index) => {
+      scrollIndicators.forEach((indicator) => {
         indicator.addEventListener('click', () => {
-          const sections = document.querySelectorAll('.section-row');
-          if (sections[index + 1]) {
-            sections[index + 1].scrollIntoView({
+          const currentSection = (typeof indicator.closest === 'function') ? indicator.closest('.section-row') : findAncestorSection(indicator);
+          if (!currentSection) return;
+          // Cerca la prossima sezione-row successiva nel DOM
+          let next = currentSection.nextElementSibling;
+          while (next && !next.classList.contains('section-row')) {
+            next = next.nextElementSibling;
+          }
+          if (next) {
+            next.scrollIntoView({
               behavior: 'smooth',
               block: 'start'
             });

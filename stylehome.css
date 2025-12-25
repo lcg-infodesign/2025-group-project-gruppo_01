@@ -259,6 +259,18 @@
       
       .section-row:nth-child(odd) .text-col { align-items: flex-end; text-align: right; }
       .section-row:nth-child(even) .text-col { align-items: flex-start; text-align: left; }
+      
+      /* Centra il testo nell'ultima sezione */
+      .section-row:last-child {
+        justify-content: center;
+      }
+      
+      .section-row:last-child .text-col { 
+        align-items: center; 
+        text-align: center; 
+        width: 100%;
+        max-width: 900px;
+      }
 
       .visual-col {
         flex: 1.2; /* Più spazio per gli omini grandi */
@@ -314,7 +326,8 @@
         line-height: 1.1;
         font-weight: bold;
         margin-bottom: 40px;
-        margin-right: 60px;
+        margin-right: 0;
+        text-align: center;
       }
 
       .highlight-yellow { color: var(--yellow-color); font-weight: bold; }
@@ -536,11 +549,13 @@
   }
   
 
-/* Centra il contenitore del bottone nella sezione finale */
+      /* Centra il contenitore del bottone nella sezione finale */
 .btn-container {
   text-align: center;
   width: 100%; /* Assicura che prenda tutta la larghezza del genitore */
   margin-top: 20px; /* Spazio opzionale sopra il bottone */
+  display: flex;
+  justify-content: center;
 }
 
 

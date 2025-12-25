@@ -236,7 +236,8 @@
             e.target.closest('#footer') || 
             e.target.closest('.help-controls') ||
             e.target.tagName === 'INPUT' || // Slider
-            e.target.tagName === 'BUTTON') { 
+            e.target.tagName === 'BUTTON' ||
+            e.target.closest('canvas')) { // IMPORTANTE: ignora click sul canvas p5.js
             return;
         }
 

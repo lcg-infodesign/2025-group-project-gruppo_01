@@ -265,13 +265,36 @@ function drawHistogram() {
       strokeWeight(3);
       line(chartX, quorumY, chartX + chartWidth, quorumY);
       
-      fill(COLORS.QUORUM_LINE);
-      noStroke();
       textSize(24);
       textAlign(RIGHT, CENTER);
+      
+      // Draw 50+1 with subtle outline for better readability
+      push();
+      // Draw outline (white/light background) first
+      stroke(255, 255, 255, 180);
+      strokeWeight(3);
+      fill(COLORS.QUORUM_LINE);
       text('50+1', chartX +1400, quorumY-20);
+      // Draw main text on top
+      noStroke();
+      fill(COLORS.QUORUM_LINE);
+      text('50+1', chartX +1400, quorumY-20);
+      pop();
+      
       textSize(14);
+      
+      // Draw QUORUM with subtle outline for better readability
+      push();
+      // Draw outline (white/light background) first
+      stroke(255, 255, 255, 180);
+      strokeWeight(2);
+      fill(COLORS.QUORUM_LINE);
       text('QUORUM', chartX +1400, quorumY + 15);
+      // Draw main text on top
+      noStroke();
+      fill(COLORS.QUORUM_LINE);
+      text('QUORUM', chartX +1400, quorumY + 15);
+      pop();
       
       
       // Bar width as percentage of chart width
@@ -381,13 +404,28 @@ function drawHoverInfo() {
         drawingContext.setLineDash([]);
     
         // Display percentage without box - bold, STIX Two Text, blue, large
+        // Remove any shadow from text - use push/pop to isolate context changes
+        push();
+        // Completely reset shadow properties
+        drawingContext.shadowBlur = 0;
+        drawingContext.shadowColor = 'rgba(0,0,0,0)';
+        drawingContext.shadowOffsetX = 0;
+        drawingContext.shadowOffsetY = 0;
+        // Disable all filter effects
+        drawingContext.filter = 'none';
+        // Set globalCompositeOperation to ensure clean rendering
+        drawingContext.globalCompositeOperation = 'source-over';
        
         fill(COLORS.INK); // Blue color
+        noStroke(); // Make sure no stroke is applied
         textFont('STIX Two Text');
         textSize(25); // Large size
         textAlign(CENTER, CENTER);
         textStyle(normal);
+        
+        // Draw text without any effects
         text(`${affluence.toFixed(2)}%`, centerX, barTopY-30);
+        pop();
  }
     
 function mouseMoved() {
@@ -454,11 +492,11 @@ navLinks.forEach(link => {
 </script>
 
     <!-- Timeline footer (same as dettaglio.html) -->
-    <div id="footer" style="position:fixed; bottom:40px; left:0; right:0; height:80px; background-color:#f5f0dc00; z-index:1000; display:flex; align-items:center; padding:0px;">
+    <div id="footer" style="position:fixed; bottom:40px; left:0; right:0; height:80px; background-color:transparent; z-index:1000; display:flex; align-items:center; padding:0px;">
       <div id="year-slider-container" style="position:relative; width:100%; max-width:1400px; margin:0 auto;">
         <div style="position:relative; height:40px; display:flex; align-items:center;">
-          <div id="timeline-line" style="position:absolute; left:0; right:0; height:2px; background-color:#0F3D88; top:50%; transform:translateY(-50%);"></div>
-          <div id="year-dots" style="position:relative; width:100%; height:100%; z-index:15;"></div>
+          <div id="timeline-line" style="position:absolute; left:0; right:0; height:4px; background-color:#0F3D88 !important; top:50%; transform:translateY(-50%); z-index:10; pointer-events:none; opacity:1 !important; display:block !important; visibility:visible !important;"></div>
+          <div id="year-dots" style="position:relative; width:100%; height:100%; z-index:15; min-height:40px;"></div>
           <input type="range" id="year-slider" min="0" max="100" value="100" step="0.01" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:5;">
         </div>
       </div>
@@ -466,7 +504,7 @@ navLinks.forEach(link => {
 
     <script>
       // Timeline setup for overview - adapted from sketch_dettaglio.js
-      let selectedYearOverview = '2025'; // Default selected year
+      let selectedYearOverview = null; // No default selected year
       
       // Convert overview year format to internal format for quorum lookup
       function getYearKeyForQuorum(displayYear) {
@@ -527,9 +565,11 @@ navLinks.forEach(link => {
         slider.max = 100;
         slider.step = 0.01;
         
-        // Find current year position
-        const currentPosition = yearToPosition[selectedYearOverview] || 100;
+        // Find current year position - start at 0 if no year selected (instead of 100 to avoid auto-selecting 2025)
+        const currentPosition = selectedYearOverview ? yearToPosition[selectedYearOverview] : 0;
         slider.value = currentPosition;
+        
+        // Don't trigger selection on initial load - only on user interaction
         
         // Function to find closest year
         const findClosestYear = (position) => {
@@ -553,18 +593,12 @@ navLinks.forEach(link => {
         const createDots = () => {
           yearDots.innerHTML = '';
           
-          // Add connecting line
+          // Create timeline line directly in year-dots container
           const line = document.createElement('div');
-          line.id = 'year-line';
-          line.style.position = 'absolute';
-          line.style.left = '2%';
-          line.style.right = '2%';
-          line.style.top = '50%';
-          line.style.transform = 'translateY(-50%)';
-          line.style.height = '2px';
-          line.style.background = '#0F3D88';
-          line.style.zIndex = '1';
+          line.style.cssText = 'position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 3px; width: 100%; background-color: #0F3D88; z-index: 1; pointer-events: none; opacity: 1; display: block; visibility: visible;';
           yearDots.appendChild(line);
+          
+          console.log('Timeline line created, yearDots:', yearDots);
           
           overviewYears.forEach((year, index) => {
             const dotContainer = document.createElement('div');
@@ -577,6 +611,10 @@ navLinks.forEach(link => {
             dotContainer.style.cursor = 'pointer';
             dotContainer.style.zIndex = '20';
             dotContainer.style.pointerEvents = 'auto';
+            // Ensure container doesn't affect label positioning
+            dotContainer.style.display = 'flex';
+            dotContainer.style.flexDirection = 'column';
+            dotContainer.style.alignItems = 'center';
             
             // Create square marker
             const dot = document.createElement('div');
@@ -586,6 +624,11 @@ navLinks.forEach(link => {
             dot.style.transition = 'all 0.18s ease';
             dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
             dot.style.borderRadius = '6px';
+            dot.style.display = 'block';
+            dot.style.visibility = 'visible';
+            dot.style.opacity = '1';
+            dot.style.position = 'relative';
+            dot.style.zIndex = '21'; // Above the line
             
             // Colors
             const FILLED_BLUE = '#1E52A6';
@@ -614,21 +657,31 @@ navLinks.forEach(link => {
             }
             
             // Create year label - positioned BELOW the timeline
+            // Position label absolutely relative to year-dots container for consistent alignment
             const label = document.createElement('div');
             label.textContent = year;
+            label.setAttribute('data-label-year', year);
             label.style.position = 'absolute';
-            label.style.left = '50%';
+            // Reuse percentage variable already declared above
+            label.style.left = `${percentage}%`;
             label.style.transform = 'translateX(-50%)';
-            label.style.top = '30px'; // Below the timeline instead of above
+            label.style.top = 'calc(50% + 30px)'; // Position relative to timeline center, always same distance
             label.style.fontFamily = "'STIX Two Text', serif";
             label.style.fontSize = '16px';
             label.style.fontWeight = 'bold';
             label.style.whiteSpace = 'nowrap';
             label.style.pointerEvents = 'none'; // Il click viene gestito dal container
             label.style.opacity = '1';
+            label.style.lineHeight = '16px'; // Fixed line height
+            label.style.height = '16px'; // Fixed height for consistent alignment
+            label.style.marginTop = '0';
+            label.style.paddingTop = '0';
+            label.style.marginBottom = '0';
+            label.style.paddingBottom = '0';
+            label.style.zIndex = '1'; // Below the line (line has z-index 5)
             
-            // Highlight selected year
-            if (year === selectedYearOverview) {
+            // Highlight selected year (only if one is selected)
+            if (selectedYearOverview && year === selectedYearOverview) {
               const selectedSize = 22;
               dot.style.width = `${selectedSize}px`;
               dot.style.height = `${selectedSize}px`;
@@ -685,8 +738,13 @@ navLinks.forEach(link => {
             });
             
             dotContainer.appendChild(dot);
-            dotContainer.appendChild(label);
+            // Append dotContainer first, then label to maintain proper z-index layering
             yearDots.appendChild(dotContainer);
+            // Append label directly to yearDots container for consistent positioning (after dotContainer so it's on top)
+            yearDots.appendChild(label);
+            
+            // Debug: verify dot is visible
+            console.log(`Dot created for ${year}:`, dot, 'Container:', dotContainer);
           });
         };
         
@@ -696,15 +754,18 @@ navLinks.forEach(link => {
           dotContainers.forEach((container) => {
             const year = container.getAttribute('data-year-key');
             const dot = container.querySelector('div');
-            const label = container.querySelectorAll('div')[1];
+            // Find label by data-label-year attribute since it's now in yearDots container
+            const label = yearDots.querySelector(`[data-label-year="${year}"]`);
             
-            if (year === selectedYearOverview) {
+            if (selectedYearOverview && year === selectedYearOverview) {
               dot.style.width = '22px';
               dot.style.height = '22px';
               dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
               if (label) {
                 label.style.color = '#255077';
                 label.style.opacity = '1';
+                // Keep label aligned at same position
+                label.style.top = 'calc(50% + 30px)';
               }
             } else {
               dot.style.width = '18px';
@@ -713,6 +774,8 @@ navLinks.forEach(link => {
               if (label) {
                 label.style.color = '#255096';
                 label.style.opacity = '1';
+                // Keep label aligned at same position
+                label.style.top = 'calc(50% + 30px)';
               }
             }
           });
@@ -722,7 +785,14 @@ navLinks.forEach(link => {
         createDots();
         
         // Handle slider change
+        let isInitialLoad = true;
         slider.addEventListener('input', (e) => {
+          // Skip first load to avoid auto-selecting 2025
+          if (isInitialLoad) {
+            isInitialLoad = false;
+            return;
+          }
+          
           const position = parseFloat(e.target.value);
           const year = findClosestYear(position);
           
@@ -736,14 +806,17 @@ navLinks.forEach(link => {
               slider.value = exactPosition;
             }
             
-            // Update hoveredIndex to match selected year
-            const yearIndex = overviewYears.indexOf(year);
-            if (yearIndex !== -1) {
-              hoveredIndex = yearIndex;
-              redraw();
-            }
+            // Don't automatically show percentage when year is selected
+            // Percentage will only show on hover
+            hoveredIndex = -1;
+            redraw();
           }
         });
+        
+        // Reset flag after a short delay to allow user interaction
+        setTimeout(() => {
+          isInitialLoad = false;
+        }, 500);
       }
       
       // Initialize timeline when page loads

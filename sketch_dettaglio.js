@@ -316,6 +316,7 @@ let currentPresidenteMode = 0; // 0 = Presidente della Repubblica, 1 = President
 let isDraggingPresidentSlider = false; // Track if slider is being dragged (not used for carousel)
 let presidenteDescScrollOffset = 0; // Scroll offset for president description
 let isDraggingDescScrollbar = false; // Track if description scrollbar is being dragged
+let isDraggingQuesitiScrollbar = false; // Track if quesiti scrollbar is being dragged
 let quesitiScrollOffset = 0; // Scroll offset for quesiti list
 
 // STIX fonts
@@ -753,11 +754,6 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  console.log('p5 setup running â€" canvas created');
-
-  
-function setup() {
   // --- LOGICA DI RICEZIONE ANNO DALL'URL ---
   const urlParams = new URLSearchParams(window.location.search);
   const yearFromUrl = urlParams.get('year');
@@ -770,45 +766,164 @@ function setup() {
   }
   // -----------------------------------------
 
-  createCanvas(windowWidth, windowHeight);
-  // ... resto del codice esistente (setupHelpMode, fonts, ecc.) ...
+  const canvas = createCanvas(windowWidth, windowHeight);
+  console.log('p5 setup running - canvas created');
   
-  // IMPORTANTE: Assicurati che lo slider della timeline si posizioni sull'anno corretto
-  // aggiungeremo una chiamata a setupYearSlider() che tenga conto dell'anno iniziale.
-}
+  // Aggiungi listener diretto sul canvas per intercettare i click sui pallini
+  // Questo bypassa eventuali problemi con mousePressed di p5.js
+  canvas.elt.addEventListener('click', (e) => {
+    const rect = canvas.elt.getBoundingClientRect();
+    // Calcola le coordinate considerando lo scaling del canvas
+    const scaleX = width / rect.width;
+    const scaleY = height / rect.height;
+    const clickX = (e.clientX - rect.left) * scaleX;
+    const clickY = (e.clientY - rect.top) * scaleY;
+    
+    console.log('🎯 Click diretto sul canvas HTML:', { 
+      clickX, clickY, 
+      clientX: e.clientX, clientY: e.clientY,
+      rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+      scale: { scaleX, scaleY },
+      canvasSize: { width, height }
+    });
+    
+    // Calcola le coordinate del carousel (stesse di mousePressed)
+    const navbarHeight = 100;
+    const sliderHeight = 80;
+    const cardX = 0;
+    const cardY = navbarHeight;
+    const cardWidth = width;
+    const cardHeight = height - navbarHeight - sliderHeight;
+    const sectionStartY = cardY + 10;
+    const bottomPadding = 3;
+    const windowLeft = cardX + 40;
+    const windowWidth = cardWidth * 0.34 - 60;
+    const bgPadding = 15;
+    const presidentSliderHeight = 250;
+    const windowSpacing = 20;
+    
+    const availableTop = sectionStartY;
+    const availableBottom = cardY + cardHeight - bottomPadding;
+    const totalAvailableHeight = availableBottom - availableTop;
+    const totalWindowsHeight = totalAvailableHeight - 20;
+    const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
+    const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
+    const presidentWindowTop = quesitiWindowTop + quesitiWindowHeight + windowSpacing;
+    const sliderAreaY = presidentWindowTop;
+    
+    const carouselLeft = windowLeft + bgPadding;
+    const carouselRight = windowLeft + windowWidth - bgPadding;
+    const carouselTop = sliderAreaY;
+    const carouselBottom = sliderAreaY + presidentSliderHeight;
+    
+    // Verifica se il click è nell'area del carousel
+    if (clickX >= carouselLeft && clickX < carouselRight && 
+        clickY >= carouselTop && clickY < carouselBottom) {
+      
+      const carouselX = windowLeft + bgPadding;
+      const carouselWidth = windowWidth - bgPadding * 2;
+      const carouselY = sliderAreaY;
+      const headerY = carouselY + 15;
+      
+      const dotSize = 8;
+      const dotSpacing = 20;
+      const carouselCenterX = carouselX + carouselWidth / 2;
+      const dotsStartX = carouselCenterX - dotSpacing / 2;
+      const dotY = headerY;
+      
+      // Area cliccabile più grande per facilitare il click
+      const dotClickAreaWidth = 100; // Aumentato da 80 a 100
+      const dotClickAreaHeight = 100; // Aumentato da 80 a 100
+      const maxClickDistance = 50; // Aumentato da 40 a 50
+      
+      // Right dot (Consiglio) - controllo con area rettangolare E distanza
+      const rightDotCenterX = dotsStartX + dotSpacing;
+      const rightDotCenterY = dotY;
+      const distToRightDot = Math.sqrt(Math.pow(clickX - rightDotCenterX, 2) + Math.pow(clickY - rightDotCenterY, 2));
+      const rightDotX = rightDotCenterX - dotClickAreaWidth / 2;
+      const rightDotY = rightDotCenterY - dotClickAreaHeight / 2;
+      const rightDotRight = rightDotX + dotClickAreaWidth;
+      const rightDotBottom = rightDotY + dotClickAreaHeight;
+      const inRightArea = (clickX >= rightDotX && clickX <= rightDotRight && clickY >= rightDotY && clickY <= rightDotBottom) ||
+                          distToRightDot <= maxClickDistance;
+      
+      console.log('🔴 Test click pallino destro:', {
+        clickX, clickY,
+        rightDotCenterX, rightDotCenterY,
+        distToRightDot, maxClickDistance,
+        inRightArea,
+        areaBounds: { left: rightDotX, right: rightDotRight, top: rightDotY, bottom: rightDotBottom }
+      });
+      
+      if (inRightArea) {
+        console.log('✅✅✅ CLICK SUL PALLINO DESTRO RILEVATO DAL LISTENER DIRETTO! ✅✅✅');
+        e.stopPropagation(); // Ferma la propagazione
+        e.preventDefault(); // Previeni comportamenti di default
+        e.stopImmediatePropagation(); // Ferma anche altri listener
+        
+        // Cambia modalità
+        if (currentPresidenteMode !== 1) {
+          currentPresidenteMode = 1;
+          presidenteDescScrollOffset = 0;
+          
+          const yearKey = String(selectedYear);
+          let presidenteData = contestoByYear[yearKey];
+          if (!presidenteData && !isNaN(selectedYear)) {
+            presidenteData = contestoByYear[parseInt(selectedYear)];
+          }
+          if (!presidenteData) {
+            const numericYear = getYearNumeric(yearKey);
+            for (const key in contestoByYear) {
+              if (getYearNumeric(key) === numericYear) {
+                presidenteData = contestoByYear[key];
+                break;
+              }
+            }
+          }
+          
+          if (presidenteData && presidenteData.imgConsiglio) {
+            const cachedImg = presidenteImages[presidenteData.imgConsiglio];
+            if (!cachedImg || (cachedImg && cachedImg.width === 0)) {
+              loadPresidenteImages(presidenteData, true);
+            }
+          }
+          
+          redraw();
+        }
+        return false; // Previeni altri handler
+      }
+      
+      // Left dot (Repubblica)
+      const leftDotCenterX = dotsStartX;
+      const leftDotCenterY = dotY;
+      const distToLeftDot = Math.sqrt(Math.pow(clickX - leftDotCenterX, 2) + Math.pow(clickY - leftDotCenterY, 2));
+      const leftDotX = leftDotCenterX - dotClickAreaWidth / 2;
+      const leftDotY = leftDotCenterY - dotClickAreaHeight / 2;
+      const leftDotRight = leftDotX + dotClickAreaWidth;
+      const leftDotBottom = leftDotY + dotClickAreaHeight;
+      const inLeftArea = (clickX >= leftDotX && clickX <= leftDotRight && clickY >= leftDotY && clickY <= leftDotBottom) ||
+                         distToLeftDot <= maxClickDistance;
+      
+      if (inLeftArea) {
+        console.log('✅✅✅ CLICK SUL PALLINO SINISTRO RILEVATO DAL LISTENER DIRETTO! ✅✅✅');
+        e.stopPropagation();
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        if (currentPresidenteMode !== 0) {
+          currentPresidenteMode = 0;
+          presidenteDescScrollOffset = 0;
+          redraw();
+        }
+        return false;
+      }
+    }
+  }, true); // Use capture phase per intercettare prima
+  console.log('p5 setup running - canvas created');
+  
   setupHelpMode();
   
 
-  // debug visual to verify canvas renders
-  background(220);
-  push();
-  // Clip to the Affluenza window to prevent overflow outside its rectangle
-  try {
-    drawingContext.save();
-    const clipLeft = chartAreaLeft + bgPadding;
-    const clipTop = windowTop;
-    const clipW = chartAreaWidth - bgPadding * 2;
-    const clipH = windowHeight;
-    drawingContext.beginPath();
-    drawingContext.rect(clipLeft, clipTop, clipW, clipH);
-    drawingContext.clip();
-  } catch (e) {
-    // drawingContext might not be available in some environments â€" ignore
-  }
-  fill(200, 50, 50);
-  noStroke();
-  rect(20, 100, 140, 80);
-  fill(255);
-  textSize(14);
-  textAlign(LEFT, TOP);
-  text('DEBUG: canvas OK', 30, 120);
-  pop();
-
-  // Restore clipping
-  try { drawingContext.restore(); } catch (e) {}
-  // Debug panel disabled for production
-  // createDebugPanel();
-  // debugLog('setup: canvas created');
   // Use STIX font if loaded, otherwise fallback
   if (stixFont) {
     textFont(stixFont);
@@ -922,47 +1037,83 @@ function loadContestoData() {
     
     // Build map year -> president data
     contestoByYear = {};
-    contestoData.forEach(row => {
+    contestoData.forEach((row, index) => {
       // Extract year from REFERENDUM column (e.g., "2-3 giugno 1946" -> 1946)
       // Handle column name with or without trailing space
-      const referendumDate = row['REFERENDUM '] || row['REFERENDUM'] || row['REFERENDUM '] || '';
-      const yearMatch = referendumDate.match(/\b(19\d{2}|20\d{2})\b/);
-      if (yearMatch) {
-        const year = parseInt(yearMatch[1]);
-        
-        // Handle 2016-1 and 2016-2 cases
-        let yearKey = year;
-        if (year === 2016) {
-          // Check if this is the first or second 2016 referendum
-          const existing2016 = Object.keys(contestoByYear).filter(k => getYearNumeric(k) === 2016);
-          if (existing2016.length > 0) {
-            yearKey = '2016-2';
-          } else {
-            yearKey = '2016-1';
-          }
-        }
-        
-        contestoByYear[yearKey] = {
-          presidenteRepubblica: row['PRESIDENTE DELLA REPUBBLICA'] || '',
-          presidenteConsiglio: row['PRESIDENTE DEL CONSIGLIO'] || '',
-          descrizioneRep: row['DESCRIZIONE_REP'] || row['DESCRIZIONE_REP '] || '',
-          descrizioneConsiglio: row['DESCRIZIONE_CONSIGLIO'] || row['DESCRIZIONE_CONSIGLIO '] || '',
-          imgRepubblica: row['IMMAGINE_REPUBBLICA'] || '',
-          imgConsiglio: row['IMMAGINE_MINISTRO'] || '',
-          referendumDate: referendumDate.trim() // Save the referendum date
-        };
-        
-        // Debug: log loaded data
-        console.log(`Loaded data for year ${yearKey}:`, {
-          rep: contestoByYear[yearKey].presidenteRepubblica,
-          consiglio: contestoByYear[yearKey].presidenteConsiglio,
-          descRep: contestoByYear[yearKey].descrizioneRep.substring(0, 50) + '...',
-          descConsiglio: contestoByYear[yearKey].descrizioneConsiglio.substring(0, 50) + '...'
-        });
-        
-        // Load images for this year
-        loadPresidenteImages(contestoByYear[yearKey]);
+      const referendumDate = row['REFERENDUM '] || row['REFERENDUM'] || '';
+      if (!referendumDate) {
+        console.warn(`⚠️ Riga ${index + 1}: colonna REFERENDUM vuota`);
+        return;
       }
+      
+      const yearMatch = referendumDate.match(/\b(19\d{2}|20\d{2})\b/);
+      if (!yearMatch) {
+        console.warn(`⚠️ Riga ${index + 1}: nessun anno trovato in "${referendumDate}"`);
+        return;
+      }
+      
+      const year = parseInt(yearMatch[1]);
+      
+      // Handle 2016-1 and 2016-2 cases
+      let yearKey = String(year);
+      if (year === 2016) {
+        // Check if this is the first or second 2016 referendum
+        const existing2016 = Object.keys(contestoByYear).filter(k => getYearNumeric(k) === 2016);
+        if (existing2016.length > 0) {
+          yearKey = '2016-2';
+        } else {
+          yearKey = '2016-1';
+        }
+      }
+      
+      // Also store with numeric key for easier lookup
+      const numericKey = String(year);
+      
+      const presidenteData = {
+        presidenteRepubblica: row['PRESIDENTE DELLA REPUBBLICA'] || '',
+        presidenteConsiglio: row['PRESIDENTE DEL CONSIGLIO'] || '',
+        descrizioneRep: row['DESCRIZIONE_REP'] || row['DESCRIZIONE_REP '] || '',
+        descrizioneConsiglio: row['DESCRIZIONE_CONSIGLIO'] || row['DESCRIZIONE_CONSIGLIO '] || '',
+        imgRepubblica: row['IMMAGINE_REPUBBLICA'] || '',
+        imgConsiglio: row['IMMAGINE_MINISTRO'] || '',
+        referendumDate: referendumDate.trim() // Save the referendum date
+      };
+      
+      // Store with both yearKey (for 2016-1/2016-2) and numeric key (for easier lookup)
+      contestoByYear[yearKey] = presidenteData;
+      if (numericKey !== yearKey) {
+        contestoByYear[numericKey] = presidenteData;
+      }
+      
+      // Debug: log loaded data with image filenames
+      console.log(`✅ Dati caricati per anno ${yearKey} (anche salvato come ${numericKey}):`, {
+        rep: presidenteData.presidenteRepubblica,
+        consiglio: presidenteData.presidenteConsiglio,
+        imgRepubblica: presidenteData.imgRepubblica,
+        imgConsiglio: presidenteData.imgConsiglio,
+        descRep: presidenteData.descrizioneRep ? presidenteData.descrizioneRep.substring(0, 50) + '...' : '',
+        descConsiglio: presidenteData.descrizioneConsiglio ? presidenteData.descrizioneConsiglio.substring(0, 50) + '...' : '',
+        rowKeys: Object.keys(row)
+      });
+      
+      // Warn if Consiglio data is missing
+      if (!presidenteData.presidenteConsiglio) {
+        console.warn(`⚠️ Nome Presidente Consiglio mancante per anno ${yearKey}`);
+      }
+      if (!presidenteData.imgConsiglio) {
+        console.warn(`⚠️ Nome immagine Consiglio mancante per anno ${yearKey}`);
+      }
+      if (!presidenteData.descrizioneConsiglio) {
+        console.warn(`⚠️ Descrizione Consiglio mancante per anno ${yearKey}`);
+      }
+      
+      // Verifica che i dati siano stati letti correttamente dal CSV
+      if (presidenteData.presidenteConsiglio && presidenteData.imgConsiglio) {
+        console.log(`✅ Dati Consiglio completi per ${yearKey}: ${presidenteData.presidenteConsiglio} - ${presidenteData.imgConsiglio}`);
+      }
+      
+      // Load images for this year
+      loadPresidenteImages(presidenteData);
     });
     
     console.log('Contesto by year:', Object.keys(contestoByYear));
@@ -1123,23 +1274,82 @@ function updateTimelineColors() {
 }
 
 // Load images for a president data object
-function loadPresidenteImages(presidenteData) {
+function loadPresidenteImages(presidenteData, forceReload = false) {
   // Load Repubblica image
-  if (presidenteData.imgRepubblica && !presidenteImages[presidenteData.imgRepubblica]) {
+  if (presidenteData.imgRepubblica && (!presidenteImages[presidenteData.imgRepubblica] || forceReload)) {
     const imgPath = 'Contesto copia/IMMAGINE_REPUBBLICA/' + presidenteData.imgRepubblica;
+    console.log('📸 Caricamento immagine Repubblica:', imgPath);
     presidenteImages[presidenteData.imgRepubblica] = loadImage(imgPath, 
-      () => console.log('Loaded image:', imgPath),
-      () => console.error('Failed to load image:', imgPath)
+      () => {
+        console.log('✅ Immagine Repubblica caricata con successo:', imgPath);
+        redraw(); // Force redraw when image loads
+      },
+      () => {
+        console.error('❌ Errore nel caricamento immagine Repubblica:', imgPath);
+      }
     );
   }
   
-  // Load Consiglio image
-  if (presidenteData.imgConsiglio && !presidenteImages[presidenteData.imgConsiglio]) {
-    const imgPath = 'Contesto copia/IMMAGINE_CONSIGLIO/' + presidenteData.imgConsiglio;
-    presidenteImages[presidenteData.imgConsiglio] = loadImage(imgPath,
-      () => console.log('Loaded image:', imgPath),
-      () => console.error('Failed to load image:', imgPath)
-    );
+  // Load Consiglio image - always try to load if filename exists
+  if (presidenteData.imgConsiglio) {
+    const cachedImg = presidenteImages[presidenteData.imgConsiglio];
+    // Only load if not in cache OR if in cache but not yet loaded (width = 0) OR if forceReload is true
+    if (forceReload || !cachedImg || (cachedImg && cachedImg.width === 0)) {
+      const imgPath = 'Contesto copia/IMMAGINE_CONSIGLIO/' + presidenteData.imgConsiglio;
+      console.log('📸 Tentativo di caricare immagine Consiglio:', imgPath);
+      console.log('   Forza ricaricamento:', forceReload, '| In cache:', !!cachedImg, '| Width:', cachedImg ? cachedImg.width : 0);
+      
+      // Try loading with original filename
+      presidenteImages[presidenteData.imgConsiglio] = loadImage(imgPath,
+        () => {
+          console.log('✅ Immagine Consiglio caricata con successo:', imgPath);
+          console.log('   Dimensioni immagine:', presidenteImages[presidenteData.imgConsiglio].width, 'x', presidenteImages[presidenteData.imgConsiglio].height);
+          redraw(); // Force redraw when image loads
+        },
+        (err) => {
+          console.error('❌ Errore nel caricamento immagine Consiglio:', imgPath);
+          console.error('   Dettagli errore:', err);
+          // Try common filename variations
+          const variations = [
+            imgPath.replace(/ /g, '_'),
+            imgPath.replace(/_/g, ' '),
+            imgPath.replace(/Goria/g, 'Gloria'),
+            imgPath.replace(/Lamberto/g, 'Lambarto'),
+            imgPath.replace(/Lambarto/g, 'Lamberto')
+          ];
+          
+          let tried = 0;
+          const tryNext = () => {
+            if (tried < variations.length && variations[tried] !== imgPath) {
+              const altPath = variations[tried];
+              console.log(`📸 Tentativo variante ${tried + 1}/${variations.length}:`, altPath);
+              tried++;
+              presidenteImages[presidenteData.imgConsiglio] = loadImage(altPath,
+                () => {
+                  console.log('✅ Immagine caricata con variante:', altPath);
+                  console.log('   Dimensioni immagine:', presidenteImages[presidenteData.imgConsiglio].width, 'x', presidenteImages[presidenteData.imgConsiglio].height);
+                  redraw();
+                },
+                () => {
+                  console.log(`⚠️ Variante ${tried} fallita, provo la prossima...`);
+                  tryNext(); // Try next variation
+                }
+              );
+            } else {
+              console.error('❌ Tutte le varianti hanno fallito per:', presidenteData.imgConsiglio);
+              console.error('   Path originale:', imgPath);
+              console.error('   Varianti provate:', variations);
+            }
+          };
+          tryNext();
+        }
+      );
+    } else {
+      console.log('✅ Immagine Consiglio già in cache e caricata:', presidenteData.imgConsiglio);
+      console.log('   Dimensioni:', cachedImg.width, 'x', cachedImg.height);
+    }
+  } else {
+    console.warn('⚠️ Nessun nome immagine Consiglio trovato nei dati per:', presidenteData);
   }
 }
 
@@ -2269,7 +2479,7 @@ function draw() {
   }
   
   // Sfondo solo a sinistra e a destra, NON sulla fascia alta sopra la mappa
-background(245, 240, 220);
+  background(245, 240, 220);
 
 // fascia navbar già disegnata dall'HTML, non serve coprirla
 
@@ -3175,9 +3385,31 @@ function setupYearSlider() {
           if (REFERENDUM_YEARS[newYear] && typeof loadCSVForYear === 'function') {
              loadCSVForYear(REFERENDUM_YEARS[newYear]);
           }
-          if (contestoByYear[String(newYear)] && typeof loadPresidenteImages === 'function') {
-             loadPresidenteImages(contestoByYear[String(newYear)]);
+          
+          // Carica immagini presidente per il nuovo anno (prova più formati di chiave)
+          let presidenteData = contestoByYear[String(newYear)];
+          if (!presidenteData && !isNaN(newYear)) {
+            presidenteData = contestoByYear[parseInt(newYear)];
           }
+          if (!presidenteData) {
+            const numericYear = getYearNumeric(String(newYear));
+            for (const key in contestoByYear) {
+              if (getYearNumeric(key) === numericYear) {
+                presidenteData = contestoByYear[key];
+                break;
+              }
+            }
+          }
+          
+          if (presidenteData && typeof loadPresidenteImages === 'function') {
+            console.log('📸 Caricamento immagini presidente per nuovo anno:', newYear);
+            loadPresidenteImages(presidenteData, false); // Non forzare, ma carica se necessario
+          } else {
+            console.warn('⚠️ Dati presidente non trovati per anno:', newYear);
+          }
+          
+          // Forza redraw dopo cambio anno
+          redraw();
       }
   });
 }
@@ -4621,17 +4853,81 @@ function drawPresidentSlider(x, y, w, h) {
   push();
   
   // Get current year's president data
+  // Try multiple formats to find the data
   const yearKey = String(selectedYear);
-  const presidenteData = contestoByYear[yearKey];
+  let presidenteData = contestoByYear[yearKey];
+  
+  // If not found, try as number
+  if (!presidenteData && !isNaN(selectedYear)) {
+    presidenteData = contestoByYear[parseInt(selectedYear)];
+  }
+  
+  // If still not found, try to find by numeric year (for 2016-1, 2016-2 cases)
+  if (!presidenteData) {
+    const numericYear = getYearNumeric(yearKey);
+    // Try to find any entry with this numeric year
+    for (const key in contestoByYear) {
+      if (getYearNumeric(key) === numericYear) {
+        presidenteData = contestoByYear[key];
+        console.log(`✅ Trovati dati per anno ${yearKey} usando chiave alternativa: ${key}`);
+        break;
+      }
+    }
+  }
   
   if (!presidenteData) {
     // No data for this year
+    console.error(`❌ Nessun dato presidente trovato per anno: ${yearKey} (tipo: ${typeof selectedYear})`);
+    console.log('Anni disponibili in contestoByYear:', Object.keys(contestoByYear));
+    console.log('selectedYear:', selectedYear, 'tipo:', typeof selectedYear);
     fill(100, 100, 100, 150);
     textSize(14);
     textAlign(CENTER, CENTER);
     text('Dati presidente non disponibili per questo anno', x + w/2, y + h/2);
     pop();
     return;
+  }
+  
+  // Determine which president to show based on mode (carousel) - MUST be defined early
+  const currentPresidente = currentPresidenteMode === 0 ? {
+    nome: presidenteData.presidenteRepubblica || 'Nome non disponibile',
+    titolo: 'PRESIDENTE DELLA REPUBBLICA',
+    descrizione: presidenteData.descrizioneRep || '',
+    img: presidenteData.imgRepubblica
+  } : {
+    nome: presidenteData.presidenteConsiglio || 'Nome non disponibile',
+    titolo: 'PRESIDENTE DEL CONSIGLIO',
+    descrizione: presidenteData.descrizioneConsiglio || '',
+    img: presidenteData.imgConsiglio
+  };
+  
+  // Debug: verifica dati ogni secondo quando in modalità Consiglio
+  if (frameCount % 60 === 0 && currentPresidenteMode === 1) {
+    const imgInCache = !!presidenteImages[currentPresidente.img];
+    const imgLoaded = imgInCache && presidenteImages[currentPresidente.img].width > 0;
+    
+    console.log('🔍 [DRAW] Modalità Consiglio attiva:', {
+      yearKey: yearKey,
+      modalità: currentPresidenteMode,
+      presidenteConsiglio: presidenteData.presidenteConsiglio,
+      imgConsiglio: presidenteData.imgConsiglio,
+      nomeVisualizzato: currentPresidente.nome,
+      immagineInCache: imgInCache,
+      immagineCaricata: imgLoaded,
+      imgWidth: imgInCache ? presidenteImages[currentPresidente.img].width : 0,
+      imgHeight: imgInCache ? presidenteImages[currentPresidente.img].height : 0,
+      tutteLeImmaginiCaricate: Object.keys(presidenteImages)
+    });
+    
+    // Se l'immagine non è in cache o non è ancora caricata, prova a ricaricarla
+    if (presidenteData.imgConsiglio) {
+      if (!imgInCache || !imgLoaded) {
+        console.log('⚠️ Immagine Consiglio non in cache o non caricata, ricarico...');
+        loadPresidenteImages(presidenteData, true); // Force reload
+      }
+    } else {
+      console.warn('⚠️ Nessun nome immagine Consiglio nei dati per anno:', yearKey);
+    }
   }
   
   // Stroke only (no background) - content directly on page background
@@ -4658,28 +4954,31 @@ function drawPresidentSlider(x, y, w, h) {
   fill(22, 50, 100);
   textAlign(CENTER, CENTER);
   
-  // Draw indicator dots
+  // Draw indicator dots - IMPORTANTE: queste coordinate devono corrispondere esattamente a quelle in mousePressed
   const dotSize = 8;
   const dotSpacing = 20;
   const dotsStartX = carouselCenterX - dotSpacing / 2;
   
-  // Left dot (Repubblica)
+  // Draw indicator dots sul canvas
+  // Left dot (Repubblica) - sempre visibile
+  noStroke();
   if (currentPresidenteMode === 0) {
     fill(22, 50, 100);
+    ellipse(dotsStartX, headerY, dotSize + 2, dotSize + 2);
   } else {
     fill(200, 200, 200);
+    ellipse(dotsStartX, headerY, dotSize, dotSize);
   }
-  noStroke();
-  ellipse(dotsStartX, headerY, dotSize, dotSize);
   
-  // Right dot (Consiglio)
+  // Right dot (Consiglio) - sempre visibile
+  noStroke();
   if (currentPresidenteMode === 1) {
     fill(22, 50, 100);
+    ellipse(dotsStartX + dotSpacing, headerY, dotSize + 2, dotSize + 2);
   } else {
     fill(200, 200, 200);
+    ellipse(dotsStartX + dotSpacing, headerY, dotSize, dotSize);
   }
-  noStroke();
-  ellipse(dotsStartX + dotSpacing, headerY, dotSize, dotSize);
   
   // Draw president image and info - centered vertically and horizontally, all inside carousel
   const carouselPadding = 18; // Padding from carousel edges
@@ -4696,18 +4995,18 @@ function drawPresidentSlider(x, y, w, h) {
   // Center content vertically within available space
   const contentY = headerY + carouselPadding + Math.max(0, (contentAreaHeight - imageSize) / 2);
   
-  // Determine which president to show based on mode (carousel)
-  const currentPresidente = currentPresidenteMode === 0 ? {
-    nome: presidenteData.presidenteRepubblica,
-    titolo: 'PRESIDENTE DELLA REPUBBLICA',
-    descrizione: presidenteData.descrizioneRep,
-    img: presidenteData.imgRepubblica
-  } : {
-    nome: presidenteData.presidenteConsiglio,
-    titolo: 'PRESIDENTE DEL CONSIGLIO',
-    descrizione: presidenteData.descrizioneConsiglio,
-    img: presidenteData.imgConsiglio
-  };
+  // Debug: verifica che i dati siano presenti (ogni secondo quando in modalità Consiglio)
+  if (currentPresidenteMode === 1 && frameCount % 60 === 0) {
+    console.log('🔍 Modalità Consiglio attiva:', {
+      nome: currentPresidente.nome,
+      img: currentPresidente.img,
+      descrizione: currentPresidente.descrizione ? currentPresidente.descrizione.substring(0, 50) + '...' : 'Manca',
+      presidenteConsiglio: presidenteData.presidenteConsiglio,
+      imgConsiglio: presidenteData.imgConsiglio,
+      immagineInCache: !!presidenteImages[currentPresidente.img],
+      tutteLeImmagini: Object.keys(presidenteImages)
+    });
+  }
   
   // No circular background - image without orange frame
   // Make sure circle doesn't go outside carousel bounds
@@ -4715,10 +5014,11 @@ function drawPresidentSlider(x, y, w, h) {
   const circleY = constrain(contentY + imageSize/2, y + circleRadius + carouselPadding, y + h - circleRadius - carouselPadding);
   
   // Draw president image if loaded - positioned on the left
-  if (currentPresidente.img && presidenteImages[currentPresidente.img]) {
+  // IMPORTANT: Always try to draw the image, even if it's still loading
+  if (currentPresidente.img && currentPresidente.img.trim() !== '') {
     const img = presidenteImages[currentPresidente.img];
-    if (img.width > 0) { // Image is loaded
-      // Draw circular mask
+    if (img && img.width > 0 && img.height > 0) {
+      // Image is loaded and ready
       push();
       // Create clipping mask for circle
       drawingContext.save();
@@ -4739,24 +5039,124 @@ function drawPresidentSlider(x, y, w, h) {
       
       drawingContext.restore();
       pop();
+    } else {
+      // Image not loaded yet or still loading
+      // Log more frequently when in Consiglio mode to help debug
+      if (currentPresidenteMode === 1 && frameCount % 30 === 0) {
+        console.warn('⚠️ Immagine Consiglio non ancora caricata:', {
+          imgFilename: currentPresidente.img,
+          inCache: !!img,
+          imgWidth: img ? img.width : 0,
+          imgHeight: img ? img.height : 0,
+          tutteLeImmagini: Object.keys(presidenteImages),
+          presidenteNome: currentPresidente.nome
+        });
+        // Try to reload if image is in cache but not loaded
+        if (img && img.width === 0) {
+          console.log('🔄 Tentativo di ricaricare immagine non caricata...');
+          const yearKey = String(selectedYear);
+          let presidenteData = contestoByYear[yearKey];
+          if (!presidenteData && !isNaN(selectedYear)) {
+            presidenteData = contestoByYear[parseInt(selectedYear)];
+          }
+          if (!presidenteData) {
+            const numericYear = getYearNumeric(yearKey);
+            for (const key in contestoByYear) {
+              if (getYearNumeric(key) === numericYear) {
+                presidenteData = contestoByYear[key];
+                break;
+              }
+            }
+          }
+          if (presidenteData && presidenteData.imgConsiglio === currentPresidente.img) {
+            loadPresidenteImages(presidenteData, true);
+          }
+        }
+      }
+      // Draw placeholder circle when image is missing or loading
+      push();
+      noFill();
+      stroke(150, 150, 150);
+      strokeWeight(2);
+      ellipse(imageX, circleY, imageSize/2, imageSize/2);
+      fill(150, 150, 150);
+      textSize(11);
+      textAlign(CENTER, CENTER);
+      text('Caricamento...', imageX, circleY);
+      pop();
     }
+  } else {
+    // No image filename specified
+    if (currentPresidenteMode === 1 && frameCount % 60 === 0) {
+      console.error('❌ Nessun nome immagine Consiglio specificato per:', currentPresidente.nome);
+      console.error('   Dati presidente:', {
+        nome: currentPresidente.nome,
+        titolo: currentPresidente.titolo,
+        img: currentPresidente.img
+      });
+    }
+    // Draw placeholder circle when image filename is missing
+    push();
+    noFill();
+    stroke(150, 150, 150);
+    strokeWeight(2);
+    ellipse(imageX, circleY, imageSize/2, imageSize/2);
+    fill(150, 150, 150);
+    textSize(10);
+    textAlign(CENTER, CENTER);
+    text('Immagine\nnon disponibile', imageX, circleY);
+    pop();
   }
   
   // Draw name and title on the right side (larger text) - centered vertically with image
+  // Always draw name and title, even if image is missing
   textSize(18); // Increased from 15
   fill(22, 50, 100); // Dark blue (no orange highlight)
   textStyle(BOLD);
   textAlign(LEFT, TOP);
   // Center text vertically with image (start text at same Y as image)
   const nameY = contentY;
-  text(currentPresidente.nome, textAreaX, nameY);
+  
+  // Debug: verifica che nome e titolo siano presenti (più frequente in modalità Consiglio)
+  if (currentPresidenteMode === 1 && frameCount % 30 === 0) {
+    console.log('🔍 Visualizzazione Consiglio:', {
+      nome: currentPresidente.nome,
+      titolo: currentPresidente.titolo,
+      descrizione: currentPresidente.descrizione ? currentPresidente.descrizione.substring(0, 50) + '...' : 'Manca',
+      img: currentPresidente.img,
+      imgInCache: !!presidenteImages[currentPresidente.img],
+      imgLoaded: presidenteImages[currentPresidente.img] ? presidenteImages[currentPresidente.img].width > 0 : false
+    });
+  }
+  
+  // Always show name, even if empty (with fallback)
+  if (currentPresidente.nome && currentPresidente.nome.trim() !== '' && currentPresidente.nome !== 'Nome non disponibile') {
+    fill(22, 50, 100);
+    text(currentPresidente.nome, textAreaX, nameY);
+  } else {
+    // Fallback se nome mancante o vuoto
+    fill(150, 100, 100);
+    textStyle(ITALIC);
+    text('Nome non disponibile', textAreaX, nameY);
+    textStyle(BOLD);
+    fill(22, 50, 100);
+  }
   
   // Draw title (larger text)
   textSize(15); // Increased from 11
   fill(22, 50, 100);
   textStyle(NORMAL);
   const titleY = nameY + 26; // Increased spacing
-  text(currentPresidente.titolo, textAreaX, titleY);
+  if (currentPresidente.titolo && currentPresidente.titolo.trim() !== '' && currentPresidente.titolo !== 'Titolo non disponibile') {
+    text(currentPresidente.titolo, textAreaX, titleY);
+  } else {
+    // Fallback se titolo mancante
+    fill(150, 100, 100);
+    textStyle(ITALIC);
+    text('Titolo non disponibile', textAreaX, titleY);
+    textStyle(NORMAL);
+    fill(22, 50, 100);
+  }
   
   // Draw description on the right side (wrapped text with scroll)
   textSize(15); // Increased from 11
@@ -5064,28 +5464,31 @@ function mouseWheel(event) {
 }
 
 function mousePressed() {
-  // First check if click is on president slider - use same coordinates as drawQuesitiWindow
+  console.log('🖱️🖱️🖱️ mousePressed CHIAMATO 🖱️🖱️🖱️');
+  console.log('   mouseX:', mouseX, 'mouseY:', mouseY);
+  console.log('   Canvas size:', width, 'x', height);
+  
+  // First check if click is on president slider - use EXACTLY the same coordinates as drawQuesitiWindow
   const navbarHeight = 100;
   const sliderHeight = 80;
-  const cardMargin = 0; // No margin - full width (matching layout)
   const cardX = 0;
-  const cardY = navbarHeight; // Start right after navbar (matching layout)
+  const cardY = navbarHeight;
   const cardWidth = width;
   const cardHeight = height - navbarHeight - sliderHeight;
-  const sectionStartY = cardY + 20; // Same as layout
+  const sectionStartY = cardY + 10; // IMPORTANTE: deve essere +10 come in drawQuesitiWindow (riga 4403)
   const bottomPadding = 3;
-  const windowLeft = cardX + 20;
-    const windowWidth = cardWidth * 0.34 - 40; // Width matching the left divider at 34%
+  const windowLeft = cardX + 40; // IMPORTANTE: deve essere +40 come in drawQuesitiWindow (riga 4406)
+  const windowWidth = cardWidth * 0.34 - 60; // IMPORTANTE: deve essere -60 come in drawQuesitiWindow (riga 4407)
   const bgPadding = 15;
-  const presidentSliderHeight = 280;
+  const presidentSliderHeight = 250; // DEVE corrispondere a quello usato in drawQuesitiWindow
   const windowSpacing = 20;
   
-  // Calculate window positions (same as drawQuesitiWindow)
+  // Calculate window positions (EXACTLY same as drawQuesitiWindow)
   const availableTop = sectionStartY;
   const availableBottom = cardY + cardHeight - bottomPadding;
   const totalAvailableHeight = availableBottom - availableTop;
   const totalWindowsHeight = totalAvailableHeight - 20;
-  const quesitiWindowHeight = (totalWindowsHeight - presidentSliderHeight - windowSpacing);
+  const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60; // IMPORTANTE: -60 come in drawQuesitiWindow (riga 4417)
   const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
   const presidentWindowTop = quesitiWindowTop + quesitiWindowHeight + windowSpacing;
   
@@ -5094,42 +5497,223 @@ function mousePressed() {
   const sliderAreaY = presidentWindowTop;
   
   // Check if click is in carousel area
-  if (mouseX >= windowLeft + bgPadding && mouseX < windowLeft + windowWidth - bgPadding && 
-      mouseY >= sliderAreaY && mouseY < sliderAreaY + presidentSliderHeight) {
-    // Arrows removed - navigation only via indicator dots
+  const carouselLeft = windowLeft + bgPadding;
+  const carouselRight = windowLeft + windowWidth - bgPadding;
+  const carouselTop = sliderAreaY;
+  const carouselBottom = sliderAreaY + presidentSliderHeight;
+  const inCarouselArea = mouseX >= carouselLeft && mouseX < carouselRight && 
+      mouseY >= carouselTop && mouseY < carouselBottom;
+  
+  console.log('📍📍📍 AREA CAROUSEL 📍📍📍');
+  console.log('   Boundaries:', { left: carouselLeft, right: carouselRight, top: carouselTop, bottom: carouselBottom });
+  console.log('   Mouse position:', { x: mouseX, y: mouseY });
+  console.log('   Canvas size:', { width: width, height: height });
+  console.log('   Window dimensions:', { windowLeft: windowLeft, windowWidth: windowWidth, sliderAreaY: sliderAreaY, presidentSliderHeight: presidentSliderHeight });
+  console.log('   Click IN carousel area?', inCarouselArea);
+  
+  // Test: se il click è nella zona sinistra (dove dovrebbero essere i pallini), logga sempre
+  if (mouseX < width * 0.4) {
+    console.log('⚠️⚠️⚠️ CLICK NELLA ZONA SINISTRA ⚠️⚠️⚠️');
+    console.log('   Questo dovrebbe essere dove ci sono i pallini del presidente');
+  }
+  
+  if (!inCarouselArea) {
+    console.log('⚠️ Click FUORI dall\'area carousel - continuo con altri controlli...');
+  }
+  
+  if (inCarouselArea) {
     
     // Calculate carousel dimensions (same as drawPresidentSlider)
-    const carouselX = windowLeft + bgPadding;
-    const carouselWidth = windowWidth - bgPadding * 2;
-    const headerY = sliderAreaY + 15;
+    // IMPORTANTE: usa le STESSE coordinate di drawPresidentSlider
+    const carouselX = windowLeft + bgPadding;  // Questo corrisponde a x in drawPresidentSlider
+    const carouselWidth = windowWidth - bgPadding * 2;  // Questo corrisponde a w in drawPresidentSlider
+    const carouselY = sliderAreaY;  // Questo corrisponde a y in drawPresidentSlider
+    const headerY = carouselY + 15;  // y + 15 come in drawPresidentSlider
     
-    // Check if click is on indicator dots (optional - can click dots to switch)
+    // PRIMA controlla se il click è sui pallini indicatori (priorità massima)
+    // Usa ESATTAMENTE le stesse coordinate di drawPresidentSlider
     const dotSize = 8;
-    const dotClickRadius = 15; // Area cliccabile piÃ¹ grande per facilitare il click
     const dotSpacing = 20;
-    const carouselCenterX = carouselX + carouselWidth / 2;
+    const carouselCenterX = carouselX + carouselWidth / 2;  // x + w / 2
     const dotsStartX = carouselCenterX - dotSpacing / 2;
-    const dotY = headerY;
+    const dotY = headerY;  // y + 15
     
-    // Left dot (Repubblica) - area cliccabile piÃ¹ grande
-    if (dist(mouseX, mouseY, dotsStartX, dotY) <= dotClickRadius) {
+    console.log('📍 Coordinate pallini:', {
+      carouselX: carouselX,
+      carouselWidth: carouselWidth,
+      carouselCenterX: carouselCenterX,
+      dotsStartX: dotsStartX,
+      dotY: dotY,
+      headerY: headerY,
+      carouselY: carouselY
+    });
+    
+    // Usa sia area rettangolare che distanza per massima affidabilità
+    const dotClickAreaWidth = 100; // Area molto grande per facilitare il click (aumentato da 80)
+    const dotClickAreaHeight = 100; // Area molto grande (aumentato da 80)
+    const maxClickDistance = 50; // Distanza massima dal centro del pallino (aumentato da 40)
+    
+    // Left dot (Repubblica) - controllo con area rettangolare E distanza
+    const leftDotCenterX = dotsStartX;
+    const leftDotCenterY = dotY;
+    const leftDotX = leftDotCenterX - dotClickAreaWidth / 2;
+    const leftDotY = leftDotCenterY - dotClickAreaHeight / 2;
+    const leftDotRight = leftDotX + dotClickAreaWidth;
+    const leftDotBottom = leftDotY + dotClickAreaHeight;
+    const distToLeftDot = dist(mouseX, mouseY, leftDotCenterX, leftDotCenterY);
+    const inLeftArea = (mouseX >= leftDotX && mouseX <= leftDotRight && mouseY >= leftDotY && mouseY <= leftDotBottom) ||
+                       distToLeftDot <= maxClickDistance;
+    
+    console.log('🔵 Pallino sinistro (Repubblica):', {
+      center: { x: leftDotCenterX, y: leftDotCenterY },
+      area: { left: leftDotX, right: leftDotRight, top: leftDotY, bottom: leftDotBottom },
+      mousePos: { x: mouseX, y: mouseY },
+      distance: distToLeftDot,
+      inArea: inLeftArea
+    });
+    
+    if (inLeftArea) {
+      console.log('✅✅✅ Click sul pallino sinistro (Repubblica) ✅✅✅');
       if (currentPresidenteMode !== 0) {
+        console.log('🔄 Cambio modalità da Consiglio a Repubblica');
         currentPresidenteMode = 0;
-        presidenteDescScrollOffset = 0; // Reset scroll when switching president
+        presidenteDescScrollOffset = 0;
+        console.log('Nuova modalità:', currentPresidenteMode);
         redraw();
-        return;
+        return true; // Indica che il click è stato gestito
+      } else {
+        console.log('Già in modalità Repubblica');
       }
+      return true; // Indica che il click è stato gestito anche se già in modalità corretta
     }
     
-    // Right dot (Consiglio) - area cliccabile piÃ¹ grande
-    if (dist(mouseX, mouseY, dotsStartX + dotSpacing, dotY) <= dotClickRadius) {
+    // Right dot (Consiglio) - controllo con area rettangolare E distanza
+    const rightDotCenterX = dotsStartX + dotSpacing;
+    const rightDotCenterY = dotY;
+    const rightDotX = rightDotCenterX - dotClickAreaWidth / 2;
+    const rightDotY = rightDotCenterY - dotClickAreaHeight / 2;
+    const rightDotRight = rightDotX + dotClickAreaWidth;
+    const rightDotBottom = rightDotY + dotClickAreaHeight;
+    const distToRightDot = dist(mouseX, mouseY, rightDotCenterX, rightDotCenterY);
+    const inRightArea = (mouseX >= rightDotX && mouseX <= rightDotRight && mouseY >= rightDotY && mouseY <= rightDotBottom) ||
+                        distToRightDot <= maxClickDistance;
+    
+    console.log('🔴🔴🔴 Pallino destro (Consiglio) 🔴🔴🔴');
+    console.log('   Center:', { x: rightDotCenterX, y: rightDotCenterY });
+    console.log('   Click area:', { left: rightDotX, right: rightDotRight, top: rightDotY, bottom: rightDotBottom });
+    console.log('   Mouse position:', { x: mouseX, y: mouseY });
+    console.log('   Distance to center:', distToRightDot, '(max:', maxClickDistance, ')');
+    console.log('   In rectangular area?', mouseX >= rightDotX && mouseX <= rightDotRight && mouseY >= rightDotY && mouseY <= rightDotBottom);
+    console.log('   Within distance?', distToRightDot <= maxClickDistance);
+    console.log('   FINAL RESULT - Click detected?', inRightArea);
+    
+    if (inRightArea) {
+      console.log('✅✅✅ Click sul pallino destro (Consiglio) ✅✅✅');
+      console.log('Modalità corrente:', currentPresidenteMode, '(0=Repubblica, 1=Consiglio)');
+      
       if (currentPresidenteMode !== 1) {
+        console.log('🔄 Cambio modalità da Repubblica a Consiglio');
         currentPresidenteMode = 1;
-        presidenteDescScrollOffset = 0; // Reset scroll when switching president
+        presidenteDescScrollOffset = 0;
+        console.log('✅ Nuova modalità impostata:', currentPresidenteMode);
+        
+        // Verifica che i dati siano presenti
+        const yearKey = String(selectedYear);
+        console.log('Cercando dati per anno:', yearKey, '(tipo:', typeof selectedYear, ')');
+        console.log('Anni disponibili in contestoByYear:', Object.keys(contestoByYear));
+        
+        // Try multiple formats to find the data
+        let presidenteData = contestoByYear[yearKey];
+        
+        // If not found, try as number
+        if (!presidenteData && !isNaN(selectedYear)) {
+          presidenteData = contestoByYear[parseInt(selectedYear)];
+          if (presidenteData) console.log('✅ Dati trovati con chiave numerica:', parseInt(selectedYear));
+        }
+        
+        // If still not found, try to find by numeric year
+        if (!presidenteData) {
+          const numericYear = getYearNumeric(yearKey);
+          for (const key in contestoByYear) {
+            if (getYearNumeric(key) === numericYear) {
+              presidenteData = contestoByYear[key];
+              console.log(`✅ Dati trovati con chiave alternativa: ${key}`);
+              break;
+            }
+          }
+        }
+        
+        if (presidenteData) {
+          console.log('✅ Dati Consiglio disponibili:', {
+            nome: presidenteData.presidenteConsiglio,
+            img: presidenteData.imgConsiglio,
+            descrizione: presidenteData.descrizioneConsiglio ? presidenteData.descrizioneConsiglio.substring(0, 50) + '...' : 'Manca'
+          });
+          
+          // Forza sempre il caricamento dell'immagine quando si cambia modalità
+          if (presidenteData.imgConsiglio) {
+            const cachedImg = presidenteImages[presidenteData.imgConsiglio];
+            const needsLoad = !cachedImg || (cachedImg && cachedImg.width === 0);
+            
+            if (needsLoad) {
+              console.log('📸 Immagine Consiglio non in cache o non ancora caricata, forzo il caricamento...');
+              loadPresidenteImages(presidenteData, true); // Force reload
+            } else {
+              console.log('✅ Immagine Consiglio già in cache e caricata:', presidenteData.imgConsiglio);
+              console.log('   Dimensioni:', cachedImg.width, 'x', cachedImg.height);
+            }
+          } else {
+            console.warn('⚠️ Nessun nome immagine Consiglio nei dati per anno:', yearKey);
+            console.warn('   Dati disponibili:', Object.keys(presidenteData));
+          }
+        } else {
+          console.error('❌ Nessun dato presidente trovato per anno:', yearKey);
+          console.error('   Anni disponibili in contestoByYear:', Object.keys(contestoByYear));
+          console.error('   selectedYear:', selectedYear, 'tipo:', typeof selectedYear);
+        }
+        
+        // Forza sempre un redraw dopo il cambio di modalità
+        console.log('🔄 Chiamata redraw() dopo cambio modalità...');
         redraw();
-        return;
+        console.log('✅ redraw() completato');
+        return true; // Indica che il click è stato gestito
+      } else {
+        console.log('Già in modalità Consiglio - verifico che i dati siano presenti...');
+        
+        // Verifica che i dati siano ancora presenti e che l'immagine sia caricata
+        const yearKey = String(selectedYear);
+        let presidenteData = contestoByYear[yearKey];
+        if (!presidenteData && !isNaN(selectedYear)) {
+          presidenteData = contestoByYear[parseInt(selectedYear)];
+        }
+        if (!presidenteData) {
+          const numericYear = getYearNumeric(yearKey);
+          for (const key in contestoByYear) {
+            if (getYearNumeric(key) === numericYear) {
+              presidenteData = contestoByYear[key];
+              break;
+            }
+          }
+        }
+        
+        if (presidenteData && presidenteData.imgConsiglio) {
+          const cachedImg = presidenteImages[presidenteData.imgConsiglio];
+          if (!cachedImg || (cachedImg && cachedImg.width === 0)) {
+            console.log('⚠️ Immagine Consiglio non caricata anche se in modalità Consiglio, ricarico...');
+            loadPresidenteImages(presidenteData, true);
+          }
+        }
+        
+        // Anche se già in modalità Consiglio, forza un redraw per assicurarsi che tutto sia visualizzato
+        redraw();
       }
+      return true; // Indica che il click è stato gestito anche se già in modalità corretta
     }
+    
+    console.log('⚠️ Click nell\'area carousel ma non sui pallini');
+    console.log('   Potrebbe essere un click su altro elemento del carousel');
+    
+    // Se non è un click sui pallini, continua con gli altri controlli (scrollbar, ecc.)
     
     // Check if click is on description scrollbar
     if (window.presidenteScrollbarX !== null && window.presidenteScrollbarX !== undefined) {
@@ -5313,6 +5897,8 @@ function mouseDragged() {
 function mouseReleased() {
   // Stop dragging president slider
   isDraggingPresidentSlider = false;
+  // Stop dragging quesiti scrollbar
+  isDraggingQuesitiScrollbar = false;
   // Stop dragging description scrollbar
   isDraggingDescScrollbar = false;
 }

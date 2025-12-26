@@ -345,6 +345,11 @@ canvas {
   overflow: visible;
   margin-left: 360px;
   z-index: 3000;
+  pointer-events: none; /* Permette ai click di passare attraverso alla mappa */
+}
+
+#mappa-regioni .regione {
+  pointer-events: auto; /* Ma le regioni devono essere cliccabili */
 }
 
 .regione {

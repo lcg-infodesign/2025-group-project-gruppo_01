@@ -334,57 +334,156 @@ let helpModeActive = false;
 let currentHoveredSection = null;
 
 // Define help sections by their VISUAL AREAS on canvas
+// I bounds devono corrispondere esattamente alle posizioni delle finestre
 const HELP_SECTIONS = {
   'quesiti': {
     label: 'QUESITI/DOMANDE',
-    description: 'Seleziona un quesito per visualizzare i dati.',
-    bounds: () => ({
-      x: 0,
-      y: 90,
-      w: width * 0.33 + 15,
-      h: height * 0.5 - 45  // â­ Ridotto di 10px per connettersi perfettamente
-    })
+    description: 'Lista dei quesiti referendari per l\'anno selezionato. Clicca su un quesito per vedere i voti SI/NO e le statistiche di genere.',
+    bounds: () => {
+      const navbarHeight = 100;
+      const sliderHeight = 140;
+      const cardX = 0;
+      const cardY = navbarHeight;
+      const cardWidth = width;
+      const cardHeight = height - navbarHeight - sliderHeight;
+      const sectionStartY = cardY + 10;
+      const bottomPadding = 3;
+      const windowLeft = cardX + 40;
+      const windowWidth = cardWidth * 0.34 - 60;
+      const availableTop = sectionStartY;
+      const availableBottom = cardY + cardHeight - bottomPadding;
+      const totalAvailableHeight = availableBottom - availableTop;
+      const bgPadding = 15;
+      const presidentSliderHeight = 250;
+      const windowSpacing = 20;
+      const totalWindowsHeight = totalAvailableHeight - 20;
+      const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
+      const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
+      
+      return {
+        x: windowLeft + bgPadding,
+        y: quesitiWindowTop,
+        w: windowWidth - bgPadding * 2,
+        h: quesitiWindowHeight
+      };
+    }
   },
   'presidenti': {
     label: 'PRESIDENTI',
-    description: 'Presidenti della Repubblica e del Consiglio.',
-    bounds: () => ({
-      x: 0,
-      y: 90 + height * 0.5 - 45,  // â­ Inizia ESATTAMENTE dove finiscono i quesiti
-      w: width * 0.33 + 15,
-      h: height * 0.5  // â­ Fino al footer, senza gap
-    })
+    description: 'Visualizza i Presidenti della Repubblica e del Consiglio durante il referendum selezionato. Usa le frecce per navigare.',
+    bounds: () => {
+      const navbarHeight = 100;
+      const sliderHeight = 140;
+      const cardX = 0;
+      const cardY = navbarHeight;
+      const cardWidth = width;
+      const cardHeight = height - navbarHeight - sliderHeight;
+      const sectionStartY = cardY + 10;
+      const bottomPadding = 3;
+      const windowLeft = cardX + 40;
+      const windowWidth = cardWidth * 0.34 - 60;
+      const availableTop = sectionStartY;
+      const availableBottom = cardY + cardHeight - bottomPadding;
+      const totalAvailableHeight = availableBottom - availableTop;
+      const bgPadding = 15;
+      const presidentSliderHeight = 250;
+      const windowSpacing = 20;
+      const totalWindowsHeight = totalAvailableHeight - 20;
+      const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
+      const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
+      const presidentWindowTop = quesitiWindowTop + quesitiWindowHeight + windowSpacing;
+      
+      return {
+        x: windowLeft + bgPadding,
+        y: presidentWindowTop,
+        w: windowWidth - bgPadding * 2,
+        h: presidentSliderHeight
+      };
+    }
   },
   'mappa': {
     label: 'MAPPA DELL\'ITALIA',
-    description: 'Clicca su una regione per filtrare i dati. I colori indicano l\'affluenza (blu scuro = più alta).',
-    bounds: () => ({
-      x: width * 0.33 + 15,
-      y: 90,
-      w: width * 0.33,
-      h: height - 170
-    })
+    description: 'Clicca su una regione per filtrare i dati per quella regione. I colori indicano l\'affluenza: blu scuro = affluenza alta, blu chiaro = affluenza bassa.',
+    bounds: () => {
+      const navbarHeight = 100;
+      const sliderHeight = 140;
+      const cardX = 0;
+      const cardY = navbarHeight;
+      const cardWidth = width;
+      const cardHeight = height - navbarHeight - sliderHeight;
+      const sectionStartY = cardY + 10;
+      const bottomPadding = 3;
+      const availableTop = sectionStartY;
+      const availableBottom = cardY + cardHeight - bottomPadding;
+      const totalAvailableHeight = availableBottom - availableTop;
+      const mapWidth = cardWidth * 0.34;
+      const mapLeft = (cardWidth - mapWidth) / 2;
+      const drawH = totalAvailableHeight - 20;
+      const paddingTop = availableTop + (totalAvailableHeight - drawH) / 2;
+      
+      return {
+        x: mapLeft,
+        y: paddingTop,
+        w: mapWidth,
+        h: drawH
+      };
+    }
   },
   'grafici': {
     label: 'STATISTICHE',
-    description: 'Visualizza Affluenza, Voti SI/NO e Distribuzione di Genere per la regione selezionata.',
+    description: 'Visualizza tre grafici: Affluenza (semicerchio), Voti SI/NO (barre con omini) e Distribuzione di Genere (semicerchio diviso). I dati si aggiornano in base alla regione e al quesito selezionati.',
+    bounds: () => {
+      const navbarHeight = 100;
+      const sliderHeight = 140;
+      const cardX = 0;
+      const cardY = navbarHeight;
+      const cardWidth = width;
+      const cardHeight = height - navbarHeight - sliderHeight;
+      const sectionStartY = cardY + 10;
+      const bottomPadding = 3;
+      const chartAreaLeft = cardX + cardWidth * 0.67 + 5;
+      const chartAreaWidth = cardWidth * 0.33 - 40;
+      const bgPadding = 10;
+      const availableTop = sectionStartY;
+      const availableBottom = cardY + cardHeight - bottomPadding;
+      const totalAvailableHeight = availableBottom - availableTop;
+      const windowSpacing = 10;
+      const windowHeight = ((totalAvailableHeight - windowSpacing * 2) / 3) * 0.95;
+      const presidentSliderHeight = 250;
+      const quesitiWindowSpacing = 20;
+      const totalWindowsHeightQuesiti = totalAvailableHeight - 20;
+      const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeightQuesiti) / 2;
+      const window1Top = quesitiWindowTop;
+      const totalGraficiHeight = windowHeight * 3 + windowSpacing * 2;
+      
+      return {
+        x: chartAreaLeft + bgPadding,
+        y: window1Top,
+        w: chartAreaWidth - bgPadding * 2,
+        h: totalGraficiHeight
+      };
+    }
+  },
+  'timeline': {
+    label: 'TIMELINE ANNI',
+    description: 'Clicca sui punti o trascina per selezionare un anno. I colori indicano lo stato del quorum: blu = raggiunto, beige = non richiesto, grigio chiaro = non raggiunto.',
     bounds: () => ({
-      x: width * 0.67,
-      y: 90,
-      w: width * 0.33,
-      h: height - 170
+      x: 0,
+      y: height - 140,   // Area della timeline (prima parte del footer)
+      w: width,
+      h: 40             // Altezza della timeline
     })
   },
-  //timeline: {
-    //label: 'TIMELINE ANNI',
-    //description: 'Seleziona un anno per visualizzare i dati di quel referendum 1946-2025. I colori indicano lo stato del quorum.',
-    //bounds: () => ({
-     // x: 0,
-     // y: height - 80,   // stessa altezza che usi per lo slider in basso
-      //w: width,         // tutta la larghezza
-     // h: 80,            // altezza della fascia timeline
-    //}),
-  //}
+  'slider': {
+    label: 'SLIDER ANNI',
+    description: 'Trascina lo slider o usa il pulsante play per scorrere automaticamente tra tutti gli anni. I grafici si aggiornano automaticamente.',
+    bounds: () => ({
+      x: 0,
+      y: height - 100,   // Area dello slider (seconda parte del footer)
+      w: width,
+      h: 40             // Altezza dello slider
+    })
+  }
 
 };
 
@@ -456,13 +555,20 @@ function mouseMoved() {
     // Se non siamo su nessuna sezione, nascondi l'overlay
     removeHelpOverlay();
 
-    // HOVER TIMELINE (fascia bassa dello schermo)
+    // HOVER TIMELINE e SLIDER (fascia bassa dello schermo) - gestiti dalle HELP_SECTIONS
     const timelineContainer = document.getElementById('timeline-container');
-    const timelineTop = height - 80;   // stessa logica slider
-    const timelineBottom = height;
+    const sliderContainer = document.getElementById('year-slider-visible-container');
+    
+    // Timeline area (prima parte del footer)
+    const timelineTop = height - 140;
+    const timelineBottom = height - 100;
+    
+    // Slider area (seconda parte del footer)
+    const sliderTop = height - 100;
+    const sliderBottom = height - 60;
 
     if (timelineContainer) {
-      if (mouseY >= timelineTop && mouseY <= timelineBottom) {
+      if (mouseY >= timelineTop && mouseY < timelineBottom) {
         // mouse nella timeline
         timelineContainer.classList.remove('help-dimmed');
         timelineContainer.classList.add('help-highlighted');
@@ -470,6 +576,18 @@ function mouseMoved() {
         // mouse fuori da timeline
         timelineContainer.classList.remove('help-highlighted');
         timelineContainer.classList.add('help-dimmed');
+      }
+    }
+    
+    if (sliderContainer) {
+      if (mouseY >= sliderTop && mouseY < sliderBottom) {
+        // mouse nello slider
+        sliderContainer.classList.remove('help-dimmed');
+        sliderContainer.classList.add('help-highlighted');
+      } else {
+        // mouse fuori dallo slider
+        sliderContainer.classList.remove('help-highlighted');
+        sliderContainer.classList.add('help-dimmed');
       }
     }
   } else {
@@ -489,7 +607,7 @@ function updateQuesitiHover() {
   
   // Calcola le stesse dimensioni usate in drawQuesitiWindow e mousePressed
   const navbarHeight = 100;
-  const sliderHeight = 80;
+  const sliderHeight = 140;
   const cardY = navbarHeight;
   const cardHeight = height - navbarHeight - sliderHeight;
   const sectionStartY = cardY + 10;
@@ -647,6 +765,14 @@ function showHelpOverlay(section, sectionKey) {
     // Per i grafici (a destra), posiziona sempre a sinistra, molto abbassato
     left = mouseX - overlayWidth - offset;
     top = mouseY + 100; // Molto più abbassato rispetto al cursore
+  } else if (sectionKey === 'timeline') {
+    // Per la timeline, posiziona sopra
+    left = mouseX - overlayWidth / 2;
+    top = bounds.y - overlayHeight - offset;
+  } else if (sectionKey === 'slider') {
+    // Per lo slider, posiziona sopra
+    left = mouseX - overlayWidth / 2;
+    top = bounds.y - overlayHeight - offset;
   } else {
     // Default: posiziona vicino al cursore, ma molto abbassato
     left = mouseX + offset;
@@ -711,22 +837,32 @@ function drawHelpModeOverlay() {
   push();
   
   for (const [sectionKey, section] of Object.entries(HELP_SECTIONS)) {
+    // Salta le sezioni quesiti e presidenti perché i loro riquadri vengono già gestiti da drawQuesitiWindow()
+    if (sectionKey === 'quesiti' || sectionKey === 'presidenti') {
+      continue;
+    }
+    
     const bounds = section.bounds();
     const isHovered = sectionKey === currentHoveredSection;
     
     if (isHovered) {
-      // Highlighted section: full opacity + glow
-      fill(255, 255, 255, 0);
-      stroke(255, 183, 0);
-      strokeWeight(3);
-    } else {
-      // Dimmed section: low opacity + blur effect (drawn with rect + fill)
-      fill(0, 0, 0, 80);
-      stroke(0, 0, 0, 60);
+      // Highlighted section: bordo giallo brillante con effetto glow
+      fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
+      stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
+      strokeWeight(4);
+      rect(bounds.x, bounds.y, bounds.w, bounds.h);
+      // Bordo esterno più sottile per effetto glow
+      noFill();
+      stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
       strokeWeight(1);
+      rect(bounds.x - 2, bounds.y - 2, bounds.w + 4, bounds.h + 4);
+    } else {
+      // In modalità help ma non in hover, mostra comunque un bordo più visibile
+      noFill();
+      stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
+      strokeWeight(2);
+      rect(bounds.x, bounds.y, bounds.w, bounds.h);
     }
-    
-    rect(bounds.x, bounds.y, bounds.w, bounds.h);
   }
   
   pop();
@@ -769,27 +905,18 @@ function setup() {
   const canvas = createCanvas(windowWidth, windowHeight);
   console.log('p5 setup running - canvas created');
   
-  // Aggiungi listener diretto sul canvas per intercettare i click sui pallini
-  // Questo bypassa eventuali problemi con mousePressed di p5.js
-  canvas.elt.addEventListener('click', (e) => {
+  // Aggiungi listener diretto sul canvas per intercettare i click anche quando altri elementi sono sopra
+  // Questo è necessario perché la mappa SVG ha z-index più alto e potrebbe coprire il canvas
+  canvas.elt.addEventListener('click', function(e) {
     const rect = canvas.elt.getBoundingClientRect();
-    // Calcola le coordinate considerando lo scaling del canvas
     const scaleX = width / rect.width;
     const scaleY = height / rect.height;
     const clickX = (e.clientX - rect.left) * scaleX;
     const clickY = (e.clientY - rect.top) * scaleY;
     
-    console.log('🎯 Click diretto sul canvas HTML:', { 
-      clickX, clickY, 
-      clientX: e.clientX, clientY: e.clientY,
-      rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
-      scale: { scaleX, scaleY },
-      canvasSize: { width, height }
-    });
-    
     // Calcola le coordinate del carousel (stesse di mousePressed)
     const navbarHeight = 100;
-    const sliderHeight = 80;
+    const sliderHeight = 140;
     const cardX = 0;
     const cardY = navbarHeight;
     const cardWidth = width;
@@ -816,7 +943,7 @@ function setup() {
     const carouselTop = sliderAreaY;
     const carouselBottom = sliderAreaY + presidentSliderHeight;
     
-    // Verifica se il click è nell'area del carousel
+    // Verifica se il click è nell'area del carousel (zona sinistra)
     if (clickX >= carouselLeft && clickX < carouselRight && 
         clickY >= carouselTop && clickY < carouselBottom) {
       
@@ -831,12 +958,11 @@ function setup() {
       const dotsStartX = carouselCenterX - dotSpacing / 2;
       const dotY = headerY;
       
-      // Area cliccabile più grande per facilitare il click
-      const dotClickAreaWidth = 100; // Aumentato da 80 a 100
-      const dotClickAreaHeight = 100; // Aumentato da 80 a 100
-      const maxClickDistance = 50; // Aumentato da 40 a 50
+      const dotClickAreaWidth = 150;
+      const dotClickAreaHeight = 150;
+      const maxClickDistance = 75;
       
-      // Right dot (Consiglio) - controllo con area rettangolare E distanza
+      // Right dot (Consiglio)
       const rightDotCenterX = dotsStartX + dotSpacing;
       const rightDotCenterY = dotY;
       const distToRightDot = Math.sqrt(Math.pow(clickX - rightDotCenterX, 2) + Math.pow(clickY - rightDotCenterY, 2));
@@ -847,19 +973,11 @@ function setup() {
       const inRightArea = (clickX >= rightDotX && clickX <= rightDotRight && clickY >= rightDotY && clickY <= rightDotBottom) ||
                           distToRightDot <= maxClickDistance;
       
-      console.log('🔴 Test click pallino destro:', {
-        clickX, clickY,
-        rightDotCenterX, rightDotCenterY,
-        distToRightDot, maxClickDistance,
-        inRightArea,
-        areaBounds: { left: rightDotX, right: rightDotRight, top: rightDotY, bottom: rightDotBottom }
-      });
-      
       if (inRightArea) {
-        console.log('✅✅✅ CLICK SUL PALLINO DESTRO RILEVATO DAL LISTENER DIRETTO! ✅✅✅');
-        e.stopPropagation(); // Ferma la propagazione
-        e.preventDefault(); // Previeni comportamenti di default
-        e.stopImmediatePropagation(); // Ferma anche altri listener
+        console.log('✅✅✅ CLICK SUL PALLINO DESTRO RILEVATO DAL LISTENER HTML! ✅✅✅');
+        e.stopPropagation();
+        e.preventDefault();
+        e.stopImmediatePropagation();
         
         // Cambia modalità
         if (currentPresidenteMode !== 1) {
@@ -890,7 +1008,7 @@ function setup() {
           
           redraw();
         }
-        return false; // Previeni altri handler
+        return false;
       }
       
       // Left dot (Repubblica)
@@ -905,7 +1023,7 @@ function setup() {
                          distToLeftDot <= maxClickDistance;
       
       if (inLeftArea) {
-        console.log('✅✅✅ CLICK SUL PALLINO SINISTRO RILEVATO DAL LISTENER DIRETTO! ✅✅✅');
+        console.log('✅✅✅ CLICK SUL PALLINO SINISTRO RILEVATO DAL LISTENER HTML! ✅✅✅');
         e.stopPropagation();
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -918,8 +1036,7 @@ function setup() {
         return false;
       }
     }
-  }, true); // Use capture phase per intercettare prima
-  console.log('p5 setup running - canvas created');
+  }, true); // Usa capture phase per intercettare prima degli altri listener
   
   setupHelpMode();
   
@@ -2499,7 +2616,7 @@ rect(width * 0.67, 90, width * 0.33, height - 170);
   
   // No card - content directly on background (matching image layout)
   const navbarHeight = 100; // Space for navbar at top
-  const sliderHeight = 80; // Space for slider at bottom
+  const sliderHeight = 140; // Space for slider at bottom
   const cardMargin = 0; // No margin - full width
   const cardX = 0;
   const cardY = navbarHeight-100; // Start right after navbar
@@ -2606,10 +2723,12 @@ rect(width * 0.67, 90, width * 0.33, height - 170);
   // ========== HELP MODE BLUR (OSCURA AREE NON IN HOVER) ==========
   if (helpModeActive && currentHoveredSection) {
     drawHelpModeBlur();  // Oscura le aree NON in hover
+    // Ridisegna i riquadri dopo il blur per mantenerli visibili
+    drawQuesitiWindowBorders();
   }
   // ================================================================
 
-  // Draw help mode overlay LAST (sopra tutto) - disegna i bordi brillanti
+  // Draw help mode overlay - disegna i bordi brillanti per evidenziare le sezioni
   drawHelpModeOverlay();
 
   drawHelpHintBubble();
@@ -2761,7 +2880,7 @@ function drawGeoMap() {
   
   // Position matching layout (no card, full width)
   const navbarHeight = 100;
-  const sliderHeight = 80;
+  const sliderHeight = 140;
   const cardMargin = 0; // No margin - full width (matching layout)
   const cardX = 0;
   const cardY = navbarHeight; // Start right after navbar (matching layout)
@@ -3186,15 +3305,18 @@ function drawLegend() {
 
 // Setup year slider with referendum years
 function setupYearSlider() {
-  console.log("Setup Year Slider AVVIATO"); // Debug per vedere se parte
+  console.log("🔧 Setup Year Slider AVVIATO"); // Debug per vedere se parte
 
   const slider = document.getElementById('year-slider');
   const yearDots = document.getElementById('year-dots');
 
   if (!slider || !yearDots) {
-      console.error("Slider o YearDots non trovati nel DOM!");
+      console.error("❌ Slider o YearDots non trovati nel DOM!");
+      console.error("Slider:", slider, "YearDots:", yearDots);
       return;
   }
+  
+  console.log("✅ Slider e YearDots trovati nel DOM");
 
   // --- Calcoli ---
   const yearToPosition = {};
@@ -3245,9 +3367,10 @@ function setupYearSlider() {
       containers.forEach(div => {
           const yKey = div.getAttribute('data-year-key');
           const dot = div.querySelector('.dot-element');
-          const label = div.querySelector('.label-element');
+          // Find label by data-label-year attribute since it's now in yearDots container (same as overview)
+          const label = yearDots.querySelector(`[data-label-year="${yKey}"]`);
           
-          if(!dot || !label) return;
+          if(!dot) return;
 
           // Recupera Colore Quorum
           let bgColor = '#E1E1E1'; // Default grigio
@@ -3274,21 +3397,27 @@ function setupYearSlider() {
           dot.style.backgroundColor = bgColor;
           dot.style.border = border;
 
-          // Stato Selezionato vs Normale
+          // Stato Selezionato vs Normale (same as overview - labels always visible)
           if (yKey === String(selectedYear)) {
               // SELEZIONATO
               dot.style.width = '22px';
               dot.style.height = '22px';
-              label.style.opacity = '1';      // Visibile
-              label.style.display = 'block';  // Sicuro
+              dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+              if (label) {
               label.style.color = '#255077';
+                  label.style.opacity = '1';
+                  label.style.top = 'calc(50% + 30px)';
+              }
           } else {
               // NON SELEZIONATO (Normale)
               dot.style.width = '18px';
               dot.style.height = '18px';
-              label.style.opacity = '0';      // Invisibile
-              // Non mettiamo display:none altrimenti l'hover non ha nulla da mostrare
+              dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+              if (label) {
               label.style.color = '#255096';
+                  label.style.opacity = '1'; // Always visible (same as overview)
+                  label.style.top = 'calc(50% + 30px)';
+              }
           }
       });
   };
@@ -3296,58 +3425,120 @@ function setupYearSlider() {
   // --- Creazione DOM ---
   yearDots.innerHTML = ''; // Pulisce tutto
   
-  // Linea sfondo
+  // Create timeline line directly in year-dots container (same as overview)
   const line = document.createElement('div');
-  Object.assign(line.style, {
-      position: 'absolute', left: '2%', right: '2%', top: '50%',
-      transform: 'translateY(-50%)', height: '3px', background: '#0F3D88', zIndex: '1'
-  });
+  line.style.cssText = 'position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 3px; width: 100%; background-color: #0F3D88; z-index: 1; pointer-events: none; opacity: 1; display: block; visibility: visible;';
   yearDots.appendChild(line);
 
   REFERENDUM_YEARS_ARRAY.forEach((yearKey) => {
       // Container invisibile per area click/hover
       const container = document.createElement('div');
       container.setAttribute('data-year-key', yearKey);
+      const percentage = yearToPosition[yearKey];
       Object.assign(container.style, {
-          position: 'absolute', left: `${yearToPosition[yearKey]}%`, top: '50%',
+          position: 'absolute', left: `${percentage}%`, top: '50%',
           transform: 'translate(-50%, -50%)', 
-          width: '30px', height: '30px', // Area cliccabile grande
-          cursor: 'pointer', zIndex: '10',
-          display: 'flex', justifyContent: 'center', alignItems: 'center'
+          cursor: 'pointer', zIndex: '20',
+          pointerEvents: 'auto',
+          display: 'flex', flexDirection: 'column', alignItems: 'center'
       });
 
       // Pallino visivo
       const dot = document.createElement('div');
       dot.className = 'dot-element';
+      const baseSize = 18;
       Object.assign(dot.style, {
-          width: '18px', height: '18px', borderRadius: '6px', 
-          transition: 'all 0.2s ease', pointerEvents: 'none' // Click passa al container
+          width: baseSize + 'px', height: baseSize + 'px', borderRadius: '6px', 
+          transition: 'all 0.18s ease', 
+          boxShadow: '0 1px 2px rgba(0,0,0,0.12)',
+          display: 'block', visibility: 'visible', opacity: '1',
+          position: 'relative', zIndex: '21'
       });
 
-      // Label Data
+      // Label Data - positioned BELOW timeline (same as overview)
       const label = document.createElement('div');
       label.className = 'label-element';
-      label.textContent = getYearDisplayName(yearKey);
+      label.setAttribute('data-label-year', yearKey);
+      const displayYear = getYearDisplayName(yearKey);
+      label.textContent = displayYear;
       Object.assign(label.style, {
-          position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)',
+          position: 'absolute', 
+          left: `${percentage}%`,
+          transform: 'translateX(-50%)',
+          top: 'calc(50% + 30px)', // Below timeline (same as overview)
           fontFamily: "'STIX Two Text', serif", fontSize: '16px', fontWeight: 'bold',
           whiteSpace: 'nowrap', pointerEvents: 'none',
-          transition: 'opacity 0.2s ease', opacity: '0', zIndex: '20'
+          opacity: '1', zIndex: '1',
+          lineHeight: '16px', height: '16px',
+          marginTop: '0', paddingTop: '0',
+          marginBottom: '0', paddingBottom: '0'
       });
 
-      // --- EVENTI HOVER (JavaScript Puro) ---
-      container.onmouseenter = () => {
-          label.style.opacity = '1';
-          dot.style.transform = 'scale(1.3)';
+      // Get quorum status for colors
+      const qStatus = quorumStatusByYear[yearKey];
+      const fallbackMap = {
+         '1946': 'NON_RICHIESTO', '1974': 'RAGGIUNTO', '1978': 'RAGGIUNTO', '1981': 'RAGGIUNTO',
+         '1985': 'RAGGIUNTO', '1987': 'RAGGIUNTO', '1989': 'NON_RICHIESTO', '1990': 'NON_RAGGIUNTO',
+         '1991': 'RAGGIUNTO', '1993': 'RAGGIUNTO', '1995': 'RAGGIUNTO', '1997': 'NON_RAGGIUNTO',
+         '1999': 'NON_RAGGIUNTO', '2000': 'NON_RAGGIUNTO', '2001': 'NON_RICHIESTO', '2003': 'NON_RAGGIUNTO',
+         '2005': 'NON_RAGGIUNTO', '2006': 'NON_RICHIESTO', '2009': 'NON_RAGGIUNTO', '2011': 'RAGGIUNTO',
+         '2016-1': 'NON_RAGGIUNTO', '2016-2': 'NON_RICHIESTO', '2020': 'NON_RICHIESTO', '2022': 'NON_RAGGIUNTO',
+         '2025': 'NON_RAGGIUNTO'
       };
+      const status = qStatus || fallbackMap[yearKey];
       
-      container.onmouseleave = () => {
-          dot.style.transform = 'scale(1)';
-          // Se non è selezionato, nascondi la data
+      const FILLED_BLUE = '#1E52A6';
+      const BORDER_BLUE = '#1E52A6';
+      const LIGHT_BLUE = '#a4afc1ff';
+      const NON_RICHIESTO_COLOR = '#F6ECE1';
+      
+      // Apply color based on quorum status (same as overview)
+      if (status === 'RAGGIUNTO') {
+          dot.style.backgroundColor = FILLED_BLUE;
+          dot.style.border = 'none';
+      } else if (status === 'NON_RICHIESTO') {
+          dot.style.backgroundColor = NON_RICHIESTO_COLOR;
+          dot.style.border = `2px solid ${BORDER_BLUE}`;
+      } else if (status === 'NON_RAGGIUNTO') {
+          dot.style.backgroundColor = LIGHT_BLUE;
+          dot.style.border = 'none';
+      } else {
+          dot.style.backgroundColor = '#E1E1E1';
+          dot.style.border = `2px solid ${BORDER_BLUE}`;
+      }
+
+      // Highlight selected year (same as overview)
+      if (yearKey === String(selectedYear)) {
+          const selectedSize = 22;
+          dot.style.width = selectedSize + 'px';
+          dot.style.height = selectedSize + 'px';
+          dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+          label.style.color = '#255077';
+      } else {
+          label.style.color = '#255096';
+      }
+
+      // --- EVENTI HOVER (same as overview) ---
+      container.addEventListener('mouseenter', () => {
+          const hoverSize = 24;
+          dot.style.width = hoverSize + 'px';
+          dot.style.height = hoverSize + 'px';
+          dot.style.boxShadow = '0 6px 12px rgba(0,0,0,0.25)';
+          dot.style.borderRadius = '6px';
+          container.title = 'Click per vedere il dettaglio';
+      });
+      
+      container.addEventListener('mouseleave', () => {
           if (yearKey !== String(selectedYear)) {
-              label.style.opacity = '0';
+              dot.style.width = '18px';
+              dot.style.height = '18px';
+              dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+          } else {
+              dot.style.width = '22px';
+              dot.style.height = '22px';
+              dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
           }
-      };
+      });
 
       // Evento Click
       container.onclick = () => {
@@ -3356,37 +3547,322 @@ function setupYearSlider() {
       };
 
       container.appendChild(dot);
-      container.appendChild(label);
+      // Append label directly to yearDots container (same as overview)
+      yearDots.appendChild(label);
       yearDots.appendChild(container);
   });
 
   // Aggiornamento iniziale
   refreshVisuals();
 
-  // --- Evento Input Slider ---
-  slider.addEventListener('input', (e) => {
+  // --- Setup Slider Visibile ---
+  const visibleSlider = document.getElementById('year-slider-visible');
+  const yearLabel = document.getElementById('slider-year-label');
+  const autoPlayBtn = document.getElementById('auto-play-btn');
+  
+  // Variabili per lo scorrimento automatico
+  let autoPlayInterval = null;
+  let autoPlayAnimationFrame = null;
+  let isAutoPlaying = false;
+  let autoPlayStartTime = null;
+  let autoPlayDuration = 30000; // durata totale dello scorrimento in millisecondi (30 secondi)
+  let autoPlayStartPosition = 0;
+  
+  if (visibleSlider) {
+    // Inizializza lo slider visibile con gli stessi valori
+    visibleSlider.min = 0;
+    visibleSlider.max = 100;
+    visibleSlider.step = 0.01;
+    visibleSlider.value = sliderValue;
+    
+    // Aggiorna l'etichetta dell'anno
+    if (yearLabel) {
+      const displayYear = getYearDisplayName(String(selectedYear));
+      yearLabel.textContent = displayYear;
+    }
+    
+    // Funzione per avviare/fermare lo scorrimento automatico continuo
+    const toggleAutoPlay = () => {
+      if (isAutoPlaying) {
+        // Ferma lo scorrimento automatico
+        if (autoPlayAnimationFrame) {
+          cancelAnimationFrame(autoPlayAnimationFrame);
+          autoPlayAnimationFrame = null;
+        }
+        if (autoPlayInterval) {
+          clearInterval(autoPlayInterval);
+          autoPlayInterval = null;
+        }
+        isAutoPlaying = false;
+        if (autoPlayBtn) {
+          autoPlayBtn.textContent = '▶';
+          autoPlayBtn.style.background = '#0F3D88';
+          autoPlayBtn.title = 'Avvia scorrimento automatico';
+        }
+      } else {
+        // Avvia lo scorrimento automatico continuo
+        isAutoPlaying = true;
+        autoPlayStartTime = Date.now();
+        autoPlayStartPosition = parseFloat(visibleSlider.value);
+        
+        if (autoPlayBtn) {
+          autoPlayBtn.textContent = '⏸';
+          autoPlayBtn.style.background = '#1E52A6';
+          autoPlayBtn.title = 'Ferma scorrimento automatico';
+        }
+        
+        // Funzione di animazione continua
+        const animate = () => {
+          if (!isAutoPlaying) return;
+          
+          const elapsed = Date.now() - autoPlayStartTime;
+          const progress = Math.min(elapsed / autoPlayDuration, 1); // 0 a 1
+          
+          // Calcola la posizione corrente (da start a 100)
+          const currentPosition = autoPlayStartPosition + (100 - autoPlayStartPosition) * progress;
+          
+          // Aggiorna entrambi gli slider
+          visibleSlider.value = currentPosition;
+          slider.value = currentPosition;
+          
+          // Trova l'anno più vicino alla posizione corrente
+          const currentYear = findClosestYear(currentPosition);
+          
+          // Aggiorna solo se l'anno è cambiato per evitare troppi aggiornamenti
+          if (currentYear && currentYear !== selectedYear) {
+            selectedYear = currentYear;
+            refreshVisuals();
+            
+            // Carica dati CSV per il nuovo anno
+            if (REFERENDUM_YEARS[currentYear] && typeof loadCSVForYear === 'function') {
+              loadCSVForYear(REFERENDUM_YEARS[currentYear]);
+            }
+          }
+          
+          if (progress < 1) {
+            autoPlayAnimationFrame = requestAnimationFrame(animate);
+          } else {
+            // Scorrimento completato
+            isAutoPlaying = false;
+            if (autoPlayBtn) {
+              autoPlayBtn.textContent = '▶';
+              autoPlayBtn.style.background = '#0F3D88';
+              autoPlayBtn.title = 'Avvia scorrimento automatico';
+            }
+          }
+        };
+        
+        autoPlayAnimationFrame = requestAnimationFrame(animate);
+      }
+    };
+    
+    // Aggiungi event listener al pulsante play/pause
+    if (autoPlayBtn) {
+      autoPlayBtn.addEventListener('click', toggleAutoPlay);
+    }
+    
+    // Ferma lo scorrimento automatico quando l'utente muove manualmente lo slider
+    visibleSlider.addEventListener('input', () => {
+      if (isAutoPlaying) {
+        toggleAutoPlay(); // Ferma lo scorrimento automatico
+      }
+    });
+    
+    // Stili CSS per lo slider visibile - stesse dimensioni della timeline
+    const style = document.createElement('style');
+    style.textContent = `
+      #year-slider-visible-container {
+        position: relative;
+        width: 100%;
+        max-width: 1450px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 0;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+      
+      #auto-play-btn {
+        margin-left: 20px;
+      }
+      
+      #auto-play-btn {
+        background: #0F3D88;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        padding: 0;
+        flex-shrink: 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+      }
+      
+      #auto-play-btn:hover {
+        background: #1E52A6;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      }
+      
+      #auto-play-btn:active {
+        transform: scale(0.95);
+      }
+      
+      #year-slider-visible-container > div {
+        position: relative;
+        flex: 1;
+        height: 40px;
+      }
+      
+      #year-slider-visible-container > div::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 4px;
+        background-color: #0F3D88;
+        z-index: 1;
+        pointer-events: none;
+        width: 100%;
+      }
+      
+      #year-slider-visible {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        outline: none;
+        cursor: pointer;
+        z-index: 5;
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 0;
+        padding: 0;
+      }
+      
+      #year-slider-visible::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #0F3D88;
+        cursor: pointer;
+        box-shadow: 0 3px 6px rgba(15, 61, 136, 0.4), 0 0 0 3px rgba(255, 255, 255, 0.9);
+        transition: all 0.2s ease;
+        border: 2px solid #ffffff;
+        margin-top: -8px;
+      }
+      
+      #year-slider-visible::-webkit-slider-thumb:hover {
+        background: #1E52A6;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(15, 61, 136, 0.5), 0 0 0 3px rgba(255, 255, 255, 1);
+      }
+      
+      #year-slider-visible::-webkit-slider-thumb:active {
+        transform: scale(1.15);
+        box-shadow: 0 6px 12px rgba(15, 61, 136, 0.6), 0 0 0 4px rgba(255, 255, 255, 1);
+      }
+      
+      #year-slider-visible::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        background: transparent;
+        cursor: pointer;
+        border: none;
+      }
+      
+      #year-slider-visible::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #0F3D88;
+        cursor: pointer;
+        border: 2px solid #ffffff;
+        box-shadow: 0 3px 6px rgba(15, 61, 136, 0.4), 0 0 0 3px rgba(255, 255, 255, 0.9);
+        transition: all 0.2s ease;
+      }
+      
+      #year-slider-visible::-moz-range-thumb:hover {
+        background: #1E52A6;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(15, 61, 136, 0.5), 0 0 0 3px rgba(255, 255, 255, 1);
+      }
+      
+      #year-slider-visible::-moz-range-thumb:active {
+        transform: scale(1.15);
+        box-shadow: 0 6px 12px rgba(15, 61, 136, 0.6), 0 0 0 4px rgba(255, 255, 255, 1);
+      }
+      
+      #year-slider-visible::-moz-range-track {
+        width: 100%;
+        height: 4px;
+        background: #0F3D88;
+        border: none;
+        cursor: pointer;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Funzione per aggiornare entrambi gli slider e l'etichetta
+    const updateSliders = (newPos, newYear) => {
+      slider.value = newPos;
+      visibleSlider.value = newPos;
+      if (yearLabel) {
+        const displayYear = getYearDisplayName(String(newYear));
+        yearLabel.textContent = displayYear;
+      }
+    };
+    
+    // Evento input per lo slider visibile
+    visibleSlider.addEventListener('input', (e) => {
+      if (isUpdating) return;
+      
       const pos = parseFloat(e.target.value);
       const newYear = findClosestYear(pos);
 
       if (newYear && newYear !== selectedYear) {
+        isUpdating = true;
+        console.log('🔄 Cambio anno da slider visibile:', selectedYear, '->', newYear);
+        
           selectedYear = newYear;
           
-          // Aggiorna grafica (accende nuovo, spegne vecchio)
+        // Aggiorna entrambi gli slider
+        updateSliders(yearToPosition[selectedYear] || pos, newYear);
+        
+        // Aggiorna grafica timeline
           refreshVisuals();
 
-          if (yearToPosition[selectedYear] !== undefined) slider.value = yearToPosition[selectedYear];
-          
-          // Logica caricamento dati app
+        // Reset selezioni
           currentPresidenteMode = 0;
           quesitiScrollOffset = 0;
           presidenteDescScrollOffset = 0;
           selectedQuesito = null;
+        selectedRegion = null;
           
+        // Carica dati CSV per il nuovo anno
           if (REFERENDUM_YEARS[newYear] && typeof loadCSVForYear === 'function') {
+          console.log('📊 Caricamento dati CSV per anno:', newYear, 'file:', REFERENDUM_YEARS[newYear]);
              loadCSVForYear(REFERENDUM_YEARS[newYear]);
+        } else {
+          console.warn('⚠️ Nessun file CSV trovato per anno:', newYear);
+          redraw();
           }
           
-          // Carica immagini presidente per il nuovo anno (prova più formati di chiave)
+        // Carica immagini presidente
           let presidenteData = contestoByYear[String(newYear)];
           if (!presidenteData && !isNaN(newYear)) {
             presidenteData = contestoByYear[parseInt(newYear)];
@@ -3403,13 +3879,91 @@ function setupYearSlider() {
           
           if (presidenteData && typeof loadPresidenteImages === 'function') {
             console.log('📸 Caricamento immagini presidente per nuovo anno:', newYear);
-            loadPresidenteImages(presidenteData, false); // Non forzare, ma carica se necessario
+          loadPresidenteImages(presidenteData, false);
+        }
+        
+        setTimeout(() => {
+          isUpdating = false;
+        }, 100);
           } else {
-            console.warn('⚠️ Dati presidente non trovati per anno:', newYear);
+        // Aggiorna solo la posizione dello slider visibile anche se l'anno non cambia
+        updateSliders(pos, selectedYear);
+      }
+    });
+  }
+
+  // --- Evento Input Slider (timeline invisibile) ---
+  let isUpdating = false; // Flag per evitare aggiornamenti multipli simultanei
+  
+  slider.addEventListener('input', (e) => {
+      if (isUpdating) return; // Evita aggiornamenti multipli
+      
+      const pos = parseFloat(e.target.value);
+      const newYear = findClosestYear(pos);
+
+      if (newYear && newYear !== selectedYear) {
+          isUpdating = true;
+          console.log('🔄 Cambio anno da slider:', selectedYear, '->', newYear);
+          
+          selectedYear = newYear;
+          
+          // Aggiorna grafica timeline (accende nuovo, spegne vecchio)
+          refreshVisuals();
+
+          // Snap slider alla posizione esatta dell'anno e sincronizza slider visibile
+          if (yearToPosition[selectedYear] !== undefined) {
+            const exactPos = yearToPosition[selectedYear];
+            slider.value = exactPos;
+            if (visibleSlider) {
+              visibleSlider.value = exactPos;
+            }
+            if (yearLabel) {
+              const displayYear = getYearDisplayName(String(selectedYear));
+              yearLabel.textContent = displayYear;
+            }
           }
           
-          // Forza redraw dopo cambio anno
+          // Reset selezioni
+          currentPresidenteMode = 0;
+          quesitiScrollOffset = 0;
+          presidenteDescScrollOffset = 0;
+          selectedQuesito = null;
+          selectedRegion = null;
+          
+          // Carica dati CSV per il nuovo anno
+          if (REFERENDUM_YEARS[newYear] && typeof loadCSVForYear === 'function') {
+            console.log('📊 Caricamento dati CSV per anno:', newYear, 'file:', REFERENDUM_YEARS[newYear]);
+            loadCSVForYear(REFERENDUM_YEARS[newYear]);
+          } else {
+            console.warn('⚠️ Nessun file CSV trovato per anno:', newYear);
+            // Forza redraw anche senza CSV per aggiornare almeno la timeline
           redraw();
+          }
+          
+          // Carica immagini presidente per il nuovo anno
+          let presidenteData = contestoByYear[String(newYear)];
+          if (!presidenteData && !isNaN(newYear)) {
+            presidenteData = contestoByYear[parseInt(newYear)];
+          }
+          if (!presidenteData) {
+            const numericYear = getYearNumeric(String(newYear));
+            for (const key in contestoByYear) {
+              if (getYearNumeric(key) === numericYear) {
+                presidenteData = contestoByYear[key];
+                break;
+              }
+            }
+          }
+          
+          if (presidenteData && typeof loadPresidenteImages === 'function') {
+            console.log('📸 Caricamento immagini presidente per nuovo anno:', newYear);
+            loadPresidenteImages(presidenteData, false);
+          }
+          
+          // Reset flag dopo un breve delay
+          setTimeout(() => {
+            isUpdating = false;
+          }, 100);
       }
   });
 }
@@ -3417,28 +3971,48 @@ function setupYearSlider() {
 
 // Load CSV for a specific year
 function loadCSVForYear(filePath) {
-  console.log('Loading CSV for year:', filePath);
+  console.log('🔄 Loading CSV for year:', selectedYear, 'from:', filePath);
+  
+  // Reset selected region and quesito when changing year
+  selectedRegion = null;
+  selectedQuesito = null;
+  
+  // Show loading state (optional - you could add a loading indicator here)
+  
   fetch(filePath).then(r => {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.text();
   }).then(txt => {
+    // Parse CSV data - parseTableTotals() handles all parsing (affluenza, quesiti, gender)
     tableRows = parseCSV(txt);
     parseTableTotals();
-    console.log('CSV loaded for year:', selectedYear);
+    
+    console.log('✅ CSV loaded and parsed for year:', selectedYear);
+    console.log('📊 Dati disponibili - Affluenza regions:', Object.keys(regionValues).length, 
+                'Quesiti:', quesitiList.length, 
+                'Gender regions:', Object.keys(regionGender).length);
     
     // Re-join data with GeoJSON if already loaded
     if (geojsonData) {
-      console.log('ðŸ" GeoJSON already loaded, re-joining with CSV data for year', selectedYear);
+      console.log('🔄 GeoJSON already loaded, re-joining with CSV data for year', selectedYear);
       joinGeoJSONData(geojsonData);
+      updateSvgRegionOpacityFromAffluenza();
     } else {
       // Load GeoJSON if not already loaded
       loadAndJoinGeoJSON();
     }
     
+    // Update timeline colors
+    updateTimelineColors();
+    
+    // Force redraw to update all charts (affluenza, voti SI/NO, gender)
+    console.log('🎨 Forcing redraw to update all charts');
     redraw();
   }).catch(err => {
+    console.error('❌ Error loading CSV for year', selectedYear, ':', err);
     console.warn('Could not load CSV:', err);
-    console.error('Error loading CSV for year', selectedYear, ':', err);
+    // Still redraw even if CSV fails to show current state
+    redraw();
   });
 }
 
@@ -3472,13 +4046,13 @@ function debugLog(msg, isError) {
 // Draw 3 separate windows for SEZIONE 3 charts
 function drawSezione3Background() {
   const navbarHeight = 100;
-  const sliderHeight = 80;
+  const sliderHeight = 140; // Space for timeline and visible slider at bottom
   const cardX = 0;
   const cardY = navbarHeight;
   const cardWidth = width;
   const cardHeight = height - navbarHeight - sliderHeight;
-  const sectionStartY = cardY + 20;
-  const bottomPadding = 3;
+  const sectionStartY = cardY + 10; // Same as quesiti window to align them
+  const bottomPadding = 3; // Same as quesiti window
   
   const chartAreaLeft = cardX + cardWidth * 0.67 + 5;
   const chartAreaWidth = cardWidth * 0.33 - 40;
@@ -3488,50 +4062,58 @@ function drawSezione3Background() {
   const windowSpacing = 10;
   
   const availableTop = sectionStartY;
-  const availableBottom = cardY + cardHeight - bottomPadding;
+  const availableBottom = cardY + cardHeight - bottomPadding; // Ensure no overlap with timeline
   const totalAvailableHeight = availableBottom - availableTop;
   
-  // Window altezza
-  const topBottomWindowHeight = (totalAvailableHeight - windowSpacing * 2) * 0.3; // Window 1 e 3 più piccoli
-  const middleWindowHeight = (totalAvailableHeight - windowSpacing * 2) * 0.40;   // Window 2 più alto
+  // All windows same height - divide available space equally, but reduce by 5% to make them slightly smaller
+  const windowHeight = ((totalAvailableHeight - windowSpacing * 2) / 3) * 0.95; // 5% smaller windows
 
-  // Top offset per centratura verticale
-  const combinedWindowHeight = topBottomWindowHeight * 2 + middleWindowHeight + windowSpacing * 2;
-  const verticalOffset = (totalAvailableHeight - combinedWindowHeight) / 2;
-  const combinedWindowTop = availableTop + verticalOffset;
+  // Calculate quesitiWindowTop using the same method as drawQuesitiWindow to align windows
+  const presidentSliderHeight = 250; // Same as in drawQuesitiWindow
+  const quesitiWindowSpacing = 20; // Same as in drawQuesitiWindow
+  const totalWindowsHeightQuesiti = totalAvailableHeight - 20; // Same as in drawQuesitiWindow
+  const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeightQuesiti) / 2;
   
-  // Window 1: Affluenza chart (top) - più stretto
-  const window1Top = combinedWindowTop;
+  // Window 1: Affluenza chart (top) - align with quesiti window
+  const window1Top = quesitiWindowTop;
   push();
-  noFill();
-  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-  strokeWeight(1);
-  rect(chartAreaLeft + bgPadding , window1Top, chartAreaWidth - bgPadding * 2, topBottomWindowHeight); // più stretto
+  // In modalità help, i bordi vengono gestiti da drawHelpModeOverlay()
+  // Qui disegniamo solo i bordi base se non siamo in modalità help
+  if (!helpModeActive) {
+    noFill();
+    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+    strokeWeight(1);
+    rect(chartAreaLeft + bgPadding, window1Top, chartAreaWidth - bgPadding * 2, windowHeight);
+  }
   pop();
   
-  // Window 2: Pie chart (middle) - più alto
-  const window2Top = window1Top + topBottomWindowHeight + windowSpacing;
+  // Window 2: Pie chart (middle) - same size
+  const window2Top = window1Top + windowHeight + windowSpacing;
   push();
-  noFill();
-  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-  strokeWeight(1);
-  rect(chartAreaLeft + bgPadding, window2Top, chartAreaWidth - bgPadding * 2, middleWindowHeight); // altezza maggiore
+  if (!helpModeActive) {
+    noFill();
+    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+    strokeWeight(1);
+    rect(chartAreaLeft + bgPadding, window2Top, chartAreaWidth - bgPadding * 2, windowHeight);
+  }
   pop();
   
-  // Window 3: Gender chart (bottom) - più stretto
-  const window3Top = window2Top + middleWindowHeight + windowSpacing;
+  // Window 3: Gender chart (bottom) - same size
+  const window3Top = window2Top + windowHeight + windowSpacing;
   push();
-  noFill();
-  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-  strokeWeight(1);
-  rect(chartAreaLeft + bgPadding , window3Top, chartAreaWidth - bgPadding * 2 , topBottomWindowHeight); // più stretto
+  if (!helpModeActive) {
+    noFill();
+    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+    strokeWeight(1);
+    rect(chartAreaLeft + bgPadding, window3Top, chartAreaWidth - bgPadding * 2, windowHeight);
+  }
   pop();
   
-  // Store window positions per le altre funzioni
+  // Store window positions per le altre funzioni - all use same height now
   window.sezione3Window1Top = window1Top;
   window.sezione3Window2Top = window2Top;
   window.sezione3Window3Top = window3Top;
-  window.sezione3WindowHeight = middleWindowHeight; // Usa l'altezza centrale come riferimento
+  window.sezione3WindowHeight = windowHeight; // Same height for all windows
   window.sezione3ChartAreaLeft = chartAreaLeft;
   window.sezione3ChartAreaWidth = chartAreaWidth;
   window.sezione3BgPadding = bgPadding;
@@ -3807,10 +4389,13 @@ function drawAffluenzaChart() {
   const windowTop = window.sezione3Window1Top;
   const windowHeight = window.sezione3WindowHeight;
   
-  const affluenzaChartX = chartAreaLeft + chartAreaWidth / 2; 
+  // Centra orizzontalmente considerando il padding
+  const windowLeft = chartAreaLeft + bgPadding;
+  const windowWidth = chartAreaWidth - bgPadding * 2;
+  const affluenzaChartX = windowLeft + windowWidth / 2; // Centrato orizzontalmente nella finestra
   const radius = getAffluenzaSemicircleRadius();
-  const verticalOffset = windowHeight * 0 + 10; 
-  const affluenzaChartY = windowTop + windowHeight / 2 + verticalOffset;
+  // Abbassa il grafico spostandolo più in basso nella finestra
+  const affluenzaChartY = windowTop + windowHeight * 0.65; // Spostato leggermente più in basso (65%)
   
   push();
   
@@ -4033,12 +4618,14 @@ function drawPieChart() {
   const rightHalfX      = chartAreaLeft + bgPadding + windowWidthHalf;
 
   const chartX          = chartAreaLeft + chartAreaWidth / 2;
-  const titleHeight     = 25;
-  const availableHeight = windowHeight - titleHeight - 10;
+  const titleHeight     = 20;
+  const availableHeight = windowHeight - titleHeight - 15;
   const radius          = getCommonSemicircleRadius();
+  const bottomPadding   = 10; // Padding dal fondo della finestra
 
-  const pieChartY          = windowTop + titleHeight + (availableHeight / 2) + radius * 1.0 + 25;
-  const pieChartTitleStart = windowTop + 5;
+  // Baseline at the bottom of the window
+  const baselineY          = windowTop + windowHeight - bottomPadding;
+  const pieChartTitleStart = windowTop + 8;
 
   // Se non ci sono dati, messaggio
   if (votiSi === 0 && votiNo === 0) {
@@ -4091,18 +4678,17 @@ function drawPieChart() {
   // Titolo
 fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
   noStroke();
-  textSize(20);
-  textFont('STIX Two Text')
+  textSize(15);
+  textFont('STIX Two Text');
   const pieTitleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
   textAlign(RIGHT, TOP);
   text(chartTitle, pieTitleX, pieChartTitleStart);
 
-  // Layout con omini + barre
-  const maxBarHeight = radius * 1.1;
-  const barWidth     = radius * 0.6;
-  const baselineY    = pieChartY + radius * 0.1;
+  // Layout con omini + barre - barre partono dal fondo
+  const maxBarHeight = Math.min(radius * 1.0, availableHeight * 0.5); // Barre più alte
+  const barWidth     = radius * 0.5;
 
-  const gapBetweenBars = radius * 0.9;
+  const gapBetweenBars = radius * 0.7;
   const leftBarX  = chartX - gapBetweenBars / 2;
   const rightBarX = chartX + gapBetweenBars / 2;
 
@@ -4121,54 +4707,54 @@ fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
 
   rectMode(CORNER);
 
-  // SI (giallo)
+  // SI (giallo) - barra parte dal fondo
   push();
   fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2]);
   noStroke();
-  const siBarY = baselineY - siBarHeight;
+  const siBarY = baselineY - siBarHeight; // Parte dal fondo
   rect(leftBarX - barWidth / 2, siBarY, barWidth, siBarHeight);
   pop();
 
-  // NO (blu)
+  // NO (blu) - barra parte dal fondo
   push();
   fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
   noStroke();
-  const noBarY = baselineY - noBarHeight;
+  const noBarY = baselineY - noBarHeight; // Parte dal fondo
   rect(rightBarX - barWidth / 2, noBarY, barWidth, noBarHeight);
   pop();
 
-  const personHeight     = radius * 1.2;
+  // Omini più grandi
+  const personHeight     = Math.min(radius * 1.3, maxBarHeight * 1.2); // Omini più grandi
   const personBaseOffset = radius * 0.05;
 
   drawPersonIcon(leftBarX,  siBarY - personBaseOffset, personHeight, omino1Img);
   drawPersonIcon(rightBarX, noBarY  - personBaseOffset, personHeight, omino2Img);
 
-  // Percentuali ai lati
+  // Percentuali ai lati - posizionate sopra le barre
   textAlign(LEFT, CENTER);
-  textSize(22);
+  textSize(16);
   textStyle(BOLD);
 
-  const siLabelX       = leftBarX - barWidth / 2 - 70;
-  const commonLabelY   = baselineY - maxBarHeight / 2;
+  const siLabelX       = leftBarX - barWidth / 2 - 45;
+  const commonLabelY   = baselineY - maxBarHeight / 2; // Centrato rispetto all'altezza massima delle barre
   const siLabelY       = commonLabelY;
   fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2]);
   text(`${siPercent.toFixed(1)}%`, siLabelX, siLabelY);
 
   textAlign(RIGHT, CENTER);
-  const noLabelX = rightBarX + barWidth / 2 + 70;
+  const noLabelX = rightBarX + barWidth / 2 + 45;
   const noLabelY = commonLabelY;
   fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
   text(`${noPercent.toFixed(1)}%`, noLabelX, noLabelY);
 
   // Etichette "SI" e "NO"
-  textSize(27
-  );
+  textSize(20);
   textFont('Stix Two Text');
   textStyle(BOLD);
 
   textAlign(LEFT, BOTTOM);
   fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2]);
-  const commonLabelTextY = commonLabelY - 6;
+  const commonLabelTextY = commonLabelY - 3;
   text('SI', siLabelX, commonLabelTextY);
 
   textAlign(RIGHT, BOTTOM);
@@ -4327,7 +4913,8 @@ function drawGenderChart() {
   const labelHeight = 25;
   const totalSymbolsHeight = textHeight + symbolSize + rowSpacing + textHeight + symbolSize + labelHeight;
   const titleY = windowTop + 8;
-  const chartY = windowTop + titleAreaHeight + (windowHeight - titleAreaHeight - totalSymbolsHeight) / 2 + textHeight + symbolSize / 2;
+  // Abbassa il grafico spostandolo più in basso nella finestra
+  const chartY = windowTop + titleAreaHeight + (windowHeight - titleAreaHeight - totalSymbolsHeight) / 2 + textHeight + symbolSize / 2 + windowHeight * 0.15;
 
   const radius = getCommonSemicircleRadius();
   const centerX = chartX;
@@ -4383,15 +4970,41 @@ function drawGenderChart() {
   text(maschi.toLocaleString('it-IT'), leftLabelX, countY);
   pop();
 
-  // Femmine
+  // Femmine - con bordo bianco per maggiore visibilità
   push();
   textAlign(CENTER, TOP);
-  textSize(20);
+  textFont('Stix Two Text');
   textStyle(BOLD);
-  fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2]);
+  
+  // Disegna "DONNE" con bordo bianco
+  fill(255, 255, 255); // Bordo bianco
+  stroke(255, 255, 255);
+  strokeWeight(4);
+  textSize(20);
   text('DONNE', rightLabelX, labelTopY);
+  
+  // Disegna testo principale "DONNE"
+  noStroke();
+  fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2]);
+  textSize(20);
+  text('DONNE', rightLabelX, labelTopY);
+  
+  // Disegna percentuale con bordo bianco
+  fill(255, 255, 255); // Bordo bianco
+  stroke(255, 255, 255);
+  strokeWeight(4);
+  textSize(20);
   text(femminePct.toFixed(1) + '%', rightLabelX, percentY);
+  
+  // Disegna percentuale principale
+  noStroke();
+  fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2]);
+  textSize(20);
+  text(femminePct.toFixed(1) + '%', rightLabelX, percentY);
+  
+  // Numero totale
   textSize(16);
+  fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2], 200);
   text(femmine.toLocaleString('it-IT'), rightLabelX, countY);
   pop();
 
@@ -4418,7 +5031,7 @@ function drawNationalTotalsGenderChart() {
   
   // Position within the ballot card (same layout as other charts)
   const navbarHeight = 100;
-  const sliderHeight = 80;
+  const sliderHeight = 140;
   const cardMargin = 0; // No margin - full width (matching layout)
   const cardX = 0;
   const cardY = navbarHeight; // Start right after navbar (matching layout)
@@ -4577,7 +5190,7 @@ function drawQuesitiWindow() {
   const quesiti2025 = quesitiList.length > 0 ? quesitiList : [];
   
   const navbarHeight = 100;
-  const sliderHeight = 80;
+  const sliderHeight = 140;
   const cardX = 0;
   const cardY = navbarHeight;
   const cardWidth = width;
@@ -4617,19 +5230,62 @@ pop();
   
   // Draw quesiti window
   push();
-  noFill();
-  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-  strokeWeight(1);
-  rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
-  
+  // In modalità spiegazione, evidenzia il riquadro se la sezione quesiti è in hover
+  if (helpModeActive && currentHoveredSection === 'quesiti') {
+    // Bordo giallo spesso con leggero riempimento per evidenziare
+    fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
+    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
+    strokeWeight(4);
+    // Disegna un doppio bordo per maggiore evidenza
+    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
+    // Bordo esterno più sottile per effetto glow
+    noFill();
+    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
+    strokeWeight(1);
+    rect(windowLeft + bgPadding - 2, quesitiWindowTop - 2, windowWidth - bgPadding * 2 + 4, quesitiWindowHeight + 4);
+  } else if (helpModeActive) {
+    // In modalità spiegazione ma non in hover, mantieni visibile con bordo più spesso
+    noFill();
+    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
+    strokeWeight(2);
+    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
+  } else {
+    // Modalità normale
+    noFill();
+    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+    strokeWeight(1);
+    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
+  }
   pop();
   
   // Draw president window
   push();
-  noFill();
-  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-  strokeWeight(1);
-  rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
+  // In modalità spiegazione, evidenzia il riquadro se la sezione presidenti è in hover
+  if (helpModeActive && currentHoveredSection === 'presidenti') {
+    // Bordo giallo spesso con leggero riempimento per evidenziare
+    fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
+    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
+    strokeWeight(4);
+    // Disegna un doppio bordo per maggiore evidenza
+    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
+    // Bordo esterno più sottile per effetto glow
+    noFill();
+    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
+    strokeWeight(1);
+    rect(windowLeft + bgPadding - 2, presidentWindowTop - 2, windowWidth - bgPadding * 2 + 4, presidentSliderHeight + 4);
+  } else if (helpModeActive) {
+    // In modalità spiegazione ma non in hover, mantieni visibile con bordo più spesso
+    noFill();
+    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
+    strokeWeight(2);
+    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
+  } else {
+    // Modalità normale
+    noFill();
+    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+    strokeWeight(1);
+    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
+  }
   pop();
   
   const startY = quesitiWindowTop + 30;
@@ -4801,6 +5457,81 @@ pop();
   // Draw quorum legend below the boxes (not in a box)
   drawQuorumLegend(windowLeft + bgPadding, presidentWindowTop + presidentSliderHeight + 40, windowWidth - bgPadding * 2);
   
+  pop();
+}
+
+// Funzione per ridisegnare solo i bordi dei riquadri dopo il blur in modalità spiegazione
+function drawQuesitiWindowBorders() {
+  const navbarHeight = 100;
+  const sliderHeight = 140;
+  const cardX = 0;
+  const cardY = navbarHeight;
+  const cardWidth = width;
+  const cardHeight = height - navbarHeight - sliderHeight;
+  const sectionStartY = cardY + 10;
+  const bottomPadding = 3;
+  
+  const windowLeft = cardX + 40;
+  const windowWidth = cardWidth * 0.34 - 60;
+  
+  const availableTop = sectionStartY;
+  const availableBottom = cardY + cardHeight - bottomPadding;
+  const totalAvailableHeight = availableBottom - availableTop;
+  const bgPadding = 15;
+  
+  const presidentSliderHeight = 250;
+  const windowSpacing = 20;
+  const totalWindowsHeight = totalAvailableHeight - 20;
+  const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
+  const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
+  const presidentWindowTop = quesitiWindowTop + quesitiWindowHeight + windowSpacing;
+  
+  // Draw quesiti window border
+  push();
+  // In modalità spiegazione, evidenzia il riquadro se la sezione quesiti è in hover
+  if (currentHoveredSection === 'quesiti') {
+    // Bordo giallo spesso con leggero riempimento per evidenziare
+    fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
+    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
+    strokeWeight(4);
+    // Disegna un doppio bordo per maggiore evidenza
+    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
+    // Bordo esterno più sottile per effetto glow
+    noFill();
+    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
+    strokeWeight(1);
+    rect(windowLeft + bgPadding - 2, quesitiWindowTop - 2, windowWidth - bgPadding * 2 + 4, quesitiWindowHeight + 4);
+  } else {
+    // In modalità spiegazione ma non in hover, mantieni visibile con bordo più spesso
+    noFill();
+    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
+    strokeWeight(2);
+    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
+  }
+  pop();
+  
+  // Draw president window border
+  push();
+  // In modalità spiegazione, evidenzia il riquadro se la sezione presidenti è in hover
+  if (currentHoveredSection === 'presidenti') {
+    // Bordo giallo spesso con leggero riempimento per evidenziare
+    fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
+    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
+    strokeWeight(4);
+    // Disegna un doppio bordo per maggiore evidenza
+    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
+    // Bordo esterno più sottile per effetto glow
+    noFill();
+    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
+    strokeWeight(1);
+    rect(windowLeft + bgPadding - 2, presidentWindowTop - 2, windowWidth - bgPadding * 2 + 4, presidentSliderHeight + 4);
+  } else {
+    // In modalità spiegazione ma non in hover, mantieni visibile con bordo più spesso
+    noFill();
+    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
+    strokeWeight(2);
+    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
+  }
   pop();
 }
 
@@ -5298,7 +6029,7 @@ function drawPresidentSlider(x, y, w, h) {
 function mouseWheel(event) {
   // Handle scrolling for quesiti list - use same coordinates as drawQuesitiWindow
   const navbarHeight = 100;
-  const sliderHeight = 80;
+  const sliderHeight = 140;
   const cardMargin = 0;
   const cardX = 0;
   const cardY = navbarHeight;
@@ -5470,7 +6201,7 @@ function mousePressed() {
   
   // First check if click is on president slider - use EXACTLY the same coordinates as drawQuesitiWindow
   const navbarHeight = 100;
-  const sliderHeight = 80;
+  const sliderHeight = 140;
   const cardX = 0;
   const cardY = navbarHeight;
   const cardWidth = width;
@@ -5549,9 +6280,10 @@ function mousePressed() {
     });
     
     // Usa sia area rettangolare che distanza per massima affidabilità
-    const dotClickAreaWidth = 100; // Area molto grande per facilitare il click (aumentato da 80)
-    const dotClickAreaHeight = 100; // Area molto grande (aumentato da 80)
-    const maxClickDistance = 50; // Distanza massima dal centro del pallino (aumentato da 40)
+    // Area cliccabile molto grande per facilitare il click
+    const dotClickAreaWidth = 150; // Area molto grande per facilitare il click (aumentato da 100)
+    const dotClickAreaHeight = 150; // Area molto grande (aumentato da 100)
+    const maxClickDistance = 75; // Distanza massima dal centro del pallino (aumentato da 50)
     
     // Left dot (Repubblica) - controllo con area rettangolare E distanza
     const leftDotCenterX = dotsStartX;
@@ -5931,10 +6663,13 @@ function drawHelpModeBlur() {
 
   for (const [sectionKey, section] of Object.entries(HELP_SECTIONS)) {
     if (sectionKey === currentHoveredSection) continue; // oscura tutto tranne la sezione sotto il mouse
-
+    
+    // Per le sezioni quesiti e presidenti, usa un'opacità minore per mantenere visibili i riquadri
     const bounds = section.bounds();
+    const isQuesitiOrPresidenti = sectionKey === 'quesiti' || sectionKey === 'presidenti';
+    const blurOpacity = isQuesitiOrPresidenti ? 60 : 120; // Opacità minore per quesiti e presidenti
 
-    fill(0, 0, 0, 120);
+    fill(0, 0, 0, blurOpacity);
     noStroke();
     rect(bounds.x, bounds.y, bounds.w, bounds.h);
   }

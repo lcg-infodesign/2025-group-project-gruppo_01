@@ -110,13 +110,129 @@ const COLORS = {
     // Costante per la dimensione del marker quadrato sulla timeline
     const TIMELINE_SQUARE_SIZE = 20; 
 
+    // Variabile per l'omino SVG come testo
+    let ominoSvgText;
+    let ominoImage;
+    
     function preload(){
       bg = loadImage("img/background.png");
+      // Carica l'SVG come testo per poterlo modificare
+      ominoSvgText = loadStrings("omino1.svg");
+    }
+    
+    // Cache per le immagini colorate già create
+    let ominoImageCache = {};
+    
+    // Funzione per creare un'immagine SVG colorata
+    function createColoredOmino(fillColor, strokeColor = null, strokeWidth = 0) {
+      if (!ominoSvgText) return null;
+      
+      // Crea una chiave per la cache basata sui colori
+      let cacheKey = hex(red(fillColor), 2) + hex(green(fillColor), 2) + hex(blue(fillColor), 2);
+      if (strokeColor) {
+        cacheKey += '_' + hex(red(strokeColor), 2) + hex(green(strokeColor), 2) + hex(blue(strokeColor), 2) + '_' + strokeWidth;
+      }
+      
+      // Se l'immagine è già in cache, restituiscila
+      if (ominoImageCache[cacheKey]) {
+        return ominoImageCache[cacheKey];
+      }
+      
+      // Converte l'array di stringhe in un'unica stringa
+      let svgText = ominoSvgText.join('\n');
+      
+      // Converte il colore p5.js in formato hex
+      let hexColor = '#' + hex(red(fillColor), 2) + hex(green(fillColor), 2) + hex(blue(fillColor), 2);
+      
+      // Sostituisce il colore fill nel path principale (il corpo dell'omino)
+      // Il primo path contiene il corpo dell'omino, sostituiamo solo quello
+      svgText = svgText.replace(/<path d="M31.6699[^>]*fill="#[^"]*"/, (match) => {
+        return match.replace(/fill="#[^"]*"/, `fill="${hexColor}"`);
+      });
+      
+      // Se l'omino è bianco, cambia occhi e bocca in blu
+      if (red(fillColor) === 255 && green(fillColor) === 255 && blue(fillColor) === 255) {
+        let blueColor = COLORS.INK; // #1E52A6
+        let blueHex = '#1E52A6';
+        
+        // Cambia gli occhi (i due rect con fill="white") in blu
+        svgText = svgText.replace(/<rect[^>]*fill="white"/g, (match) => {
+          return match.replace(/fill="white"/, `fill="${blueHex}"`);
+        });
+        
+        // Cambia la bocca (il path con stroke="white") in blu
+        svgText = svgText.replace(/<path d="M16.5889[^>]*stroke="white"/g, (match) => {
+          return match.replace(/stroke="white"/, `stroke="${blueHex}"`);
+        });
+      }
+      
+      // Se c'è un bordo, aggiungi stroke al path principale
+      if (strokeColor && strokeWidth > 0) {
+        let strokeHex = '#' + hex(red(strokeColor), 2) + hex(green(strokeColor), 2) + hex(blue(strokeColor), 2);
+        
+        // Aggiungi padding al viewBox per evitare che lo stroke venga tagliato
+        // Il padding deve essere almeno la metà dello stroke-width
+        let padding = Math.ceil(strokeWidth / 2) + 1; // Aggiungi 1px extra per sicurezza
+        svgText = svgText.replace(/viewBox="([^"]*)"/, (match, viewBox) => {
+          let parts = viewBox.split(' ');
+          if (parts.length === 4) {
+            let x = parseFloat(parts[0]) - padding;
+            let y = parseFloat(parts[1]) - padding;
+            let width = parseFloat(parts[2]) + (padding * 2);
+            let height = parseFloat(parts[3]) + (padding * 2);
+            return `viewBox="${x} ${y} ${width} ${height}"`;
+          }
+          return match;
+        });
+        
+        // Trova il path principale e aggiungi/modifica stroke con linejoin e linecap per evitare tagli
+        svgText = svgText.replace(/<path d="M31.6699([^>]*)>/, (match, attrs) => {
+          if (!attrs.includes('stroke=')) {
+            return `<path stroke="${strokeHex}" stroke-width="${strokeWidth}" stroke-linejoin="round" stroke-linecap="round" d="M31.6699${attrs}>`;
+          } else {
+            // Rimuovi eventuali attributi stroke esistenti e aggiungi quelli corretti
+            let newAttrs = attrs.replace(/stroke="[^"]*"/g, '').replace(/stroke-width="[^"]*"/g, '').replace(/stroke-linejoin="[^"]*"/g, '').replace(/stroke-linecap="[^"]*"/g, '');
+            return `<path stroke="${strokeHex}" stroke-width="${strokeWidth}" stroke-linejoin="round" stroke-linecap="round" d="M31.6699${newAttrs}>`;
+          }
+        });
+      }
+      
+      // Crea un data URL dall'SVG modificato
+      let svgBlob = new Blob([svgText], {type: 'image/svg+xml;charset=utf-8'});
+      let url = URL.createObjectURL(svgBlob);
+      
+      // Carica l'immagine dal blob URL
+      let img = loadImage(url, (loadedImg) => {
+        // Immagine caricata con successo
+      }, () => {
+        // Errore nel caricamento
+        console.error('Errore nel caricamento dell\'omino colorato');
+      });
+      
+      // Salva nella cache
+      ominoImageCache[cacheKey] = img;
+      
+      return img;
+    }
+    
+    // Funzione helper per convertire numero in hex a 2 cifre
+    function hex(num, len) {
+      let str = Math.round(num).toString(16);
+      while (str.length < len) str = '0' + str;
+      return str;
     }
     
     function setup() {
       createCanvas(windowWidth, windowHeight);
-      textFont('sans-serif'); 
+      textFont('sans-serif');
+      
+      // Pre-crea le immagini colorate degli omini dopo che l'SVG è stato caricato
+      if (ominoSvgText) {
+        // Crea le tre versioni colorate
+        ominoImageCache['raggiunto'] = createColoredOmino(COLORS.RAGGIUNTO, color(255, 255, 255), 2);
+        ominoImageCache['non_raggiunto'] = createColoredOmino(COLORS.NON_RAGGIUNTO, null, 0);
+        ominoImageCache['non_richiesto'] = createColoredOmino(color(255, 255, 255), COLORS.INK, 2);
+      }
       
       years = [
         '1946', '1974', '1978', '1981', '1985', '1987', '1989', '1990', '1991', '1993',
@@ -492,7 +608,7 @@ navLinks.forEach(link => {
 </script>
 
     <!-- Timeline footer (same as dettaglio.html) -->
-    <div id="footer" style="position:fixed; bottom:40px; left:0; right:0; height:80px; background-color:transparent; z-index:1000; display:flex; align-items:center; padding:0px;">
+    <div id="footer" style="position:fixed; bottom:40px; left:0; right:0; height:80px; background-color:#f5f0dc; z-index:10000; display:flex; align-items:center; padding:0px;">
       <div id="year-slider-container" style="position:relative; width:100%; max-width:1400px; margin:0 auto;">
         <div style="position:relative; height:40px; display:flex; align-items:center;">
           <div id="timeline-line" style="position:absolute; left:0; right:0; height:4px; background-color:#0F3D88 !important; top:50%; transform:translateY(-50%); z-index:10; pointer-events:none; opacity:1 !important; display:block !important; visibility:visible !important;"></div>

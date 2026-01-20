@@ -334,135 +334,46 @@ let helpModeActive = false;
 let currentHoveredSection = null;
 
 // Define help sections by their VISUAL AREAS on canvas
-// I bounds devono corrispondere esattamente alle posizioni delle finestre
 const HELP_SECTIONS = {
   'quesiti': {
     label: 'QUESITI/DOMANDE',
     description: 'Lista dei quesiti referendari per l\'anno selezionato. Clicca su un quesito per vedere i voti SI/NO e le statistiche di genere.',
-    bounds: () => {
-      const navbarHeight = 100;
-      const sliderHeight = 140;
-      const cardX = 0;
-      const cardY = navbarHeight;
-      const cardWidth = width;
-      const cardHeight = height - navbarHeight - sliderHeight;
-      const sectionStartY = cardY + 10;
-      const bottomPadding = 3;
-      const windowLeft = cardX + 40;
-      const windowWidth = cardWidth * 0.34 - 60;
-      const availableTop = sectionStartY;
-      const availableBottom = cardY + cardHeight - bottomPadding;
-      const totalAvailableHeight = availableBottom - availableTop;
-      const bgPadding = 15;
-      const presidentSliderHeight = 250;
-      const windowSpacing = 20;
-      const totalWindowsHeight = totalAvailableHeight - 20;
-      const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
-      const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
-      
-      return {
-        x: windowLeft + bgPadding,
-        y: quesitiWindowTop,
-        w: windowWidth - bgPadding * 2,
-        h: quesitiWindowHeight
-      };
-    }
+    bounds: () => ({
+      x: 0,
+      y: 90,
+      w: width * 0.33 + 15,
+      h: height * 0.5 - 45  // â­ Ridotto di 10px per connettersi perfettamente
+    })
   },
   'presidenti': {
     label: 'PRESIDENTI',
     description: 'Visualizza i Presidenti della Repubblica e del Consiglio durante il referendum selezionato. Usa le frecce per navigare.',
-    bounds: () => {
-      const navbarHeight = 100;
-      const sliderHeight = 140;
-      const cardX = 0;
-      const cardY = navbarHeight;
-      const cardWidth = width;
-      const cardHeight = height - navbarHeight - sliderHeight;
-      const sectionStartY = cardY + 10;
-      const bottomPadding = 3;
-      const windowLeft = cardX + 40;
-      const windowWidth = cardWidth * 0.34 - 60;
-      const availableTop = sectionStartY;
-      const availableBottom = cardY + cardHeight - bottomPadding;
-      const totalAvailableHeight = availableBottom - availableTop;
-      const bgPadding = 15;
-      const presidentSliderHeight = 250;
-      const windowSpacing = 20;
-      const totalWindowsHeight = totalAvailableHeight - 20;
-      const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
-      const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
-      const presidentWindowTop = quesitiWindowTop + quesitiWindowHeight + windowSpacing;
-      
-      return {
-        x: windowLeft + bgPadding,
-        y: presidentWindowTop,
-        w: windowWidth - bgPadding * 2,
-        h: presidentSliderHeight
-      };
-    }
+    bounds: () => ({
+      x: 0,
+      y: 90 + height * 0.5 - 45,  // â­ Inizia ESATTAMENTE dove finiscono i quesiti
+      w: width * 0.33 + 15,
+      h: height * 0.5  // â­ Fino al footer, senza gap
+    })
   },
   'mappa': {
     label: 'MAPPA DELL\'ITALIA',
     description: 'Clicca su una regione per filtrare i dati per quella regione. I colori indicano l\'affluenza: blu scuro = affluenza alta, blu chiaro = affluenza bassa.',
-    bounds: () => {
-      const navbarHeight = 100;
-      const sliderHeight = 140;
-      const cardX = 0;
-      const cardY = navbarHeight;
-      const cardWidth = width;
-      const cardHeight = height - navbarHeight - sliderHeight;
-      const sectionStartY = cardY + 10;
-      const bottomPadding = 3;
-      const availableTop = sectionStartY;
-      const availableBottom = cardY + cardHeight - bottomPadding;
-      const totalAvailableHeight = availableBottom - availableTop;
-      const mapWidth = cardWidth * 0.34;
-      const mapLeft = (cardWidth - mapWidth) / 2;
-      const drawH = totalAvailableHeight - 20;
-      const paddingTop = availableTop + (totalAvailableHeight - drawH) / 2;
-      
-      return {
-        x: mapLeft,
-        y: paddingTop,
-        w: mapWidth,
-        h: drawH
-      };
-    }
+    bounds: () => ({
+      x: width * 0.33 + 15,
+      y: 90,
+      w: width * 0.33,
+      h: height - 170
+    })
   },
   'grafici': {
     label: 'STATISTICHE',
     description: 'Visualizza tre grafici: Affluenza (semicerchio), Voti SI/NO (barre con omini) e Distribuzione di Genere (semicerchio diviso). I dati si aggiornano in base alla regione e al quesito selezionati.',
-    bounds: () => {
-      const navbarHeight = 100;
-      const sliderHeight = 140;
-      const cardX = 0;
-      const cardY = navbarHeight;
-      const cardWidth = width;
-      const cardHeight = height - navbarHeight - sliderHeight;
-      const sectionStartY = cardY + 10;
-      const bottomPadding = 3;
-      const chartAreaLeft = cardX + cardWidth * 0.67 + 5;
-      const chartAreaWidth = cardWidth * 0.33 - 40;
-      const bgPadding = 10;
-      const availableTop = sectionStartY;
-      const availableBottom = cardY + cardHeight - bottomPadding;
-      const totalAvailableHeight = availableBottom - availableTop;
-      const windowSpacing = 10;
-      const windowHeight = ((totalAvailableHeight - windowSpacing * 2) / 3) * 0.95;
-      const presidentSliderHeight = 250;
-      const quesitiWindowSpacing = 20;
-      const totalWindowsHeightQuesiti = totalAvailableHeight - 20;
-      const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeightQuesiti) / 2;
-      const window1Top = quesitiWindowTop;
-      const totalGraficiHeight = windowHeight * 3 + windowSpacing * 2;
-      
-      return {
-        x: chartAreaLeft + bgPadding,
-        y: window1Top,
-        w: chartAreaWidth - bgPadding * 2,
-        h: totalGraficiHeight
-      };
-    }
+    bounds: () => ({
+      x: width * 0.67,
+      y: 90,
+      w: width * 0.33,
+      h: height - 170
+    })
   },
   'timeline': {
     label: 'TIMELINE ANNI',
@@ -837,32 +748,22 @@ function drawHelpModeOverlay() {
   push();
   
   for (const [sectionKey, section] of Object.entries(HELP_SECTIONS)) {
-    // Salta le sezioni quesiti e presidenti perché i loro riquadri vengono già gestiti da drawQuesitiWindow()
-    if (sectionKey === 'quesiti' || sectionKey === 'presidenti') {
-      continue;
-    }
-    
     const bounds = section.bounds();
     const isHovered = sectionKey === currentHoveredSection;
     
     if (isHovered) {
-      // Highlighted section: bordo giallo brillante con effetto glow
-      fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
-      stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
-      strokeWeight(4);
-      rect(bounds.x, bounds.y, bounds.w, bounds.h);
-      // Bordo esterno più sottile per effetto glow
-      noFill();
-      stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
-      strokeWeight(1);
-      rect(bounds.x - 2, bounds.y - 2, bounds.w + 4, bounds.h + 4);
+      // Highlighted section: full opacity + glow
+      fill(255, 255, 255, 0);
+      stroke(255, 183, 0);
+      strokeWeight(3);
     } else {
-      // In modalità help ma non in hover, mostra comunque un bordo più visibile
-      noFill();
-      stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
-      strokeWeight(2);
-      rect(bounds.x, bounds.y, bounds.w, bounds.h);
+      // Dimmed section: low opacity + blur effect (drawn with rect + fill)
+      fill(0, 0, 0, 80);
+      stroke(0, 0, 0, 60);
+      strokeWeight(1);
     }
+    
+    rect(bounds.x, bounds.y, bounds.w, bounds.h);
   }
   
   pop();
@@ -2723,12 +2624,10 @@ rect(width * 0.67, 90, width * 0.33, height - 170);
   // ========== HELP MODE BLUR (OSCURA AREE NON IN HOVER) ==========
   if (helpModeActive && currentHoveredSection) {
     drawHelpModeBlur();  // Oscura le aree NON in hover
-    // Ridisegna i riquadri dopo il blur per mantenerli visibili
-    drawQuesitiWindowBorders();
   }
   // ================================================================
 
-  // Draw help mode overlay - disegna i bordi brillanti per evidenziare le sezioni
+  // Draw help mode overlay LAST (sopra tutto) - disegna i bordi brillanti
   drawHelpModeOverlay();
 
   drawHelpHintBubble();
@@ -4077,36 +3976,28 @@ function drawSezione3Background() {
   // Window 1: Affluenza chart (top) - align with quesiti window
   const window1Top = quesitiWindowTop;
   push();
-  // In modalità help, i bordi vengono gestiti da drawHelpModeOverlay()
-  // Qui disegniamo solo i bordi base se non siamo in modalità help
-  if (!helpModeActive) {
-    noFill();
-    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-    strokeWeight(1);
-    rect(chartAreaLeft + bgPadding, window1Top, chartAreaWidth - bgPadding * 2, windowHeight);
-  }
+  noFill();
+  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+  strokeWeight(1);
+  rect(chartAreaLeft + bgPadding, window1Top, chartAreaWidth - bgPadding * 2, windowHeight);
   pop();
   
   // Window 2: Pie chart (middle) - same size
   const window2Top = window1Top + windowHeight + windowSpacing;
   push();
-  if (!helpModeActive) {
-    noFill();
-    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-    strokeWeight(1);
-    rect(chartAreaLeft + bgPadding, window2Top, chartAreaWidth - bgPadding * 2, windowHeight);
-  }
+  noFill();
+  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+  strokeWeight(1);
+  rect(chartAreaLeft + bgPadding, window2Top, chartAreaWidth - bgPadding * 2, windowHeight);
   pop();
   
   // Window 3: Gender chart (bottom) - same size
   const window3Top = window2Top + windowHeight + windowSpacing;
   push();
-  if (!helpModeActive) {
-    noFill();
-    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-    strokeWeight(1);
-    rect(chartAreaLeft + bgPadding, window3Top, chartAreaWidth - bgPadding * 2, windowHeight);
-  }
+  noFill();
+  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+  strokeWeight(1);
+  rect(chartAreaLeft + bgPadding, window3Top, chartAreaWidth - bgPadding * 2, windowHeight);
   pop();
   
   // Store window positions per le altre funzioni - all use same height now
@@ -5230,62 +5121,19 @@ pop();
   
   // Draw quesiti window
   push();
-  // In modalità spiegazione, evidenzia il riquadro se la sezione quesiti è in hover
-  if (helpModeActive && currentHoveredSection === 'quesiti') {
-    // Bordo giallo spesso con leggero riempimento per evidenziare
-    fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
-    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
-    strokeWeight(4);
-    // Disegna un doppio bordo per maggiore evidenza
-    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
-    // Bordo esterno più sottile per effetto glow
-    noFill();
-    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
-    strokeWeight(1);
-    rect(windowLeft + bgPadding - 2, quesitiWindowTop - 2, windowWidth - bgPadding * 2 + 4, quesitiWindowHeight + 4);
-  } else if (helpModeActive) {
-    // In modalità spiegazione ma non in hover, mantieni visibile con bordo più spesso
-    noFill();
-    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
-    strokeWeight(2);
-    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
-  } else {
-    // Modalità normale
-    noFill();
-    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-    strokeWeight(1);
-    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
-  }
+  noFill();
+  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+  strokeWeight(1);
+  rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
+  
   pop();
   
   // Draw president window
   push();
-  // In modalità spiegazione, evidenzia il riquadro se la sezione presidenti è in hover
-  if (helpModeActive && currentHoveredSection === 'presidenti') {
-    // Bordo giallo spesso con leggero riempimento per evidenziare
-    fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
-    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
-    strokeWeight(4);
-    // Disegna un doppio bordo per maggiore evidenza
-    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
-    // Bordo esterno più sottile per effetto glow
-    noFill();
-    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
-    strokeWeight(1);
-    rect(windowLeft + bgPadding - 2, presidentWindowTop - 2, windowWidth - bgPadding * 2 + 4, presidentSliderHeight + 4);
-  } else if (helpModeActive) {
-    // In modalità spiegazione ma non in hover, mantieni visibile con bordo più spesso
-    noFill();
-    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
-    strokeWeight(2);
-    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
-  } else {
-    // Modalità normale
-    noFill();
-    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
-    strokeWeight(1);
-    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
-  }
+  noFill();
+  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+  strokeWeight(1);
+  rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
   pop();
   
   const startY = quesitiWindowTop + 30;
@@ -5457,81 +5305,6 @@ pop();
   // Draw quorum legend below the boxes (not in a box)
   drawQuorumLegend(windowLeft + bgPadding, presidentWindowTop + presidentSliderHeight + 40, windowWidth - bgPadding * 2);
   
-  pop();
-}
-
-// Funzione per ridisegnare solo i bordi dei riquadri dopo il blur in modalità spiegazione
-function drawQuesitiWindowBorders() {
-  const navbarHeight = 100;
-  const sliderHeight = 140;
-  const cardX = 0;
-  const cardY = navbarHeight;
-  const cardWidth = width;
-  const cardHeight = height - navbarHeight - sliderHeight;
-  const sectionStartY = cardY + 10;
-  const bottomPadding = 3;
-  
-  const windowLeft = cardX + 40;
-  const windowWidth = cardWidth * 0.34 - 60;
-  
-  const availableTop = sectionStartY;
-  const availableBottom = cardY + cardHeight - bottomPadding;
-  const totalAvailableHeight = availableBottom - availableTop;
-  const bgPadding = 15;
-  
-  const presidentSliderHeight = 250;
-  const windowSpacing = 20;
-  const totalWindowsHeight = totalAvailableHeight - 20;
-  const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
-  const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
-  const presidentWindowTop = quesitiWindowTop + quesitiWindowHeight + windowSpacing;
-  
-  // Draw quesiti window border
-  push();
-  // In modalità spiegazione, evidenzia il riquadro se la sezione quesiti è in hover
-  if (currentHoveredSection === 'quesiti') {
-    // Bordo giallo spesso con leggero riempimento per evidenziare
-    fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
-    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
-    strokeWeight(4);
-    // Disegna un doppio bordo per maggiore evidenza
-    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
-    // Bordo esterno più sottile per effetto glow
-    noFill();
-    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
-    strokeWeight(1);
-    rect(windowLeft + bgPadding - 2, quesitiWindowTop - 2, windowWidth - bgPadding * 2 + 4, quesitiWindowHeight + 4);
-  } else {
-    // In modalità spiegazione ma non in hover, mantieni visibile con bordo più spesso
-    noFill();
-    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
-    strokeWeight(2);
-    rect(windowLeft + bgPadding, quesitiWindowTop, windowWidth - bgPadding * 2, quesitiWindowHeight);
-  }
-  pop();
-  
-  // Draw president window border
-  push();
-  // In modalità spiegazione, evidenzia il riquadro se la sezione presidenti è in hover
-  if (currentHoveredSection === 'presidenti') {
-    // Bordo giallo spesso con leggero riempimento per evidenziare
-    fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 15);
-    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 255);
-    strokeWeight(4);
-    // Disegna un doppio bordo per maggiore evidenza
-    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
-    // Bordo esterno più sottile per effetto glow
-    noFill();
-    stroke(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2], 100);
-    strokeWeight(1);
-    rect(windowLeft + bgPadding - 2, presidentWindowTop - 2, windowWidth - bgPadding * 2 + 4, presidentSliderHeight + 4);
-  } else {
-    // In modalità spiegazione ma non in hover, mantieni visibile con bordo più spesso
-    noFill();
-    stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 200);
-    strokeWeight(2);
-    rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
-  }
   pop();
 }
 
@@ -6663,13 +6436,10 @@ function drawHelpModeBlur() {
 
   for (const [sectionKey, section] of Object.entries(HELP_SECTIONS)) {
     if (sectionKey === currentHoveredSection) continue; // oscura tutto tranne la sezione sotto il mouse
-    
-    // Per le sezioni quesiti e presidenti, usa un'opacità minore per mantenere visibili i riquadri
-    const bounds = section.bounds();
-    const isQuesitiOrPresidenti = sectionKey === 'quesiti' || sectionKey === 'presidenti';
-    const blurOpacity = isQuesitiOrPresidenti ? 60 : 120; // Opacità minore per quesiti e presidenti
 
-    fill(0, 0, 0, blurOpacity);
+    const bounds = section.bounds();
+
+    fill(0, 0, 0, 120);
     noStroke();
     rect(bounds.x, bounds.y, bounds.w, bounds.h);
   }

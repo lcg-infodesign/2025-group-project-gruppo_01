@@ -380,7 +380,7 @@ const HELP_SECTIONS = {
     description: 'Clicca sui punti o trascina per selezionare un anno. I colori indicano lo stato del quorum: blu = raggiunto, beige = non richiesto, grigio chiaro = non raggiunto.',
     bounds: () => ({
       x: 0,
-      y: height - 140,   // Area della timeline (prima parte del footer)
+      y: height - 220,   // Area della timeline (prima parte del footer)
       w: width,
       h: 40             // Altezza della timeline
     })
@@ -390,7 +390,7 @@ const HELP_SECTIONS = {
     description: 'Trascina lo slider o usa il pulsante play per scorrere automaticamente tra tutti gli anni. I grafici si aggiornano automaticamente.',
     bounds: () => ({
       x: 0,
-      y: height - 100,   // Area dello slider (seconda parte del footer)
+      y: height - 155,   // Area dello slider (seconda parte del footer)
       w: width,
       h: 40             // Altezza dello slider
     })
@@ -471,12 +471,12 @@ function mouseMoved() {
     const sliderContainer = document.getElementById('year-slider-visible-container');
     
     // Timeline area (prima parte del footer)
-    const timelineTop = height - 140;
-    const timelineBottom = height - 100;
+    const timelineTop = height - 220;
+    const timelineBottom = height - 180;
     
     // Slider area (seconda parte del footer)
-    const sliderTop = height - 100;
-    const sliderBottom = height - 60;
+    const sliderTop = height - 155;
+    const sliderBottom = height - 115;
 
     if (timelineContainer) {
       if (mouseY >= timelineTop && mouseY < timelineBottom) {
@@ -3319,6 +3319,11 @@ function setupYearSlider() {
               }
           }
       });
+      
+      // Aggiorna anche i dots dello slider
+      if (window.refreshSliderDots) {
+        window.refreshSliderDots();
+      }
   };
 
   // --- Creazione DOM ---
@@ -3454,10 +3459,149 @@ function setupYearSlider() {
   // Aggiornamento iniziale
   refreshVisuals();
 
-  // --- Setup Slider Visibile ---
+  // --- Setup Slider Visibile con Dots ---
+  const sliderDots = document.getElementById('slider-dots');
   const visibleSlider = document.getElementById('year-slider-visible');
-  const yearLabel = document.getElementById('slider-year-label');
   const autoPlayBtn = document.getElementById('auto-play-btn');
+  
+  // Crea i dots nello slider (stesso stile della timeline)
+  if (sliderDots) {
+    sliderDots.innerHTML = ''; // Pulisce tutto
+    
+    // Create slider line
+    const sliderLine = document.createElement('div');
+    sliderLine.style.cssText = 'position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 3px; width: 100%; background-color: #0F3D88; z-index: 1; pointer-events: none; opacity: 1; display: block; visibility: visible;';
+    sliderDots.appendChild(sliderLine);
+    
+    REFERENDUM_YEARS_ARRAY.forEach((yearKey) => {
+      const percentage = yearToPosition[yearKey];
+      
+      // Container per il dot
+      const container = document.createElement('div');
+      container.setAttribute('data-slider-year-key', yearKey);
+      Object.assign(container.style, {
+        position: 'absolute', 
+        left: `${percentage}%`, 
+        top: '50%',
+        transform: 'translate(-50%, -50%)', 
+        cursor: 'pointer', 
+        zIndex: '20',
+        pointerEvents: 'auto',
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center'
+      });
+      
+      // Quadratino visivo
+      const dot = document.createElement('div');
+      dot.className = 'slider-dot-element';
+      const baseSize = 18;
+      Object.assign(dot.style, {
+        width: baseSize + 'px', 
+        height: baseSize + 'px', 
+        borderRadius: '6px', 
+        transition: 'all 0.18s ease', 
+        boxShadow: '0 1px 2px rgba(0,0,0,0.12)',
+        display: 'block', 
+        visibility: 'visible', 
+        opacity: '1',
+        position: 'relative', 
+        zIndex: '21'
+      });
+      
+      // Get quorum status for colors
+      const qStatus = quorumStatusByYear[yearKey];
+      const fallbackMap = {
+        '1946': 'NON_RICHIESTO', '1974': 'RAGGIUNTO', '1978': 'RAGGIUNTO', '1981': 'RAGGIUNTO',
+        '1985': 'RAGGIUNTO', '1987': 'RAGGIUNTO', '1989': 'NON_RICHIESTO', '1990': 'NON_RAGGIUNTO',
+        '1991': 'RAGGIUNTO', '1993': 'RAGGIUNTO', '1995': 'RAGGIUNTO', '1997': 'NON_RAGGIUNTO',
+        '1999': 'NON_RAGGIUNTO', '2000': 'NON_RAGGIUNTO', '2001': 'NON_RICHIESTO', '2003': 'NON_RAGGIUNTO',
+        '2005': 'NON_RAGGIUNTO', '2006': 'NON_RICHIESTO', '2009': 'NON_RAGGIUNTO', '2011': 'RAGGIUNTO',
+        '2016-1': 'NON_RAGGIUNTO', '2016-2': 'NON_RICHIESTO', '2020': 'NON_RICHIESTO', '2022': 'NON_RAGGIUNTO',
+        '2025': 'NON_RAGGIUNTO'
+      };
+      const status = qStatus || fallbackMap[yearKey];
+      
+      const FILLED_BLUE = '#1E52A6';
+      const BORDER_BLUE = '#1E52A6';
+      const LIGHT_BLUE = '#a4afc1ff';
+      const NON_RICHIESTO_COLOR = '#F6ECE1';
+      
+      // Apply color based on quorum status
+      if (status === 'RAGGIUNTO') {
+        dot.style.backgroundColor = FILLED_BLUE;
+        dot.style.border = 'none';
+      } else if (status === 'NON_RICHIESTO') {
+        dot.style.backgroundColor = NON_RICHIESTO_COLOR;
+        dot.style.border = `2px solid ${BORDER_BLUE}`;
+      } else if (status === 'NON_RAGGIUNTO') {
+        dot.style.backgroundColor = LIGHT_BLUE;
+        dot.style.border = 'none';
+      } else {
+        dot.style.backgroundColor = '#E1E1E1';
+        dot.style.border = `2px solid ${BORDER_BLUE}`;
+      }
+      
+      // Highlight selected year
+      if (yearKey === String(selectedYear)) {
+        const selectedSize = 22;
+        dot.style.width = selectedSize + 'px';
+        dot.style.height = selectedSize + 'px';
+        dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+      }
+      
+      // Eventi hover
+      container.addEventListener('mouseenter', () => {
+        const hoverSize = 24;
+        dot.style.width = hoverSize + 'px';
+        dot.style.height = hoverSize + 'px';
+        dot.style.boxShadow = '0 6px 12px rgba(0,0,0,0.25)';
+        dot.style.borderRadius = '6px';
+      });
+      
+      container.addEventListener('mouseleave', () => {
+        if (yearKey !== String(selectedYear)) {
+          dot.style.width = '18px';
+          dot.style.height = '18px';
+          dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+        } else {
+          dot.style.width = '22px';
+          dot.style.height = '22px';
+          dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+        }
+      });
+      
+      // Evento Click
+      container.onclick = () => {
+        slider.value = yearToPosition[yearKey];
+        slider.dispatchEvent(new Event('input'));
+      };
+      
+      container.appendChild(dot);
+      sliderDots.appendChild(container);
+    });
+    
+    // Funzione per aggiornare i dots dello slider quando cambia l'anno
+    const refreshSliderDots = () => {
+      const dots = sliderDots.querySelectorAll('.slider-dot-element');
+      dots.forEach((dot, index) => {
+        const container = dot.parentElement;
+        const yearKey = container.getAttribute('data-slider-year-key');
+        if (yearKey === String(selectedYear)) {
+          dot.style.width = '22px';
+          dot.style.height = '22px';
+          dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+        } else {
+          dot.style.width = '18px';
+          dot.style.height = '18px';
+          dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+        }
+      });
+    };
+    
+    // Salva la funzione per aggiornare i dots dello slider
+    window.refreshSliderDots = refreshSliderDots;
+  }
   
   // Variabili per lo scorrimento automatico
   let autoPlayInterval = null;
@@ -3473,12 +3617,6 @@ function setupYearSlider() {
     visibleSlider.max = 100;
     visibleSlider.step = 0.01;
     visibleSlider.value = sliderValue;
-    
-    // Aggiorna l'etichetta dell'anno
-    if (yearLabel) {
-      const displayYear = getYearDisplayName(String(selectedYear));
-      yearLabel.textContent = displayYear;
-    }
     
     // Funzione per avviare/fermare lo scorrimento automatico continuo
     const toggleAutoPlay = () => {
@@ -3621,18 +3759,11 @@ function setupYearSlider() {
         height: 40px;
       }
       
-      #year-slider-visible-container > div::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        height: 4px;
-        background-color: #0F3D88;
-        z-index: 1;
-        pointer-events: none;
+      #slider-dots {
+        position: relative;
         width: 100%;
+        height: 100%;
+        z-index: 2;
       }
       
       #year-slider-visible {
@@ -3716,13 +3847,13 @@ function setupYearSlider() {
     `;
     document.head.appendChild(style);
     
-    // Funzione per aggiornare entrambi gli slider e l'etichetta
+    // Funzione per aggiornare entrambi gli slider
     const updateSliders = (newPos, newYear) => {
       slider.value = newPos;
       visibleSlider.value = newPos;
-      if (yearLabel) {
-        const displayYear = getYearDisplayName(String(newYear));
-        yearLabel.textContent = displayYear;
+      // Aggiorna i dots dello slider
+      if (window.refreshSliderDots) {
+        window.refreshSliderDots();
       }
     };
     
@@ -3815,10 +3946,6 @@ function setupYearSlider() {
             slider.value = exactPos;
             if (visibleSlider) {
               visibleSlider.value = exactPos;
-            }
-            if (yearLabel) {
-              const displayYear = getYearDisplayName(String(selectedYear));
-              yearLabel.textContent = displayYear;
             }
           }
           

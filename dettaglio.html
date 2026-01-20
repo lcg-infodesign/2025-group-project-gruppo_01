@@ -107,7 +107,8 @@
     </div>
 
     <!-- FOOTER CON TIMELINE -->
-    <div id="footer" style="position:fixed; bottom:80px; left:0; right:0; height:60px; background-color:#f5f0dc; z-index:1000; display:flex; align-items:center; padding:10px 20px;">
+    <div id="footer" style="position:fixed; bottom:0px; left:0; right:0; height:140px; background-color:#f5f0dc; z-index:1000; display:flex; flex-direction:column; justify-content:center; padding:10px 20px;">
+      <!-- Timeline -->
       <div id="year-slider-container" style="position:relative; width:100%; max-width:1400px; margin:0 auto;">
         <div id="timeline-container" style="position:relative; height:40px; display:flex; align-items:center;">
           <div id="timeline-line" style="position:absolute; left:0; right:0; height:2px; background-color:#0F3D88; top:50%; transform:translateY(-50%);"></div>
@@ -115,11 +116,12 @@
           <input type="range" id="year-slider" min="0" max="100" value="100" step="0.01" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:10;">
         </div>
       </div>
-      <!-- Container aggiuntivo per compatibilità con lo script -->
-      <div id="year-slider-visible-container" style="display:none;">
-        <div>
-          <span id="slider-year-label"></span>
-          <input type="range" id="year-slider-visible" min="0" max="100" step="0.01" value="100">
+      
+      <!-- Slider visibile per scorrimento veloce -->
+      <div id="year-slider-visible-container" style="width:100%; max-width:1400px; margin:25px auto 0;">
+        <div style="position: relative; flex: 1; height: 40px; display: flex; align-items: center; gap: 15px;">
+          <div id="slider-dots" style="position: relative; width: 100%; height: 100%;"></div>
+          <input type="range" id="year-slider-visible" min="0" max="100" step="0.01" value="100" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: none; appearance: none; background: transparent; outline: none; cursor: pointer; z-index: 5; margin: 0; padding: 0;">
         </div>
       </div>
     </div>

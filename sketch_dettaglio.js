@@ -318,7 +318,8 @@ let presidenteDescScrollOffset = 0; // Scroll offset for president description
 let isDraggingDescScrollbar = false; // Track if description scrollbar is being dragged
 let isDraggingQuesitiScrollbar = false; // Track if quesiti scrollbar is being dragged
 let quesitiScrollOffset = 0; // Scroll offset for quesiti list
-
+// Aggiungila insieme alle altre variabili globali all'inizio del file
+let presidentClickZones = [];
 // STIX fonts
 let stixFont = null;
 let stixFontBold = null;
@@ -1193,7 +1194,13 @@ function loadContestoData() {
         descrizioneConsiglio: row['DESCRIZIONE_CONSIGLIO'] || row['DESCRIZIONE_CONSIGLIO '] || '',
         imgRepubblica: row['IMMAGINE_REPUBBLICA'] || '',
         imgConsiglio: row['IMMAGINE_MINISTRO'] || '',
-        referendumDate: referendumDate.trim() // Save the referendum date
+        
+        // --- QUESTE SONO LE RIGHE NUOVE DA AGGIUNGERE ---
+        linkRepubblica: row['LINK_REP'] || '', 
+        linkConsiglio: row['LINK_CONS'] || '',
+        // ------------------------------------------------
+        
+        referendumDate: referendumDate.trim()
       };
       
       // Store with both yearKey (for 2016-1/2016-2) and numeric key (for easier lookup)
@@ -2582,7 +2589,13 @@ async function runCartogram() {
 }
 
 function draw() {
+ 
+  // Resetta il cursore a "default" all'inizio di ogni frame
+  document.querySelector('canvas').style.cursor = 'default';
   
+  // ... resto del codice ...
+
+
   // Hide debug panel if it exists
   const debugPanel = document.getElementById('debug-panel');
   if (debugPanel) {
@@ -5438,452 +5451,240 @@ function drawQuorumLegend(x, y, w) {
   pop();
 }
 
-// Draw president slider in the left window bottom
 function drawPresidentSlider(x, y, w, h) {
   push();
   
-  // Get current year's president data
-  // Try multiple formats to find the data
+  // 1. Reset delle zone cliccabili per questo frame
+  presidentClickZones = [];
+  
+  // 2. Recupero Dati
   const yearKey = String(selectedYear);
   let presidenteData = contestoByYear[yearKey];
   
-  // If not found, try as number
   if (!presidenteData && !isNaN(selectedYear)) {
     presidenteData = contestoByYear[parseInt(selectedYear)];
   }
   
-  // If still not found, try to find by numeric year (for 2016-1, 2016-2 cases)
   if (!presidenteData) {
-    const numericYear = getYearNumeric(yearKey);
-    // Try to find any entry with this numeric year
-    for (const key in contestoByYear) {
-      if (getYearNumeric(key) === numericYear) {
-        presidenteData = contestoByYear[key];
-        console.log(`✅ Trovati dati per anno ${yearKey} usando chiave alternativa: ${key}`);
-        break;
-      }
-    }
-  }
-  
-  if (!presidenteData) {
-    // No data for this year
-    console.error(`❌ Nessun dato presidente trovato per anno: ${yearKey} (tipo: ${typeof selectedYear})`);
-    console.log('Anni disponibili in contestoByYear:', Object.keys(contestoByYear));
-    console.log('selectedYear:', selectedYear, 'tipo:', typeof selectedYear);
-    fill(100, 100, 100, 150);
+    fill(100);
     textSize(14);
     textAlign(CENTER, CENTER);
-    text('Dati presidente non disponibili per questo anno', x + w/2, y + h/2);
+    text('Dati contesto non disponibili', x + w/2, y + h/2);
     pop();
     return;
   }
+
+  // --- CONFIGURAZIONE VISIVA ---
+  const borderColor = color(30, 82, 166); 
+  const nameColor = color(255, 183, 0);   
+  const titleColor = color(30, 82, 166);  
+  const circleBgColor = color(255, 183, 0); 
   
-  // Determine which president to show based on mode (carousel) - MUST be defined early
-  const currentPresidente = currentPresidenteMode === 0 ? {
-    nome: presidenteData.presidenteRepubblica || 'Nome non disponibile',
-    titolo: 'PRESIDENTE DELLA REPUBBLICA',
-    descrizione: presidenteData.descrizioneRep || '',
-    img: presidenteData.imgRepubblica
-  } : {
-    nome: presidenteData.presidenteConsiglio || 'Nome non disponibile',
-    titolo: 'PRESIDENTE DEL CONSIGLIO',
-    descrizione: presidenteData.descrizioneConsiglio || '',
-    img: presidenteData.imgConsiglio
-  };
+  const imgSize = 100; 
+  const padding = 20;
   
-  // Debug: verifica dati ogni secondo quando in modalità Consiglio
-  if (frameCount % 60 === 0 && currentPresidenteMode === 1) {
-    const imgInCache = !!presidenteImages[currentPresidente.img];
-    const imgLoaded = imgInCache && presidenteImages[currentPresidente.img].width > 0;
-    
-    console.log('🔍 [DRAW] Modalità Consiglio attiva:', {
-      yearKey: yearKey,
-      modalità: currentPresidenteMode,
-      presidenteConsiglio: presidenteData.presidenteConsiglio,
-      imgConsiglio: presidenteData.imgConsiglio,
-      nomeVisualizzato: currentPresidente.nome,
-      immagineInCache: imgInCache,
-      immagineCaricata: imgLoaded,
-      imgWidth: imgInCache ? presidenteImages[currentPresidente.img].width : 0,
-      imgHeight: imgInCache ? presidenteImages[currentPresidente.img].height : 0,
-      tutteLeImmaginiCaricate: Object.keys(presidenteImages)
-    });
-    
-    // Se l'immagine non è in cache o non è ancora caricata, prova a ricaricarla
-    if (presidenteData.imgConsiglio) {
-      if (!imgInCache || !imgLoaded) {
-        console.log('⚠️ Immagine Consiglio non in cache o non caricata, ricarico...');
-        loadPresidenteImages(presidenteData, true); // Force reload
-      }
-    } else {
-      console.warn('⚠️ Nessun nome immagine Consiglio nei dati per anno:', yearKey);
-    }
-  }
-  
-  // Stroke only (no background) - content directly on page background
-  push();
+  // 3. DISEGNO BOX
   noFill();
-  stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
+  stroke(borderColor);
   strokeWeight(1);
   rect(x, y, w, h);
-  pop();
   
-  // Apply clipping to ensure everything stays inside carousel
-  push();
-  drawingContext.save();
-  drawingContext.beginPath();
-  drawingContext.rect(x, y, w, h);
-  drawingContext.clip();
+  // Etichetta "contesto"
+  const pillW = 120;
+  const pillH = 26;
+  const pillX = x + w/2 - pillW/2;
+  const pillY = y - pillH/2;
   
-  // Calculate positions
-  const carouselCenterX = x + w / 2;
-  const headerY = y + 15;
+  fill(nameColor);
+  stroke(borderColor);
+  strokeWeight(1);
+  rect(pillX, pillY, pillW, pillH, 12);
   
-  // Draw labels/indicators at top
-  textSize(11);
-  fill(22, 50, 100);
+  fill(titleColor);
+  noStroke();
   textAlign(CENTER, CENTER);
-  
-  // Draw indicator dots - IMPORTANTE: queste coordinate devono corrispondere esattamente a quelle in mousePressed
-  const dotSize = 8;
-  const dotSpacing = 20;
-  const dotsStartX = carouselCenterX - dotSpacing / 2;
-  
-  // Draw indicator dots sul canvas
-  // Left dot (Repubblica) - sempre visibile
-  noStroke();
-  if (currentPresidenteMode === 0) {
-    fill(22, 50, 100);
-    ellipse(dotsStartX, headerY, dotSize + 2, dotSize + 2);
-  } else {
-    fill(200, 200, 200);
-    ellipse(dotsStartX, headerY, dotSize, dotSize);
-  }
-  
-  // Right dot (Consiglio) - sempre visibile
-  noStroke();
-  if (currentPresidenteMode === 1) {
-    fill(22, 50, 100);
-    ellipse(dotsStartX + dotSpacing, headerY, dotSize + 2, dotSize + 2);
-  } else {
-    fill(200, 200, 200);
-    ellipse(dotsStartX + dotSpacing, headerY, dotSize, dotSize);
-  }
-  
-  // Draw president image and info - centered vertically and horizontally, all inside carousel
-  const carouselPadding = 18; // Padding from carousel edges
-  const contentAreaHeight = h - headerY - carouselPadding * 2; // Available height below header with padding
-  const imageSize = 120; // Increased size for better visibility
-  // Position image and text more to the left, inside the frame
-  const imagePadding = carouselPadding + 1; // Reduced padding to move left
-  const imageY = headerY + carouselPadding;
-  const imageX = x + imagePadding + imageSize/2;
-  const textAreaX = imageX + imageSize/2 + 15; // Space between image and text
-  const scrollbarWidth = 6; // Width of scrollbar on right edge
-  const textAreaWidth = w - textAreaX - carouselPadding - scrollbarWidth - 5; // Leave space for scrollbar
-  
-  // Center content vertically within available space
-  const contentY = headerY + carouselPadding + Math.max(0, (contentAreaHeight - imageSize) / 2);
-  
-  // Debug: verifica che i dati siano presenti (ogni secondo quando in modalità Consiglio)
-  if (currentPresidenteMode === 1 && frameCount % 60 === 0) {
-    console.log('🔍 Modalità Consiglio attiva:', {
-      nome: currentPresidente.nome,
-      img: currentPresidente.img,
-      descrizione: currentPresidente.descrizione ? currentPresidente.descrizione.substring(0, 50) + '...' : 'Manca',
-      presidenteConsiglio: presidenteData.presidenteConsiglio,
-      imgConsiglio: presidenteData.imgConsiglio,
-      immagineInCache: !!presidenteImages[currentPresidente.img],
-      tutteLeImmagini: Object.keys(presidenteImages)
-    });
-  }
-  
-  // No circular background - image without orange frame
-  // Make sure circle doesn't go outside carousel bounds
-  const circleRadius = imageSize / 2;
-  const circleY = constrain(contentY + imageSize/2, y + circleRadius + carouselPadding, y + h - circleRadius - carouselPadding);
-  
-  // Draw president image if loaded - positioned on the left
-  // IMPORTANT: Always try to draw the image, even if it's still loading
-  if (currentPresidente.img && currentPresidente.img.trim() !== '') {
-    const img = presidenteImages[currentPresidente.img];
-    if (img && img.width > 0 && img.height > 0) {
-      // Image is loaded and ready
-      push();
-      // Create clipping mask for circle
-      drawingContext.save();
-      drawingContext.beginPath();
-      drawingContext.arc(imageX, circleY, imageSize/2, 0, TWO_PI);
-      drawingContext.clip();
-      
-      // Draw image centered
-      const imgAspect = img.width / img.height;
-      let drawW = imageSize;
-      let drawH = imageSize;
-      if (imgAspect > 1) {
-        drawH = imageSize / imgAspect;
-      } else {
-        drawW = imageSize * imgAspect;
-      }
-      image(img, imageX - drawW/2, circleY - drawH/2, drawW, drawH);
-      
-      drawingContext.restore();
-      pop();
+  textSize(20);
+  textStyle(BOLD);
+  textFont('Stix Two Text');
+  text("contesto", x + w/2, y);
+
+  // --- FUNZIONE INTERNA PER DISEGNARE UN PRESIDENTE ---
+  function drawSinglePresident(pName, pRole, pImgFilename, px, py, align, pLink) {
+    if (!pName) return;
+
+    // Coordinate Immagine
+    let imgCenterX;
+    if (align === 'left') {
+        imgCenterX = px + imgSize/2;
     } else {
-      // Image not loaded yet or still loading
-      // Log more frequently when in Consiglio mode to help debug
-      if (currentPresidenteMode === 1 && frameCount % 30 === 0) {
-        console.warn('⚠️ Immagine Consiglio non ancora caricata:', {
-          imgFilename: currentPresidente.img,
-          inCache: !!img,
-          imgWidth: img ? img.width : 0,
-          imgHeight: img ? img.height : 0,
-          tutteLeImmagini: Object.keys(presidenteImages),
-          presidenteNome: currentPresidente.nome
+        imgCenterX = px + w - imgSize/2 - padding; 
+    }
+    const imgCenterY = py;
+
+    // --- GESTIONE CLICK IMMAGINE ---
+    if (pLink && pLink.length > 3) {
+        presidentClickZones.push({
+            type: 'circle',
+            x: imgCenterX,
+            y: imgCenterY,
+            r: imgSize/2,
+            url: pLink,
+            name: pName
         });
-        // Try to reload if image is in cache but not loaded
-        if (img && img.width === 0) {
-          console.log('🔄 Tentativo di ricaricare immagine non caricata...');
-          const yearKey = String(selectedYear);
-          let presidenteData = contestoByYear[yearKey];
-          if (!presidenteData && !isNaN(selectedYear)) {
-            presidenteData = contestoByYear[parseInt(selectedYear)];
-          }
-          if (!presidenteData) {
-            const numericYear = getYearNumeric(yearKey);
-            for (const key in contestoByYear) {
-              if (getYearNumeric(key) === numericYear) {
-                presidenteData = contestoByYear[key];
-                break;
-              }
-            }
-          }
-          if (presidenteData && presidenteData.imgConsiglio === currentPresidente.img) {
-            loadPresidenteImages(presidenteData, true);
-          }
+        
+        // SE IL MOUSE È SOPRA L'IMMAGINE -> CURSORE MANO
+        if (dist(mouseX, mouseY, imgCenterX, imgCenterY) < imgSize/2) {
+             cursor(HAND); 
         }
-      }
-      // Draw placeholder circle when image is missing or loading
-      push();
-      noFill();
-      stroke(150, 150, 150);
-      strokeWeight(2);
-      ellipse(imageX, circleY, imageSize/2, imageSize/2);
-      fill(150, 150, 150);
-      textSize(11);
-      textAlign(CENTER, CENTER);
-      text('Caricamento...', imageX, circleY);
-      pop();
     }
-  } else {
-    // No image filename specified
-    if (currentPresidenteMode === 1 && frameCount % 60 === 0) {
-      console.error('❌ Nessun nome immagine Consiglio specificato per:', currentPresidente.nome);
-      console.error('   Dati presidente:', {
-        nome: currentPresidente.nome,
-        titolo: currentPresidente.titolo,
-        img: currentPresidente.img
-      });
+
+    // Cerchio sfondo
+    noStroke();
+    fill(circleBgColor);
+    ellipse(imgCenterX, imgCenterY, imgSize, imgSize);
+
+    // Immagine
+    if (pImgFilename && pImgFilename.trim() !== '') {
+        const img = presidenteImages[pImgFilename];
+        if (img && img.width > 0) {
+            push();
+            drawingContext.save();
+            drawingContext.beginPath();
+            drawingContext.arc(imgCenterX, imgCenterY, imgSize/2, 0, TWO_PI);
+            drawingContext.clip();
+            
+            const aspect = img.width / img.height;
+            let dw = imgSize;
+            let dh = imgSize;
+            if (aspect > 1) dh = imgSize / aspect; 
+            else dw = imgSize * aspect;          
+            dw *= 1.1; dh *= 1.1;
+
+            imageMode(CENTER);
+            image(img, imgCenterX, imgCenterY, dw, dh);
+            drawingContext.restore();
+            pop();
+        } else {
+             if (img && img.width === 0) loadPresidenteImages(presidenteData, true);
+        }
     }
-    // Draw placeholder circle when image filename is missing
+
+    // --- CALCOLO POSIZIONE TESTI (PER CENTRATURA VERTICALE) ---
+    let textX;
+    let alignMode;
+    if (align === 'left') {
+        textX = imgCenterX + imgSize/2 + 15; 
+        alignMode = LEFT;
+    } else {
+        textX = imgCenterX - imgSize/2 - 15; 
+        alignMode = RIGHT;
+    }
+
+    // Pre-calcolo delle righe del ruolo per capire l'altezza totale
+    const roleLines = pRole.toUpperCase().split(" DEL");
+    const hasSecondLine = roleLines.length > 1;
+
+    // Calcolo altezza totale blocco testo:
+    // Nome (22px) + Spazio (6px) + Ruolo Riga 1 (15px) + [Eventuale Riga 2 (18px)]
+    let totalTextHeight = 22 + 6 + 15; 
+    if (hasSecondLine) totalTextHeight += 18;
+
+    // Punto di partenza Y per centrare il blocco rispetto al centro immagine
+    let currentY = imgCenterY - (totalTextHeight / 2) + 8; // +8 compensa l'allineamento del font
+
     push();
-    noFill();
-    stroke(150, 150, 150);
-    strokeWeight(2);
-    ellipse(imageX, circleY, imageSize/2, imageSize/2);
-    fill(150, 150, 150);
-    textSize(10);
-    textAlign(CENTER, CENTER);
-    text('Immagine\nnon disponibile', imageX, circleY);
+    textAlign(alignMode, BASELINE); // Uso BASELINE per controllo preciso
+    
+    // --- NOME DEL PRESIDENTE ---
+    fill(nameColor);
+    noStroke();
+    textSize(22);
+    textStyle(ITALIC);
+    textFont('Stix Two Text'); 
+
+    text(pName, textX, currentY);
+    
+    // --- GESTIONE HOVER E CLICK SUL NOME ---
+    const nameW = textWidth(pName);
+    const nameH = 22; // Altezza del font
+    
+    // Calcolo box preciso per il click
+    let linkBoxX = (alignMode === LEFT) ? textX : textX - nameW;
+    let linkBoxY = currentY - nameH + 5; // Aggiusto leggermente per coprire il testo
+    
+    if (pLink && pLink.length > 3) {
+        presidentClickZones.push({
+            type: 'rect',
+            x: linkBoxX,
+            y: linkBoxY,
+            w: nameW,
+            h: nameH,
+            url: pLink,
+            name: pName
+        });
+        
+        // CONTROLLO HOVER SUL TESTO
+        if (mouseX >= linkBoxX && mouseX <= linkBoxX + nameW && 
+            mouseY >= linkBoxY && mouseY <= linkBoxY + nameH) {
+            
+            cursor(HAND); // Forza il cursore a mano
+            
+            // Sottolineatura
+            stroke(nameColor);
+            strokeWeight(2);
+            line(linkBoxX, currentY + 3, linkBoxX + nameW, currentY + 3);
+            noStroke();
+        }
+    }
+
+    // Avanzamento Y per il ruolo
+    currentY += 22; // Spazio dopo il nome
+
+    // --- RUOLO ---
+    fill(titleColor);
+    textSize(15);
+    textStyle(BOLD);
+    
+    if (hasSecondLine) {
+        text(roleLines[0] + (pRole.toUpperCase().includes("DELL") ? "" : ""), textX, currentY);
+        currentY += 18; // Spazio tra le righe del ruolo
+        text(pRole.toUpperCase().replace(roleLines[0], "").trim(), textX, currentY);
+    } else {
+        text(pRole.toUpperCase(), textX, currentY);
+    }
     pop();
   }
-  
-  // Draw name and title on the right side (larger text) - centered vertically with image
-  // Always draw name and title, even if image is missing
-  textSize(18); // Increased from 15
-  fill(22, 50, 100); // Dark blue (no orange highlight)
-  textStyle(BOLD);
-  textAlign(LEFT, TOP);
-  // Center text vertically with image (start text at same Y as image)
-  const nameY = contentY;
-  
-  // Debug: verifica che nome e titolo siano presenti (più frequente in modalità Consiglio)
-  if (currentPresidenteMode === 1 && frameCount % 30 === 0) {
-    console.log('🔍 Visualizzazione Consiglio:', {
-      nome: currentPresidente.nome,
-      titolo: currentPresidente.titolo,
-      descrizione: currentPresidente.descrizione ? currentPresidente.descrizione.substring(0, 50) + '...' : 'Manca',
-      img: currentPresidente.img,
-      imgInCache: !!presidenteImages[currentPresidente.img],
-      imgLoaded: presidenteImages[currentPresidente.img] ? presidenteImages[currentPresidente.img].width > 0 : false
-    });
-  }
-  
-  // Always show name, even if empty (with fallback)
-  if (currentPresidente.nome && currentPresidente.nome.trim() !== '' && currentPresidente.nome !== 'Nome non disponibile') {
-    fill(22, 50, 100);
-    text(currentPresidente.nome, textAreaX, nameY);
-  } else {
-    // Fallback se nome mancante o vuoto
-    fill(150, 100, 100);
-    textStyle(ITALIC);
-    text('Nome non disponibile', textAreaX, nameY);
-    textStyle(BOLD);
-    fill(22, 50, 100);
-  }
-  
-  // Draw title (larger text)
-  textSize(15); // Increased from 11
-  fill(22, 50, 100);
-  textStyle(NORMAL);
-  const titleY = nameY + 26; // Increased spacing
-  if (currentPresidente.titolo && currentPresidente.titolo.trim() !== '' && currentPresidente.titolo !== 'Titolo non disponibile') {
-    text(currentPresidente.titolo, textAreaX, titleY);
-  } else {
-    // Fallback se titolo mancante
-    fill(150, 100, 100);
-    textStyle(ITALIC);
-    text('Titolo non disponibile', textAreaX, titleY);
-    textStyle(NORMAL);
-    fill(22, 50, 100);
-  }
-  
-  // Draw description on the right side (wrapped text with scroll)
-  textSize(15); // Increased from 11
-  fill(22, 50, 100, 255); // Full opacity to ensure visibility
-  textStyle(NORMAL);
-  textAlign(LEFT, TOP);
-  const descY = titleY + 28; // Increased spacing
-  const lineHeight = 18; // Increased line height for larger text
-  const descAreaTop = descY;
-  const bottomPaddingExtra = 20; // Extra padding at bottom to prevent text from being covered
-  const descAreaBottom = y + h - carouselPadding - bottomPaddingExtra; // Leave more padding at bottom
-  const descAreaHeight = descAreaBottom - descAreaTop;
-  
-  // Calculate total description height needed
-  let totalDescHeight = 0;
-  if (currentPresidente.descrizione && currentPresidente.descrizione.trim() !== '') {
-    const words = currentPresidente.descrizione.split(' ');
-    let line = '';
-    let lineCount = 0;
-    
-    for (let i = 0; i < words.length; i++) {
-      const testLine = line + (line ? ' ' : '') + words[i];
-      const testWidth = textWidth(testLine);
-      
-      if (testWidth > textAreaWidth && line.length > 0) {
-        line = words[i];
-        lineCount++;
-      } else {
-        line = testLine;
-      }
-    }
-    if (line) lineCount++;
-    totalDescHeight = lineCount * lineHeight;
-  }
-  
-  // Calculate if scrolling is needed
-  const needsDescScroll = totalDescHeight > descAreaHeight;
-  // Calcolo corretto: quando si scrolla al massimo, l'ultima riga deve essere completamente visibile
-  // La prima riga Ã¨ a descY, l'ultima riga finisce a descY + totalDescHeight
-  // Quando scrollato al massimo, l'ultima riga deve essere completamente dentro descAreaBottom
-  // Quindi: (descY + totalDescHeight) - maxScrollOffset <= descAreaBottom
-  // Risolvendo: maxScrollOffset >= descY + totalDescHeight - descAreaBottom
-  // Ma descY = descAreaTop, quindi: maxScrollOffset >= totalDescHeight - (descAreaBottom - descAreaTop)
-  // maxScrollOffset >= totalDescHeight - descAreaHeight
-  const maxDescScrollOffset = needsDescScroll ? Math.max(0, totalDescHeight - descAreaHeight) : 0;
-  presidenteDescScrollOffset = constrain(presidenteDescScrollOffset, 0, maxDescScrollOffset);
-  
-  // Apply clipping to description area
-  push();
-  drawingContext.save();
-  drawingContext.beginPath();
-  drawingContext.rect(textAreaX, descAreaTop, textAreaWidth, descAreaHeight);
-  drawingContext.clip();
-  
-  // Wrap and draw description text with scroll
-  if (currentPresidente.descrizione && currentPresidente.descrizione.trim() !== '') {
-    const words = currentPresidente.descrizione.split(' ');
-    let line = '';
-    let currentY = descY - presidenteDescScrollOffset;
-    
-    for (let i = 0; i < words.length; i++) {
-      const testLine = line + (line ? ' ' : '') + words[i];
-      const testWidth = textWidth(testLine);
-      
-      if (testWidth > textAreaWidth && line.length > 0) {
-        // Only draw if line is in visible area
-        if (currentY >= descAreaTop - lineHeight && currentY <= descAreaBottom) {
-          text(line, textAreaX, currentY);
-        }
-        line = words[i];
-        currentY += lineHeight;
-      } else {
-        line = testLine;
-      }
-    }
-    
-    // Draw remaining line if in visible area
-    if (line && currentY >= descAreaTop - lineHeight && currentY <= descAreaBottom) {
-      text(line, textAreaX, currentY);
-    }
-  } else {
-    // Show message if description is missing
-    fill(150, 150, 150, 150);
-    textSize(10);
-    text('Descrizione non disponibile', textAreaX, descY);
-  }
-  
-  // Restore clipping
-  drawingContext.restore();
-  pop();
-  
-  // Draw scrollbar for description if needed - positioned on right edge of carousel, aligned with quesiti scrollbar
-  if (needsDescScroll && maxDescScrollOffset > 0) {
-    // Align with quesiti scrollbar position (same X position)
-    // Quesiti scrollbar is at: windowLeft + windowWidth - bgPadding - scrollbarWidth
-    // Carousel is at: x = windowLeft + bgPadding, w = windowWidth - bgPadding * 2
-    // So carousel right edge is at: x + w = windowLeft + windowWidth - bgPadding
-    // To align with quesiti scrollbar: scrollbarX = windowLeft + windowWidth - bgPadding - scrollbarWidth
-    // Which equals: (x + w) - scrollbarWidth = (windowLeft + windowWidth - bgPadding) - scrollbarWidth
-    const scrollbarX = x + w - scrollbarWidth; // Aligned with quesiti scrollbar (no carouselPadding)
-    const scrollbarHeight = descAreaHeight;
-    const scrollbarY = descAreaTop;
-    
-    // Draw scrollbar track
-    fill(200, 200, 200, 150);
-    noStroke();
-    rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight);
-    
-    // Draw scrollbar thumb
-    const thumbHeight = Math.max(20, (descAreaHeight / totalDescHeight) * scrollbarHeight); // Minimum thumb height
-    // Calcolo corretto del thumbY che permette di arrivare fino in fondo
-    const scrollableHeight = scrollbarHeight - thumbHeight;
-    const thumbY = maxDescScrollOffset > 0 
-      ? scrollbarY + (presidenteDescScrollOffset / maxDescScrollOffset) * scrollableHeight
-      : scrollbarY; // Se non c'Ã¨ scroll, thumb in alto
-    fill(22, 50, 100, 200);
-    rect(scrollbarX, thumbY, scrollbarWidth, thumbHeight);
-    
-    // Store scrollbar bounds for mouse interaction
-    window.presidenteScrollbarX = scrollbarX;
-    window.presidenteScrollbarY = scrollbarY;
-    window.presidenteScrollbarWidth = scrollbarWidth;
-    window.presidenteScrollbarHeight = scrollbarHeight;
-    window.presidenteScrollbarThumbY = thumbY;
-    window.presidenteScrollbarThumbHeight = thumbHeight;
-    window.presidenteScrollbarMaxOffset = maxDescScrollOffset;
-    window.presidenteScrollbarTotalHeight = totalDescHeight;
-  } else {
-    // Clear scrollbar bounds if not needed
-    window.presidenteScrollbarX = null;
-  }
-  
-  // Restore clipping
-  drawingContext.restore();
+
+  // --- POSIZIONAMENTO ---
+  const contentYStart = y + 20;
+  const availableH = h - 20;
+  const repY = contentYStart + availableH * 0.30; 
+  const consY = contentYStart + availableH * 0.70; 
+
+  // 1. Presidente della Repubblica
+  drawSinglePresident(
+      presidenteData.presidenteRepubblica, 
+      "PRESIDENTE DELLA REPUBBLICA", 
+      presidenteData.imgRepubblica, 
+      x + padding, 
+      repY, 
+      'left',
+      presidenteData.linkRepubblica 
+  );
+
+  // 2. Presidente del Consiglio
+  drawSinglePresident(
+      presidenteData.presidenteConsiglio, 
+      "PRESIDENTE DEL CONSIGLIO", 
+      presidenteData.imgConsiglio, 
+      x, 
+      consY, 
+      'right',
+      presidenteData.linkConsiglio 
+  );
+
   pop();
 }
-
 
 function mouseWheel(event) {
   // Handle scrolling for quesiti list - use same coordinates as drawQuesitiWindow
@@ -6054,7 +5855,33 @@ function mouseWheel(event) {
 }
 
 function mousePressed() {
-  console.log('🖱️🖱️🖱️ mousePressed CHIAMATO 🖱️🖱️🖱️');
+  console.log('🖱️ mousePressed CHIAMATO');
+  
+  // --- NUOVO: GESTIONE CLICK LINK PRESIDENTI ---
+  if (presidentClickZones && presidentClickZones.length > 0) {
+    for (let zone of presidentClickZones) {
+      let clicked = false;
+      
+      if (zone.type === 'rect') {
+        // Controllo rettangolo (testo)
+        if (mouseX >= zone.x && mouseX <= zone.x + zone.w &&
+            mouseY >= zone.y && mouseY <= zone.y + zone.h) {
+          clicked = true;
+        }
+      } else if (zone.type === 'circle') {
+        // Controllo cerchio (immagine)
+        if (dist(mouseX, mouseY, zone.x, zone.y) < zone.r) {
+          clicked = true;
+        }
+      }
+      
+      if (clicked && zone.url) {
+        console.log("🔗 Apertura link Wikipedia per:", zone.name, zone.url);
+        window.open(zone.url, '_blank');
+        return; // Interrompi altri controlli se abbiamo cliccato un link
+      }
+    }
+  }
   console.log('   mouseX:', mouseX, 'mouseY:', mouseY);
   console.log('   Canvas size:', width, 'x', height);
   

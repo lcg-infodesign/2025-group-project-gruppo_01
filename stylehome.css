@@ -142,13 +142,13 @@
   }
   
   
-  /* canvas p5 sotto tutto */
+  /* canvas p5 - solo se presente */
   canvas {
-    display: block;
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 0;
+    z-index: -1;
+    pointer-events: none;
   }
   /*-----------------*/
   /* HELP TOGGLE (dentro navbar) */
@@ -569,10 +569,10 @@
   }
   
   .hero .referendum-icon{
-    position: absolute ;
-    transform: translateY(100px);
-    transform: translateX(40px);
-  
+    position: absolute;
+    left: 40px;
+    top: 100px;
+    z-index: 1;
   }
   
   .hero .referendum-icon img{
@@ -653,121 +653,180 @@
   .referendum-image img{
     border-radius: 4px;
   }
-  
-  .referendum-icon{
-    position: absolute; /*omino*/
-   transform: translateX(-20px);
-  }
-  
-  .referendum-icon img {
-    width: 100px; 
-    height: auto;
-  }
   .info {
     display: flex;
-    justify-content: space-between; /* uno a sinistra e uno a destra */
-    align-items: flex-start;         /* allinea in alto */
-    margin: 40px 70px;               /* distanza dai bordi */
-    gap: 30px;
+    flex-direction: column;
+    margin: 60px 70px;
+    gap: 80px;
+    position: relative;
+    min-height: 800px;
   }
   
-    /* Referendum a sinistra */
-    .info .referendum {
-      width: 45%;
-      margin-top:  10px;         /* sposta leggermente verso il basso */
-      order: 1;                 /* visualmente prima */
-      text-align: left;
-    }
-    
-    /* Dati a destra */
-    .info .dati {
-      width: 45%;
-      display: flex;
-      justify-content: flex-end; /* allinea contenuto a destra */
-      align-items: center;
-      margin-top: 30px;
-      order: 2;                  /* visualmente dopo */
-    }
-    
-    .info .dati-img {
-      width: 60px;
-      height: 60px;
-      order: 1;                  /* immagine a destra */
+  /* Prima riga: Dati a destra, immagine a sinistra */
+  .info .dati {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    margin-top: 0;
+    position: relative;
+    min-height: 300px;
+  }
+  
+  .info .dati-content {
+    width: 45%;
+    text-align: right;
+    margin-right: 0;
+    margin-top: 0;
+    z-index: 2;
+  }
+  
+  .dati-content a {
+    color: var(--blue-color);
+    text-decoration: underline;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+  }
+  
+  /* Immagine dati */
+  .image-block-dati {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 40%;
+    z-index: 1;
+  }
+  
+  .image-block-dati img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 5px;
+  }
+  
+  /* Seconda riga: Referendum a sinistra, immagine a destra */
+  .info .referendum {
+    width: 100%;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 2;
+    min-height: 400px;
+  }
+  
+  .info .referendum-icon {
+    margin-bottom: 20px;
+  }
+  
+  .info .referendum-icon img {
+    width: 100px;
+    height: auto;
+  }
+  
+  .info .referendum .highlight {
+    margin-bottom: 20px;
+  }
+  
+  .info .referendum p {
+    margin: 0;
+    margin-left: 0;
+    margin-top: 15px;
+    line-height: 1.5;
+    width: 45%;
+    max-width: 600px;
+  }
+  
+  /* Immagine referendum - posizionata rispetto a .info */
+  .info .referendum-image {
+    position: absolute;
+    right: 0;
+    top: calc(300px + 60px); /* Dopo la prima sezione (min-height dati + gap) */
+    width: 40%;
+    z-index: 1;
+  }
+  
+  .info .referendum-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 5px;
+  }
+  
+  /* Titoli e paragrafi */
+  .info h4 {
+    color: var(--blue-color);
+    font-size: 20px;
+  }
+  
+  .dati-content p {
+    margin: 0;
+    margin-top: 15px;
+    line-height: 1.5;
+    width: 100%;
+  }
+  
+  /* Media query per schermi più piccoli */
+  @media (max-width: 1200px) {
+    .info {
+      margin: 60px 40px;
+      gap: 60px;
     }
     
     .info .dati-content {
-      margin-right: 40px;
-      text-align: right;         /* testo allineato a destra */
-      order: 1;                  /* testo a sinistra dell’immagine */
-      margin-top: 30px;
-    }
-    
-    .dati-content a {
-      color:var(--blue-color);
-      text-decoration: underline; /* sottolineatura classica dei link */
-      transition: color 0.3s ease, text-decoration 0.3s ease;
-    }
-  
-  /* Immagine */
-      .image-block-dati {
-        position: absolute;
-        width:40%;    
-       padding-right: 40%;
-        padding-top:0px;
-        padding-bottom: 100px;
-  
-  
-    }
-    
-    .image-block-dati img {
-        width: 100%;
-        height: auto;
-        display: block;
-        border-radius: 5px;
-    }
-    /* Titoli e paragrafi */
-  
-    .info h4 {
-      color: var(--blue-color);
-      font-size: 20px;
-    }
-    
-    .info p {
-
-      margin-top: 700px;
-      margin-right: 150 px;
-  
-      width: 500px;
-    }
-    
-   /* Referendum più in basso */
-    .info .referendum {
       width: 50%;
-      margin-top: 400px; 
-      /* sposta il div verso il basso */
-    }
-  
-    .referendum,
-    .dati {
-      width: 48%;                      /* larghezza dei blocchi simile */
     }
     
-    .referendum p{
-      margin: 0;
-      margin-left: 100px;
-      margin-top: 15px;                /* spazio verticale uniforme */
-      line-height: 1.5;
-      width:100%;
-      margin-right: 80px;
+    .image-block-dati {
+      width: 45%;
     }
-     
-    .dati-content p {
-      margin: 0;
-      margin-right: 80px;
-      margin-top: 15px;                /* spazio verticale uniforme */
-      line-height: 1.5;
-      width:100%;
+    
+    .info .referendum p {
+      width: 50%;
     }
+    
+    .referendum-image {
+      width: 45%;
+    }
+  }
+  
+  @media (max-width: 900px) {
+    .info {
+      margin: 40px 20px;
+      gap: 40px;
+      flex-direction: column;
+    }
+    
+    .info .dati {
+      flex-direction: column;
+      min-height: auto;
+    }
+    
+    .image-block-dati {
+      position: relative;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+    
+    .info .dati-content {
+      width: 100%;
+      text-align: left;
+    }
+    
+    .info .referendum {
+      min-height: auto;
+    }
+    
+    .info .referendum p {
+      width: 100%;
+    }
+    
+    .info .referendum-image {
+      position: relative;
+      width: 100%;
+      margin-top: 30px;
+      top: auto;
+    }
+  }
     
   
   
@@ -795,6 +854,22 @@
     left: 20px;
     right: 20px;
     height: 4px;
+}
+
+/* Linea sinistra */
+.frame-left {
+    left: 0;
+    top: 30px;
+    bottom: 20px;
+    width: 4px;
+}
+
+/* Linea destra */
+.frame-right {
+    right: 0;
+    top: 30px;
+    bottom: 20px;
+    width: 4px;
 }
 
 

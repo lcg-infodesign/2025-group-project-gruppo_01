@@ -333,67 +333,208 @@ let omino2Img = null; // omino2.svg (per NO)
 let helpModeActive = false;
 let currentHoveredSection = null;
 
+// Helper function to calculate quesiti and presidenti window bounds (same as drawQuesitiWindow)
+function calculateQuesitiPresidentiBounds() {
+  const navbarHeight = 100;
+  const sliderHeight = 130;
+  const cardY = navbarHeight;
+  const cardHeight = height - navbarHeight - sliderHeight;
+  const sectionStartY = cardY + 10;
+  const bottomPadding = 3;
+  
+  const availableTop = sectionStartY;
+  const availableBottom = cardY + cardHeight - bottomPadding;
+  const totalAvailableHeight = availableBottom - availableTop;
+  
+  const presidentSliderHeight = 250;
+  const windowSpacing = 20;
+  const totalWindowsHeight = totalAvailableHeight - 20;
+  const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
+  const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
+  const presidentWindowTop = quesitiWindowTop + quesitiWindowHeight + windowSpacing;
+  
+  const windowLeft = 40;
+  const windowWidth = width * 0.34 - 60;
+  const bgPadding = 15;
+  
+  return {
+    quesiti: {
+      x: windowLeft + bgPadding,
+      y: quesitiWindowTop,
+      w: windowWidth - bgPadding * 2,
+      h: quesitiWindowHeight
+    },
+    presidenti: {
+      x: windowLeft + bgPadding,
+      y: presidentWindowTop,
+      w: windowWidth - bgPadding * 2,
+      h: presidentSliderHeight
+    }
+  };
+}
+
+// Helper function to calculate charts bounds (same as drawSezione3Background)
+function calculateChartsBounds() {
+  const navbarHeight = 100;
+  const sliderHeight = 130;
+  const cardX = 0;
+  const cardY = navbarHeight;
+  const cardWidth = width;
+  const cardHeight = height - navbarHeight - sliderHeight;
+  const sectionStartY = cardY + 10;
+  const bottomPadding = 3;
+  
+  const chartAreaLeft = cardX + cardWidth * 0.67 + 5;
+  const chartAreaWidth = cardWidth * 0.33 - 40;
+  const bgPadding = 10;
+  const windowSpacing = 10;
+  
+  const availableTop = sectionStartY;
+  const availableBottom = cardY + cardHeight - bottomPadding;
+  const totalAvailableHeight = availableBottom - availableTop;
+  
+  // All windows same height - divide available space equally, but reduce by 5% to make them slightly smaller
+  const windowHeight = ((totalAvailableHeight - windowSpacing * 2) / 3) * 0.95;
+  
+  // Calculate quesitiWindowTop using the same method as drawQuesitiWindow to align windows
+  const presidentSliderHeight = 250;
+  const quesitiWindowSpacing = 20;
+  const totalWindowsHeightQuesiti = totalAvailableHeight - 20;
+  const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeightQuesiti) / 2;
+  
+  // Window 1: Affluenza chart (top)
+  const window1Top = quesitiWindowTop;
+  // Window 2: Pie chart (middle)
+  const window2Top = window1Top + windowHeight + windowSpacing;
+  // Window 3: Gender chart (bottom)
+  const window3Top = window2Top + windowHeight + windowSpacing;
+  
+  // I bounds dei grafici comprendono tutte e tre le finestre
+  const chartsTop = window1Top;
+  const chartsBottom = window3Top + windowHeight;
+  const chartsHeight = chartsBottom - chartsTop;
+  
+  return {
+    x: chartAreaLeft + bgPadding,
+    y: chartsTop,
+    w: chartAreaWidth - bgPadding * 2,
+    h: chartsHeight
+  };
+}
+
+// Helper function to calculate map bounds (same as drawGeoMap, including date header)
+function calculateMapBounds() {
+  const navbarHeight = 100;
+  const sliderHeight = 130;
+  const cardX = 0;
+  const cardY = navbarHeight;
+  const cardWidth = width;
+  const cardHeight = height - navbarHeight - sliderHeight;
+  const sectionStartY = cardY + 20;
+  const bottomPadding = 3;
+  
+  // Center map perfectly in the page (horizontally and vertically)
+  const mapWidth = cardWidth * 0.34;
+  const mapLeft = (cardWidth - mapWidth) / 2;
+  
+  // Center map vertically - spostata più in basso
+  const availableTop = sectionStartY + 30;
+  const availableBottom = cardY + cardHeight - bottomPadding;
+  const totalAvailableHeight = availableBottom - availableTop;
+  const drawH = totalAvailableHeight - 20; // Leave some padding
+  const paddingTop = availableTop + (totalAvailableHeight - drawH) / 2; // Center vertically
+  
+  // La data viene disegnata a y=120 con sfondo che va da y=115 a y=155
+  // Includiamo l'area della data nei bounds della mappa
+  const dateY = 120;
+  const dateBgTop = dateY - 5; // 115
+  const dateBgHeight = 40;
+  const dateBgBottom = dateBgTop + dateBgHeight; // 155
+  
+  // La timeline inizia a height - 220, quindi il bordo della mappa deve finire prima
+  const timelineTop = height - 220;
+  
+  // I bounds della mappa devono includere la data sopra
+  // La mappa inizia a paddingTop, ma vogliamo includere anche la data sopra
+  const mapBoundsTop = Math.min(dateBgTop, paddingTop);
+  // Il bordo inferiore deve finire sopra la timeline
+  const mapBoundsBottom = timelineTop;
+  const mapBoundsHeight = mapBoundsBottom - mapBoundsTop;
+  
+  return {
+    x: mapLeft,
+    y: mapBoundsTop,
+    w: mapWidth,
+    h: mapBoundsHeight
+  };
+}
+
 // Define help sections by their VISUAL AREAS on canvas
 const HELP_SECTIONS = {
   'quesiti': {
     label: 'QUESITI/DOMANDE',
     description: 'Lista dei quesiti referendari per l\'anno selezionato. Clicca su un quesito per vedere i voti SI/NO e le statistiche di genere.',
-    bounds: () => ({
-      x: 0,
-      y: 90,
-      w: width * 0.33 + 15,
-      h: height * 0.5 - 45  // â­ Ridotto di 10px per connettersi perfettamente
-    })
+    bounds: () => {
+      const bounds = calculateQuesitiPresidentiBounds();
+      return bounds.quesiti;
+    }
   },
   'presidenti': {
     label: 'PRESIDENTI',
     description: 'Visualizza i Presidenti della Repubblica e del Consiglio durante il referendum selezionato. Usa le frecce per navigare.',
-    bounds: () => ({
-      x: 0,
-      y: 90 + height * 0.5 - 45,  // â­ Inizia ESATTAMENTE dove finiscono i quesiti
-      w: width * 0.33 + 15,
-      h: height * 0.5  // â­ Fino al footer, senza gap
-    })
+    bounds: () => {
+      const bounds = calculateQuesitiPresidentiBounds();
+      return bounds.presidenti;
+    }
   },
   'mappa': {
     label: 'MAPPA DELL\'ITALIA',
     description: 'Clicca su una regione per filtrare i dati per quella regione. I colori indicano l\'affluenza: blu scuro = affluenza alta, blu chiaro = affluenza bassa.',
-    bounds: () => ({
-      x: width * 0.33 + 15,
-      y: 90,
-      w: width * 0.33,
-      h: height - 170
-    })
+    bounds: () => calculateMapBounds()
   },
   'grafici': {
     label: 'STATISTICHE',
     description: 'Visualizza tre grafici: Affluenza (semicerchio), Voti SI/NO (barre con omini) e Distribuzione di Genere (semicerchio diviso). I dati si aggiornano in base alla regione e al quesito selezionati.',
-    bounds: () => ({
-      x: width * 0.67,
-      y: 90,
-      w: width * 0.33,
-      h: height - 170
-    })
+    bounds: () => calculateChartsBounds()
   },
   'timeline': {
     label: 'TIMELINE ANNI',
     description: 'Clicca sui punti o trascina per selezionare un anno. I colori indicano lo stato del quorum: blu = raggiunto, beige = non richiesto, grigio chiaro = non raggiunto.',
-    bounds: () => ({
-      x: 0,
-      y: height - 220,   // Area della timeline (prima parte del footer)
-      w: width,
-      h: 40             // Altezza della timeline
-    })
+    bounds: () => {
+      // Il footer è posizionato a bottom:10px con height:130px
+      // Quindi il footer inizia a height - 10 - 130 = height - 140
+      // Lo slider container è dentro il footer e ha height:60px secondo il CSS
+      const footerBottom = 10;
+      const footerHeight = 130;
+      const footerTop = height - footerBottom - footerHeight; // height - 140
+      const sliderContainerHeight = 60; // Secondo il CSS
+      
+      return {
+        x: 0,
+        y: footerTop, // height - 140
+        w: width,
+        h: sliderContainerHeight // 60px
+      };
+    }
   },
   'slider': {
     label: 'SLIDER ANNI',
     description: 'Trascina lo slider o usa il pulsante play per scorrere automaticamente tra tutti gli anni. I grafici si aggiornano automaticamente.',
-    bounds: () => ({
-      x: 0,
-      y: height - 155,   // Area dello slider (seconda parte del footer)
-      w: width,
-      h: 40             // Altezza dello slider
-    })
+    bounds: () => {
+      // Il footer è posizionato a bottom:10px con height:130px
+      // Lo slider container è nella parte superiore del footer
+      const footerBottom = 10;
+      const footerHeight = 130;
+      const footerTop = height - footerBottom - footerHeight; // height - 140
+      const sliderContainerHeight = 60; // Secondo il CSS
+      
+      return {
+        x: 0,
+        y: footerTop, // height - 140 (stesso della timeline, sono la stessa cosa)
+        w: width,
+        h: sliderContainerHeight // 60px
+      };
+    }
   }
 
 };
@@ -428,11 +569,7 @@ function setupHelpMode() {
       removeHelpOverlay();
       currentHoveredSection = null;
       
-      // RESET: Rimuovi blur da timeline
-      const timelineContainer = document.getElementById('timeline-container');
-      if (timelineContainer) {
-        timelineContainer.classList.remove('help-dimmed', 'help-highlighted');
-      }
+      // Timeline rimossa - non serve più resettare
       
       // RESET: Rimuovi blur da canvas
       const canvas = document.querySelector('canvas');
@@ -450,14 +587,13 @@ function mouseMoved() {
   if (helpModeActive) {
     currentHoveredSection = null;
 
-    // hover SEZIONI CANVAS
+    // hover SEZIONI CANVAS (inclusa timeline e slider)
     for (const [sectionKey, section] of Object.entries(HELP_SECTIONS)) {
       const bounds = section.bounds();
       if (mouseX >= bounds.x && mouseX < bounds.x + bounds.w &&
           mouseY >= bounds.y && mouseY < bounds.y + bounds.h) {
         currentHoveredSection = sectionKey;
         showHelpOverlay(section, sectionKey);
-        // qui lasci tutto com per mappa/grafici/presidenti/quesiti
         redraw();
         return;
       }
@@ -465,42 +601,6 @@ function mouseMoved() {
 
     // Se non siamo su nessuna sezione, nascondi l'overlay
     removeHelpOverlay();
-
-    // HOVER TIMELINE e SLIDER (fascia bassa dello schermo) - gestiti dalle HELP_SECTIONS
-    const timelineContainer = document.getElementById('timeline-container');
-    const sliderContainer = document.getElementById('year-slider-visible-container');
-    
-    // Timeline area (prima parte del footer)
-    const timelineTop = height - 220;
-    const timelineBottom = height - 180;
-    
-    // Slider area (seconda parte del footer)
-    const sliderTop = height - 155;
-    const sliderBottom = height - 115;
-
-    if (timelineContainer) {
-      if (mouseY >= timelineTop && mouseY < timelineBottom) {
-        // mouse nella timeline
-        timelineContainer.classList.remove('help-dimmed');
-        timelineContainer.classList.add('help-highlighted');
-      } else {
-        // mouse fuori da timeline
-        timelineContainer.classList.remove('help-highlighted');
-        timelineContainer.classList.add('help-dimmed');
-      }
-    }
-    
-    if (sliderContainer) {
-      if (mouseY >= sliderTop && mouseY < sliderBottom) {
-        // mouse nello slider
-        sliderContainer.classList.remove('help-dimmed');
-        sliderContainer.classList.add('help-highlighted');
-      } else {
-        // mouse fuori dallo slider
-        sliderContainer.classList.remove('help-highlighted');
-        sliderContainer.classList.add('help-dimmed');
-      }
-    }
   } else {
     // Se la modalità help non è attiva, assicurati che l'overlay sia nascosto
     removeHelpOverlay();
@@ -518,7 +618,7 @@ function updateQuesitiHover() {
   
   // Calcola le stesse dimensioni usate in drawQuesitiWindow e mousePressed
   const navbarHeight = 100;
-  const sliderHeight = 140;
+  const sliderHeight = 130; // Space for slider, year labels and back button at bottom
   const cardY = navbarHeight;
   const cardHeight = height - navbarHeight - sliderHeight;
   const sectionStartY = cardY + 10;
@@ -706,7 +806,7 @@ function showHelpOverlay(section, sectionKey) {
   }
   
   // Se esce in basso, posizionalo sopra il cursore
-  if (top + overlayHeight > windowHeight - 100) { // Lascia spazio per il footer
+  if (top + overlayHeight > windowHeight - 130) { // Lascia spazio per il footer (130px altezza + 10px bottom)
     top = mouseY - overlayHeight - offset;
   }
   
@@ -722,7 +822,7 @@ function showHelpOverlay(section, sectionKey) {
   
   // Assicurati che non esca dai bordi
   left = Math.max(10, Math.min(left, windowWidth - overlayWidth - 10));
-  top = Math.max(100, Math.min(top, windowHeight - overlayHeight - 100));
+    top = Math.max(100, Math.min(top, windowHeight - overlayHeight - 130));
   
   overlay.style.display = 'block';
   overlay.style.left = left + 'px';
@@ -752,18 +852,17 @@ function drawHelpModeOverlay() {
     const isHovered = sectionKey === currentHoveredSection;
     
     if (isHovered) {
-      // Highlighted section: full opacity + glow
-      fill(255, 255, 255, 0);
+      // Highlighted section: solo bordo giallo, nessun fill
+      noFill();
       stroke(255, 183, 0);
       strokeWeight(3);
+      rect(bounds.x, bounds.y, bounds.w, bounds.h);
     } else {
-      // Dimmed section: low opacity + blur effect (drawn with rect + fill)
+      // Dimmed section: ombreggiatura nera
       fill(0, 0, 0, 80);
-      stroke(0, 0, 0, 60);
-      strokeWeight(1);
+      noStroke();
+      rect(bounds.x, bounds.y, bounds.w, bounds.h);
     }
-    
-    rect(bounds.x, bounds.y, bounds.w, bounds.h);
   }
   
   pop();
@@ -817,7 +916,7 @@ function setup() {
     
     // Calcola le coordinate del carousel (stesse di mousePressed)
     const navbarHeight = 100;
-    const sliderHeight = 140;
+    const sliderHeight = 130; // Space for slider, year labels and back button at bottom
     const cardX = 0;
     const cardY = navbarHeight;
     const cardWidth = width;
@@ -1204,8 +1303,9 @@ function loadQuorumData() {
 
 // Update timeline square colors based on quorum data
 function updateTimelineColors() {
-  const yearDots = document.getElementById('year-dots');
-  if (!yearDots) return;
+  // Timeline rimossa - aggiorna solo i dots dello slider visibile
+  // const yearDots = document.getElementById('year-dots');
+  // if (!yearDots) return;
   
   const dots = yearDots.querySelectorAll('[data-year-key]');
   const FILLED_BLUE = '#1E52A6';
@@ -2517,7 +2617,7 @@ rect(width * 0.67, 90, width * 0.33, height - 170);
   
   // No card - content directly on background (matching image layout)
   const navbarHeight = 100; // Space for navbar at top
-  const sliderHeight = 140; // Space for slider at bottom
+  const sliderHeight = 130; // Space for slider, year labels and back button at bottom // Space for slider at bottom
   const cardMargin = 0; // No margin - full width
   const cardX = 0;
   const cardY = navbarHeight-100; // Start right after navbar
@@ -2779,7 +2879,7 @@ function drawGeoMap() {
   
   // Position matching layout (no card, full width)
   const navbarHeight = 100;
-  const sliderHeight = 140;
+  const sliderHeight = 130; // Space for slider, year labels and back button at bottom
   const cardMargin = 0; // No margin - full width (matching layout)
   const cardX = 0;
   const cardY = navbarHeight; // Start right after navbar (matching layout)
@@ -2793,8 +2893,8 @@ function drawGeoMap() {
   const mapLeft = (cardWidth - mapWidth) / 2; // Centra orizzontalmente nella pagina
   const drawW = mapWidth;
   
-  // Center map vertically
-  const availableTop = sectionStartY;
+  // Center map vertically - spostata più in basso
+  const availableTop = sectionStartY + 30; // Aggiunto offset per spostare la mappa più in basso
   const availableBottom = cardY + cardHeight - bottomPadding;
   const totalAvailableHeight = availableBottom - availableTop;
   const drawH = totalAvailableHeight - 20; // Leave some padding
@@ -3206,16 +3306,17 @@ function drawLegend() {
 function setupYearSlider() {
   console.log("🔧 Setup Year Slider AVVIATO"); // Debug per vedere se parte
 
-  const slider = document.getElementById('year-slider');
-  const yearDots = document.getElementById('year-dots');
+  // Usa solo lo slider visibile (la timeline in alto è stata rimossa)
+  const visibleSlider = document.getElementById('year-slider-visible');
+  const sliderDots = document.getElementById('slider-dots');
 
-  if (!slider || !yearDots) {
-      console.error("❌ Slider o YearDots non trovati nel DOM!");
-      console.error("Slider:", slider, "YearDots:", yearDots);
+  if (!visibleSlider || !sliderDots) {
+      console.error("❌ Slider visibile o SliderDots non trovati nel DOM!");
+      console.error("VisibleSlider:", visibleSlider, "SliderDots:", sliderDots);
       return;
   }
   
-  console.log("✅ Slider e YearDots trovati nel DOM");
+  console.log("✅ Slider visibile e SliderDots trovati nel DOM");
 
   // --- Calcoli ---
   const yearToPosition = {};
@@ -3226,10 +3327,10 @@ function setupYearSlider() {
     yearToPosition[yearKey] = position;
   });
 
-  // --- Setup Slider ---
-  slider.min = 0;
-  slider.max = 100;
-  slider.step = 0.01;
+  // --- Setup Slider Visibile ---
+  visibleSlider.min = 0;
+  visibleSlider.max = 100;
+  visibleSlider.step = 0.01;
   
   // Normalizza selectedYear per trovare la posizione corretta
   let normalizedYear = selectedYear;
@@ -3246,8 +3347,8 @@ function setupYearSlider() {
   }
   
   const sliderValue = yearToPosition[normalizedYear] || yearToPosition[String(selectedYear)] || yearToPosition[selectedYear] || 100;
-  slider.value = sliderValue;
-  console.log('Slider impostato - selectedYear:', selectedYear, 'tipo:', typeof selectedYear, 'normalized:', normalizedYear, 'value:', sliderValue);
+  visibleSlider.value = sliderValue;
+  console.log('Slider visibile impostato - selectedYear:', selectedYear, 'tipo:', typeof selectedYear, 'normalized:', normalizedYear, 'value:', sliderValue);
 
   const findClosestYear = (pos) => {
     let closest = REFERENDUM_YEARS_ARRAY[0];
@@ -3259,209 +3360,21 @@ function setupYearSlider() {
     return closest;
   };
 
-  // --- Funzione Aggiornamento Grafico ---
+  // --- Funzione Aggiornamento Grafico (solo per slider visibile) ---
   const refreshVisuals = () => {
-      const containers = yearDots.querySelectorAll('div[data-year-key]');
-      
-      containers.forEach(div => {
-          const yKey = div.getAttribute('data-year-key');
-          const dot = div.querySelector('.dot-element');
-          // Find label by data-label-year attribute since it's now in yearDots container (same as overview)
-          const label = yearDots.querySelector(`[data-label-year="${yKey}"]`);
-          
-          if(!dot) return;
-
-          // Recupera Colore Quorum
-          let bgColor = '#E1E1E1'; // Default grigio
-          let border = 'none';
-          
-          const qStatus = quorumStatusByYear[yKey];
-          // Mappa manuale fallback se serve
-          const fallbackMap = {
-             '1946': 'NON_RICHIESTO', '1974': 'RAGGIUNTO', '1978': 'RAGGIUNTO', '1981': 'RAGGIUNTO',
-             '1985': 'RAGGIUNTO', '1987': 'RAGGIUNTO', '1989': 'NON_RICHIESTO', '1990': 'NON_RAGGIUNTO',
-             '1991': 'RAGGIUNTO', '1993': 'RAGGIUNTO', '1995': 'RAGGIUNTO', '1997': 'NON_RAGGIUNTO',
-             '1999': 'NON_RAGGIUNTO', '2000': 'NON_RAGGIUNTO', '2001': 'NON_RICHIESTO', '2003': 'NON_RAGGIUNTO',
-             '2005': 'NON_RAGGIUNTO', '2006': 'NON_RICHIESTO', '2009': 'NON_RAGGIUNTO', '2011': 'RAGGIUNTO',
-             '2016-1': 'NON_RAGGIUNTO', '2016-2': 'NON_RICHIESTO', '2020': 'NON_RICHIESTO', '2022': 'NON_RAGGIUNTO',
-             '2025': 'NON_RAGGIUNTO'
-          };
-          const status = qStatus || fallbackMap[yKey];
-
-          if (status === 'RAGGIUNTO') { bgColor = '#1E52A6'; }
-          else if (status === 'NON_RICHIESTO') { bgColor = '#F6ECE1'; border = '2px solid #1E52A6'; }
-          else if (status === 'NON_RAGGIUNTO') { bgColor = '#a4afc1ff'; }
-
-          // Applica Colori
-          dot.style.backgroundColor = bgColor;
-          dot.style.border = border;
-
-          // Stato Selezionato vs Normale (same as overview - labels always visible)
-          if (yKey === String(selectedYear)) {
-              // SELEZIONATO
-              dot.style.width = '22px';
-              dot.style.height = '22px';
-              dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
-              if (label) {
-              label.style.color = '#255077';
-                  label.style.opacity = '1';
-                  label.style.top = 'calc(50% + 30px)';
-              }
-          } else {
-              // NON SELEZIONATO (Normale)
-              dot.style.width = '18px';
-              dot.style.height = '18px';
-              dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
-              if (label) {
-              label.style.color = '#255096';
-                  label.style.opacity = '1'; // Always visible (same as overview)
-                  label.style.top = 'calc(50% + 30px)';
-              }
-          }
-      });
-      
-      // Aggiorna anche i dots dello slider
+      // Aggiorna i dots dello slider visibile
       if (window.refreshSliderDots) {
         window.refreshSliderDots();
       }
+      return; // Timeline rimossa, non serve più
   };
 
-  // --- Creazione DOM ---
-  yearDots.innerHTML = ''; // Pulisce tutto
-  
-  // Create timeline line directly in year-dots container (same as overview)
-  const line = document.createElement('div');
-  line.style.cssText = 'position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 3px; width: 100%; background-color: #0F3D88; z-index: 1; pointer-events: none; opacity: 1; display: block; visibility: visible;';
-  yearDots.appendChild(line);
-
-  REFERENDUM_YEARS_ARRAY.forEach((yearKey) => {
-      // Container invisibile per area click/hover
-      const container = document.createElement('div');
-      container.setAttribute('data-year-key', yearKey);
-      const percentage = yearToPosition[yearKey];
-      Object.assign(container.style, {
-          position: 'absolute', left: `${percentage}%`, top: '50%',
-          transform: 'translate(-50%, -50%)', 
-          cursor: 'pointer', zIndex: '20',
-          pointerEvents: 'auto',
-          display: 'flex', flexDirection: 'column', alignItems: 'center'
-      });
-
-      // Pallino visivo
-      const dot = document.createElement('div');
-      dot.className = 'dot-element';
-      const baseSize = 18;
-      Object.assign(dot.style, {
-          width: baseSize + 'px', height: baseSize + 'px', borderRadius: '6px', 
-          transition: 'all 0.18s ease', 
-          boxShadow: '0 1px 2px rgba(0,0,0,0.12)',
-          display: 'block', visibility: 'visible', opacity: '1',
-          position: 'relative', zIndex: '21'
-      });
-
-      // Label Data - positioned BELOW timeline (same as overview)
-      const label = document.createElement('div');
-      label.className = 'label-element';
-      label.setAttribute('data-label-year', yearKey);
-      const displayYear = getYearDisplayName(yearKey);
-      label.textContent = displayYear;
-      Object.assign(label.style, {
-          position: 'absolute', 
-          left: `${percentage}%`,
-          transform: 'translateX(-50%)',
-          top: 'calc(50% + 30px)', // Below timeline (same as overview)
-          fontFamily: "'STIX Two Text', serif", fontSize: '16px', fontWeight: 'bold',
-          whiteSpace: 'nowrap', pointerEvents: 'none',
-          opacity: '1', zIndex: '1',
-          lineHeight: '16px', height: '16px',
-          marginTop: '0', paddingTop: '0',
-          marginBottom: '0', paddingBottom: '0'
-      });
-
-      // Get quorum status for colors
-      const qStatus = quorumStatusByYear[yearKey];
-      const fallbackMap = {
-         '1946': 'NON_RICHIESTO', '1974': 'RAGGIUNTO', '1978': 'RAGGIUNTO', '1981': 'RAGGIUNTO',
-         '1985': 'RAGGIUNTO', '1987': 'RAGGIUNTO', '1989': 'NON_RICHIESTO', '1990': 'NON_RAGGIUNTO',
-         '1991': 'RAGGIUNTO', '1993': 'RAGGIUNTO', '1995': 'RAGGIUNTO', '1997': 'NON_RAGGIUNTO',
-         '1999': 'NON_RAGGIUNTO', '2000': 'NON_RAGGIUNTO', '2001': 'NON_RICHIESTO', '2003': 'NON_RAGGIUNTO',
-         '2005': 'NON_RAGGIUNTO', '2006': 'NON_RICHIESTO', '2009': 'NON_RAGGIUNTO', '2011': 'RAGGIUNTO',
-         '2016-1': 'NON_RAGGIUNTO', '2016-2': 'NON_RICHIESTO', '2020': 'NON_RICHIESTO', '2022': 'NON_RAGGIUNTO',
-         '2025': 'NON_RAGGIUNTO'
-      };
-      const status = qStatus || fallbackMap[yearKey];
-      
-      const FILLED_BLUE = '#1E52A6';
-      const BORDER_BLUE = '#1E52A6';
-      const LIGHT_BLUE = '#a4afc1ff';
-      const NON_RICHIESTO_COLOR = '#F6ECE1';
-      
-      // Apply color based on quorum status (same as overview)
-      if (status === 'RAGGIUNTO') {
-          dot.style.backgroundColor = FILLED_BLUE;
-          dot.style.border = 'none';
-      } else if (status === 'NON_RICHIESTO') {
-          dot.style.backgroundColor = NON_RICHIESTO_COLOR;
-          dot.style.border = `2px solid ${BORDER_BLUE}`;
-      } else if (status === 'NON_RAGGIUNTO') {
-          dot.style.backgroundColor = LIGHT_BLUE;
-          dot.style.border = 'none';
-      } else {
-          dot.style.backgroundColor = '#E1E1E1';
-          dot.style.border = `2px solid ${BORDER_BLUE}`;
-      }
-
-      // Highlight selected year (same as overview)
-      if (yearKey === String(selectedYear)) {
-          const selectedSize = 22;
-          dot.style.width = selectedSize + 'px';
-          dot.style.height = selectedSize + 'px';
-          dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
-          label.style.color = '#255077';
-      } else {
-          label.style.color = '#255096';
-      }
-
-      // --- EVENTI HOVER (same as overview) ---
-      container.addEventListener('mouseenter', () => {
-          const hoverSize = 24;
-          dot.style.width = hoverSize + 'px';
-          dot.style.height = hoverSize + 'px';
-          dot.style.boxShadow = '0 6px 12px rgba(0,0,0,0.25)';
-          dot.style.borderRadius = '6px';
-          container.title = 'Click per vedere il dettaglio';
-      });
-      
-      container.addEventListener('mouseleave', () => {
-          if (yearKey !== String(selectedYear)) {
-              dot.style.width = '18px';
-              dot.style.height = '18px';
-              dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
-          } else {
-              dot.style.width = '22px';
-              dot.style.height = '22px';
-              dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
-          }
-      });
-
-      // Evento Click
-      container.onclick = () => {
-          slider.value = yearToPosition[yearKey];
-          slider.dispatchEvent(new Event('input'));
-      };
-
-      container.appendChild(dot);
-      // Append label directly to yearDots container (same as overview)
-      yearDots.appendChild(label);
-      yearDots.appendChild(container);
-  });
-
+  // Timeline rimossa - non serve più creare yearDots
   // Aggiornamento iniziale
   refreshVisuals();
 
   // --- Setup Slider Visibile con Dots ---
-  const sliderDots = document.getElementById('slider-dots');
-  const visibleSlider = document.getElementById('year-slider-visible');
+  // (sliderDots e visibleSlider già definiti all'inizio della funzione)
   const autoPlayBtn = document.getElementById('auto-play-btn');
   
   // Crea i dots nello slider (stesso stile della timeline)
@@ -3550,6 +3463,39 @@ function setupYearSlider() {
         dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
       }
       
+      // Label Data - positioned BELOW slider (same as overview timeline)
+      const label = document.createElement('div');
+      label.className = 'slider-label-element';
+      label.setAttribute('data-slider-label-year', yearKey);
+      const displayYear = getYearDisplayName(yearKey);
+      label.textContent = displayYear;
+      Object.assign(label.style, {
+        position: 'absolute',
+        left: `${percentage}%`,
+        transform: 'translateX(-50%)',
+        top: 'calc(50% + 30px)', // Below slider (same as overview timeline)
+        fontFamily: "'STIX Two Text', serif",
+        fontSize: '16px',
+        fontWeight: 'bold',
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none',
+        opacity: '1',
+        zIndex: '1',
+        lineHeight: '16px',
+        height: '16px',
+        marginTop: '0',
+        paddingTop: '0',
+        marginBottom: '0',
+        paddingBottom: '0'
+      });
+      
+      // Set label color based on selection
+      if (yearKey === String(selectedYear)) {
+        label.style.color = '#255077';
+      } else {
+        label.style.color = '#255096';
+      }
+      
       // Eventi hover
       container.addEventListener('mouseenter', () => {
         const hoverSize = 24;
@@ -3573,12 +3519,14 @@ function setupYearSlider() {
       
       // Evento Click
       container.onclick = () => {
-        slider.value = yearToPosition[yearKey];
-        slider.dispatchEvent(new Event('input'));
+        visibleSlider.value = yearToPosition[yearKey];
+        visibleSlider.dispatchEvent(new Event('input'));
       };
       
       container.appendChild(dot);
       sliderDots.appendChild(container);
+      // Append label directly to sliderDots container (below slider)
+      sliderDots.appendChild(label);
     });
     
     // Funzione per aggiornare i dots dello slider quando cambia l'anno
@@ -3595,6 +3543,17 @@ function setupYearSlider() {
           dot.style.width = '18px';
           dot.style.height = '18px';
           dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+        }
+      });
+      
+      // Aggiorna anche i colori delle etichette
+      const labels = sliderDots.querySelectorAll('.slider-label-element');
+      labels.forEach((label) => {
+        const yearKey = label.getAttribute('data-slider-label-year');
+        if (yearKey === String(selectedYear)) {
+          label.style.color = '#255077';
+        } else {
+          label.style.color = '#255096';
         }
       });
     };
@@ -3712,13 +3671,14 @@ function setupYearSlider() {
         position: relative;
         width: 100%;
         max-width: 1450px;
-        height: 40px;
+        height: 60px; /* Aumentato per dare spazio alle etichette degli anni */
         display: flex;
         align-items: center;
         gap: 15px;
         padding: 0;
         margin: 0 auto;
         box-sizing: border-box;
+        overflow: visible !important; /* Permette alle etichette degli anni di essere visibili */
       }
       
       #auto-play-btn {
@@ -3756,7 +3716,8 @@ function setupYearSlider() {
       #year-slider-visible-container > div {
         position: relative;
         flex: 1;
-        height: 40px;
+        height: 60px; /* Aumentato per dare spazio alle etichette degli anni */
+        overflow: visible !important; /* Permette alle etichette degli anni di essere visibili */
       }
       
       #slider-dots {
@@ -3764,6 +3725,7 @@ function setupYearSlider() {
         width: 100%;
         height: 100%;
         z-index: 2;
+        overflow: visible !important; /* Permette alle etichette degli anni di essere visibili sotto */
       }
       
       #year-slider-visible {
@@ -3922,10 +3884,10 @@ function setupYearSlider() {
     });
   }
 
-  // --- Evento Input Slider (timeline invisibile) ---
+  // --- Evento Input Slider Visibile ---
   let isUpdating = false; // Flag per evitare aggiornamenti multipli simultanei
   
-  slider.addEventListener('input', (e) => {
+  visibleSlider.addEventListener('input', (e) => {
       if (isUpdating) return; // Evita aggiornamenti multipli
       
       const pos = parseFloat(e.target.value);
@@ -3937,16 +3899,13 @@ function setupYearSlider() {
           
           selectedYear = newYear;
           
-          // Aggiorna grafica timeline (accende nuovo, spegne vecchio)
+          // Aggiorna grafica slider (accende nuovo, spegne vecchio)
           refreshVisuals();
 
-          // Snap slider alla posizione esatta dell'anno e sincronizza slider visibile
+          // Snap slider alla posizione esatta dell'anno
           if (yearToPosition[selectedYear] !== undefined) {
             const exactPos = yearToPosition[selectedYear];
-            slider.value = exactPos;
-            if (visibleSlider) {
-              visibleSlider.value = exactPos;
-            }
+            visibleSlider.value = exactPos;
           }
           
           // Reset selezioni
@@ -4072,7 +4031,7 @@ function debugLog(msg, isError) {
 // Draw 3 separate windows for SEZIONE 3 charts
 function drawSezione3Background() {
   const navbarHeight = 100;
-  const sliderHeight = 140; // Space for timeline and visible slider at bottom
+  const sliderHeight = 130; // Space for slider, year labels and back button at bottom // Space for timeline and visible slider at bottom
   const cardX = 0;
   const cardY = navbarHeight;
   const cardWidth = width;
@@ -5049,7 +5008,7 @@ function drawNationalTotalsGenderChart() {
   
   // Position within the ballot card (same layout as other charts)
   const navbarHeight = 100;
-  const sliderHeight = 140;
+  const sliderHeight = 130; // Space for slider, year labels and back button at bottom
   const cardMargin = 0; // No margin - full width (matching layout)
   const cardX = 0;
   const cardY = navbarHeight; // Start right after navbar (matching layout)
@@ -5208,7 +5167,7 @@ function drawQuesitiWindow() {
   const quesiti2025 = quesitiList.length > 0 ? quesitiList : [];
   
   const navbarHeight = 100;
-  const sliderHeight = 140;
+  const sliderHeight = 130; // Space for slider, year labels and back button at bottom
   const cardX = 0;
   const cardY = navbarHeight;
   const cardWidth = width;
@@ -5929,7 +5888,7 @@ function drawPresidentSlider(x, y, w, h) {
 function mouseWheel(event) {
   // Handle scrolling for quesiti list - use same coordinates as drawQuesitiWindow
   const navbarHeight = 100;
-  const sliderHeight = 140;
+  const sliderHeight = 130; // Space for slider, year labels and back button at bottom
   const cardMargin = 0;
   const cardX = 0;
   const cardY = navbarHeight;
@@ -6101,7 +6060,7 @@ function mousePressed() {
   
   // First check if click is on president slider - use EXACTLY the same coordinates as drawQuesitiWindow
   const navbarHeight = 100;
-  const sliderHeight = 140;
+  const sliderHeight = 130; // Space for slider, year labels and back button at bottom
   const cardX = 0;
   const cardY = navbarHeight;
   const cardWidth = width;
@@ -6115,7 +6074,7 @@ function mousePressed() {
   const windowSpacing = 20;
   
   // Calculate window positions (EXACTLY same as drawQuesitiWindow)
-  const availableTop = sectionStartY;
+  const availableTop = sectionStartY + 30; // Stesso offset di drawGeoMap per spostare la mappa più in basso
   const availableBottom = cardY + cardHeight - bottomPadding;
   const totalAvailableHeight = availableBottom - availableTop;
   const totalWindowsHeight = totalAvailableHeight - 20;
@@ -6552,7 +6511,7 @@ function windowResized() {
 }
 
 
-//ModalitÃ  help
+//Modalità help
 
 function drawHelpModeBlur() {
   if (!helpModeActive || !currentHoveredSection) return;

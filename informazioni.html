@@ -11,7 +11,23 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 
     <style>
-     
+      /* Assicura che tutto il contenuto sia visibile */
+      body {
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      
+      section, .hero, .info, .album, .text-block, .dati, .referendum {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+      }
+      
+      /* Nascondi il canvas se viene creato */
+      canvas {
+        display: none !important;
+        visibility: hidden !important;
+      }
     </style>
   </head>
 
@@ -246,6 +262,6 @@ navLinks.forEach(link => {
   </script>
   
 
-    <script src="sketch_informazioni.js"></script>
+    <!-- Script p5.js non necessario per questa pagina -->
   </body>
 </html>

@@ -532,315 +532,347 @@
         .omino { width: 50px; } 
         .omino-big { width: 250px; }
       }
+/*-----------------------*/
+/*--    INFORMAZIONI   --*/
+/*-----------------------*/
 
- /*-----------------------*/
- /*--    INFORMAZIONI   --*/
- /*-----------------------*/
-  
-  
-  .page {
+.page {
     position: relative;
-    width: 100vw;         /* larghezza = intero viewport */
-    min-height: 100vh;    /* copre tutta l'altezza dello schermo */
-    
-    margin: 0;            /* niente margini */
-    padding: 0;   /* padding ridotto per lasciare spazio alla cornice */
+    width: 100vw;         
+    min-height: 100vh;    
+    margin: 0;            
+    padding: 0;   
     box-sizing: border-box;
-  }
-  
-
-      /* Centra il contenitore del bottone nella sezione finale */
-.btn-container {
-  text-align: center;
-  width: 100%; /* Assicura che prenda tutta la larghezza del genitore */
-  margin-top: 20px; /* Spazio opzionale sopra il bottone */
-  display: flex;
-  justify-content: center;
 }
 
-
-    
-  .hero {
+/* Centra il contenitore del bottone nella sezione finale */
+.btn-container {
+    text-align: center;
+    width: 100%; 
+    margin-top: 20px; 
     display: flex;
-    justify-content: flex-start; /* allinea tutto a sinistra */
-    gap: 180px;                   /* distanza tra testo e immagine */
-    margin-bottom: 30px;
-    margin-top: 130px;
-  }
-  
-  .hero .referendum-icon{
+    justify-content: center;
+}
+
+.hero {
+    display: flex;
+    justify-content: space-between; 
+    align-items: flex-start;     
+    gap: 100px;                  
+    margin-top: 140px;           
+    margin-bottom: 50px;
+}
+
+.hero .referendum-icon{
     position: absolute;
     left: 40px;
-    top: 100px;
+    top: 210px;
     z-index: 1;
-  }
-  
-  .hero .referendum-icon img{
+}
+
+.hero .referendum-icon img{
     width: 130px;
     height: auto;
-  }
+}
 
-  .hero p{
+.hero p{
     margin-top: 30px;
-  }
-  
-    .text-block h2{
-      font-size: 36px;
-      color: var(--blue-color);
-      justify-content: flex-start;
-      margin-left: 40px;
-      margin-top: 30px;
-      margin-bottom: 90px;
-    }
-  
-    .text-block {
-      width: 40%;
-      justify-content: flex-start;
-      margin-left: 150px;
-    }
-    
-    .text-block h3 {
-      font-size: 28px;
-      color: var(--blue-color);
-    }
-    
-  
-  .highlight {
+}
+
+.text-block h2{
+    font-size: 36px;
+    color: var(--blue-color);
+    justify-content: flex-start;
+    margin-left: 20px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+.text-block {
+    width: 40%;
+    justify-content: flex-start;
+    margin-left: 180px;
+}
+
+.text-block h3 {
+    font-size: 28px;
+    color: var(--blue-color);
+}
+
+.highlight {
     font-size: 28px;
     color: var(--blue-color);
     font-weight: bold;
-    position: relative;        /* necessario per posizionare il cerchio */
-    display: inline-block;
-    z-index: 2;                /* il testo resta sopra */
-  }
-  
-  .highlight-right {
+    position: relative;        
+    z-index: 2;    
+}
+
+.highlight-right {
     font-size: 28px;
     color: #0047AB;
     font-weight: bold;
-    position: relative;        /* necessario per posizionare il cerchio */
-  
-    padding-right: 40px;
-    z-index: 2;                /* il testo resta sopra */
-  }
-  
-  
-  .highlight .referendum{
+    position: relative;
+    z-index: 2;
+    text-align: right;  
+    justify-self: flex-end; 
+}
+
+.highlight .referendum{
     margin-top: 50px;
-  }
-  
-  
-    /* Immagine */
-  .image-block {
-      position: relative;
-      width: 30%;
-  }
-  
-  
-  .image-block img {
-      width: 100%;
-      border-radius: 4px;
-  }
-  
-  .referendum-image{
+    margin-left: 40px;  
+}
+
+/* Immagine */
+.image-block {
+    position: absolute;
+    width: 30%;
+    margin-left: 70%;
+    margin-top: -20%;
+}
+
+.image-block img {
+    width: 100%;
+    border-radius: 4px;
+}
+
+.referendum-image{
     position: absolute;
     margin-left: 55%;
-    margin-top: 30%;
+    margin-top: 15%;
     width: 30%;
     height: auto;
-  }
-  
-  .referendum-image img{
+}
+
+.referendum-image img{
     border-radius: 4px;
-  }
-  .info {
-    display: flex;
-    flex-direction: column;
-    margin: 60px 70px;
-    gap: 80px;
-    position: relative;
-    min-height: 800px;
-  }
-  
-  /* Prima riga: Dati a destra, immagine a sinistra */
-  .info .dati {
+}
+
+/*----------------------*/
+/* SEZIONE DATI E REFERENDUM */
+/*----------------------*/
+
+/* Contenitore dati + immagine */
+.info {
     width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
-    margin-top: 0;
+    margin-top: 50px;
     position: relative;
-    min-height: 300px;
-  }
-  
-  .info .dati-content {
-    width: 45%;
-    text-align: right;
-    margin-right: 0;
-    margin-top: 0;
-    z-index: 2;
-  }
-  
-  .dati-content a {
+}
+
+/* SEZIONE DATI: immagine a sinistra, testo a destra */
+/* Contenitore dati + immagine a sinistra, testo a destra */
+.info .dati {
+  display: flex;                 
+  justify-content: flex-end;      
+  align-items: flex-start;                         
+  width: 100%;
+}
+
+.info .dati h2 {
+      font-size: 36px;
     color: var(--blue-color);
-    text-decoration: underline;
-    transition: color 0.3s ease, text-decoration 0.3s ease;
-  }
-  
-  /* Immagine dati */
-  .image-block-dati {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 40%;
-    z-index: 1;
-  }
-  
-  .image-block-dati img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 5px;
-  }
-  
-  /* Seconda riga: Referendum a sinistra, immagine a destra */
-  .info .referendum {
-    width: 100%;
-    margin-top: 0;
-    display: flex;
+    justify-content: flex-start;
+    margin-left: 20px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+
+/* Immagine dati */
+.image-block-dati {
+  width: 40%;                    
+  border-radius: 5px;
+  position: relative;            
+}
+
+.image-block-dati img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 5px;
+}
+
+/* Testo dati */
+.dati-content {
+  width: 55%;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.dati-h2,
+.info .dati h2 {
+  font-weight: 700;              /* SOLO il titolo */
+  font-size: 36px;
+  color: var(--blue-color);
+  margin-bottom: 10px;
+}
+
+/* Testo normale */
+.info .dati p {
+  font-weight: 400; 
+  font-family: 13px;             /* torna normale */
+}
+/* SEZIONE REFERENDUM: testo a sinistra, immagine a destra */
+.info .referendum {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-top: 50px;
+}
+
+.info .referendum-icon img {
+  width: 100px;
+  height: auto;
+}
+
+.info .referendum .highlight {
+  margin-bottom: 20px;
+}
+
+.info .referendum p {
+  margin: 0;
+  margin-top: 15px;
+  line-height: 1.5;
+  width: 60%;
+}
+
+.info .referendum-image {
+  width: 35%;
+}
+
+.info .referendum-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 5px;
+}
+
+/* Titolo "I DATI" in grassetto */
+.dati-h2 {
+  font-weight: bold;
+  font-size: 28px;              /* opzionale */
+  color: var(--blue-color);     /* mantiene il tuo colore */
+  margin-bottom: 15px;
+}
+
+/* Link sottolineato ma dello stesso colore del testo */
+.external-link {
+  color: inherit;               /* prende il colore del testo */
+  text-decoration: underline;
+  text-underline-offset: 3px;   /* estetica */
+}
+
+/* Opzionale: hover pulito */
+.external-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* MEDIA QUERY: layout responsive per schermi piccoli */
+@media (max-width: 900px) {
+  .info .dati, .info .referendum {
     flex-direction: column;
-    position: relative;
-    z-index: 2;
-    min-height: 400px;
+    align-items: flex-start;
   }
-  
-  .info .referendum-icon {
-    margin-bottom: 20px;
-  }
-  
-  .info .referendum-icon img {
-    width: 100px;
-    height: auto;
-  }
-  
-  .info .referendum .highlight {
-    margin-bottom: 20px;
-  }
-  
-  .info .referendum p {
-    margin: 0;
-    margin-left: 0;
-    margin-top: 15px;
-    line-height: 1.5;
-    width: 45%;
-    max-width: 600px;
-  }
-  
-  /* Immagine referendum - posizionata rispetto a .info */
-  .info .referendum-image {
-    position: absolute;
-    right: 0;
-    top: calc(300px + 60px); /* Dopo la prima sezione (min-height dati + gap) */
-    width: 40%;
-    z-index: 1;
-  }
-  
-  .info .referendum-image img {
+
+  .image-block-dati, .dati-content,
+  .info .referendum p, .info .referendum-image {
     width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 5px;
+    text-align: left;
+    margin-bottom: 20px;
   }
-  
-  /* Titoli e paragrafi */
-  .info h4 {
+}
+
+/* Titoli e paragrafi */
+.info h4 {
     color: var(--blue-color);
     font-size: 20px;
-  }
-  
-  .dati-content p {
+}
+
+.dati p {
     margin: 0;
     margin-top: 15px;
     line-height: 1.5;
     width: 100%;
-  }
-  
-  /* Media query per schermi più piccoli */
-  @media (max-width: 1200px) {
+}
+
+
+/*----------------------*/
+/* MEDIA QUERY */
+@media (max-width: 1200px) {
     .info {
-      margin: 60px 40px;
-      gap: 60px;
+        margin: 60px 40px;
+        gap: 60px;
     }
     
     .info .dati-content {
-      width: 50%;
+        width: 50%;
+        text-align: right;
     }
     
     .image-block-dati {
-      width: 45%;
+        width: 45%;
     }
     
     .info .referendum p {
-      width: 50%;
+        width: 50%;
     }
     
     .referendum-image {
-      width: 45%;
+        width: 45%;
     }
-  }
-  
-  @media (max-width: 900px) {
+}
+
+@media (max-width: 900px) {
     .info {
-      margin: 40px 20px;
-      gap: 40px;
-      flex-direction: column;
+        margin: 40px 20px;
+        gap: 40px;
+        flex-direction: column;
     }
     
     .info .dati {
-      flex-direction: column;
-      min-height: auto;
+        flex-direction: column;
+        min-height: auto;
     }
     
     .image-block-dati {
-      position: relative;
-      width: 100%;
-      margin-bottom: 30px;
+        position: relative;
+        width: 100%;
+        margin-bottom: 30px;
     }
     
     .info .dati-content {
-      width: 100%;
-      text-align: left;
+        width: 100%;
+        text-align: left;
     }
     
     .info .referendum {
-      min-height: auto;
+        min-height: auto;
     }
     
     .info .referendum p {
-      width: 100%;
+        width: 100%;
     }
     
     .info .referendum-image {
-      position: relative;
-      width: 100%;
-      margin-top: 30px;
-      top: auto;
+        position: relative;
+        width: 100%;
+        margin-top: 30px;
+        top: auto;
     }
-  }
-    
-  
-  
-  /* Linea sotto il contenuto */
+}
+
+/*----------------------*/
+/* CORNICI E ALTRO */
 .frame-top,
 .frame-bottom,
 .frame-left,
 .frame-right {
     position: fixed;
     background-color: var(--blue-color);
-    z-index: 900; /* sotto la navbar (1000) */
+    z-index: 900;
 }
 
-/* Linea sopra */
 .frame-top {
     top: 0;
     left: 30px;
@@ -848,7 +880,6 @@
     height: 4px;
 }
 
-/* Linea sotto */
 .frame-bottom {
     bottom: 0;
     left: 20px;
@@ -856,7 +887,6 @@
     height: 4px;
 }
 
-/* Linea sinistra */
 .frame-left {
     left: 0;
     top: 30px;
@@ -864,7 +894,6 @@
     width: 4px;
 }
 
-/* Linea destra */
 .frame-right {
     right: 0;
     top: 30px;
@@ -872,78 +901,72 @@
     width: 4px;
 }
 
-
-  .linea-parallela {
+.linea-parallela {
     height: 4px;
     background: var(--blue-color);
     margin: 0px auto 10px;
-    width: 100%; /* prende tutta la larghezza del contenitore .page */
-  }
-  
-  /*--------------------------------------*/    
-  
-  .album {
+    width: 100%;
+}
+
+/*----------------------*/
+/* ALBUM E FOOTER */
+.album {
     padding: 50px 20px;
     text-align: center;
-  }
+}
    
-  .album h1 {
+.album h1 {
     font-size:40px;
     letter-spacing: 1px;
     color: var(--blue-color);
-    display: inline-block;   /* permette alla linea di apparire sotto il testo */
-    margin-bottom: 20px;     /* opzionale, spazio aggiuntivo sotto l’h1 */
+    display: inline-block;
+    margin-bottom: 20px;
     margin-top: 15px;
-  }
-  
-  .album-grid {
+}
+
+.album-grid {
     display: grid;
     grid-template-columns: repeat(3, 300px);
     gap: 30px;
     max-width: 1000px;
-    margin: 80px auto 0 auto; /
- }
-  
-  .album-item img {
+    margin: 80px auto 0 auto;
+}
+
+.album-item img {
     width: 100%;
     height: 200px;
     border-radius: 10px;
     transition: transform 0.3s ease;
-  }
-  
-  
-  .album-item p {
+}
+
+.album-item p {
     margin-top: 10px;
     font-weight: bold;
     font-size: 1rem;
     color: var(--blue-color);   
-  }
-  
-  .site-footer {
+}
+
+.site-footer {
     display: flex;
-    justify-content: space-between; /* distribuisce gli elementi sui tre lati */
+    justify-content: space-between;
     align-items: center; 
     color: var(--blue-color);          
     padding: 15px 30px;         
     font-size: 20px;
     font-style: italic;
-    
-  }
-  
-  .footer-left {
-    text-align: left;
-  
-  }
-  
-  .footer-center {
-    position: absolute;         /* posiziona il testo centrale assolutamente */
-    left: 50%;                  /* a metà della pagina */
-    transform: translateX(-50%); /* centra il testo rispetto al punto medio */
-    text-align: center;
-  }
-  
-  .footer-right {
-    text-align: right;
-  }
-  
+}
 
+.footer-left {
+    text-align: left;
+}
+
+.footer-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.footer-right {
+    text-align: right;
+}

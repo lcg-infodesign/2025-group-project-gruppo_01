@@ -235,6 +235,13 @@ window.onRegionSelected = function(regionId) {
       selectedRegion = null;       // Resetta la variabile globale p5
       window.currentRegion = null; // Resetta eventuali altre variabili
       console.log("Reset grafico p5: Italia");
+      
+      // Resetta il nome della regione nel header
+      const regionNameElement = document.getElementById('selected-region');
+      if (regionNameElement) {
+          regionNameElement.textContent = '';
+      }
+      
       redraw();                    // FORZA il ridisegno immediato del canvas
       return;
   }
@@ -296,7 +303,18 @@ window.onRegionSelected = function(regionId) {
       selectedRegion = normalized;
   }
 
-  // E. Forza aggiornamento
+  // E. Aggiorna il nome della regione nel header
+  const regionNameElement = document.getElementById('selected-region');
+  if (regionNameElement) {
+      let displayName = normalized;
+      // Se è una feature GeoJSON, estrai il nome dalla proprietà giusta
+      if (typeof selectedRegion === 'object' && selectedRegion.properties) {
+          displayName = selectedRegion.properties.reg_name || selectedRegion.properties.denominazione_reg || selectedRegion.properties.denominazione || selectedRegion.properties.nome || normalized;
+      }
+      regionNameElement.textContent = displayName;
+  }
+  
+  // F. Forza aggiornamento
   redraw();
 };
 
@@ -2722,6 +2740,19 @@ rect(width * 0.67, 90, width * 0.33, height - 170);
  // 4. DISEGNO TESTO
  fill("#1E52A6"); 
  text(dateText, dateX, dateY);
+ 
+ // 5. DISEGNO NOME REGIONE (se selezionata)
+ if (selectedRegion) {
+   const regionName = selectedRegion.properties.reg_name || selectedRegion.properties.denominazione_reg || selectedRegion.properties.denominazione || selectedRegion.properties.nome || 'Unknown';
+   const regionY = dateY + 35; // Posizionato sotto la data
+   
+   // Stile per il nome della regione (più piccolo)
+   fill("#1E52A6");
+   textSize(16); // Più piccolo della data
+   textStyle(NORMAL); // Non grassetto
+   text(regionName, dateX, regionY);
+ }
+ 
  pop();
  // --- FINE: BLOCCO RISOLUTIVO PER LA DATA (TITOLO) ---
  

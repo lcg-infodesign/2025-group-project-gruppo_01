@@ -631,6 +631,34 @@ function mouseMoved() {
   redraw();
 }
 
+// --- NUOVO CODICE DA INSERIRE QUI ---
+function mousePressed() {
+  // Verifica se il click è su una barra dell'istogramma (hoveredIndex calcolato da updateHoverState)
+  if (hoveredIndex !== -1) {
+    const year = years[hoveredIndex];
+    
+    // Converti il formato anno da overview a dettaglio (stesso formato della timeline)
+    let yearParam = year;
+    // Gestione specifica per i casi 2016
+    if (year === "2016(1)") {
+      yearParam = "2016-1";
+    } else if (year === "2016(2)") {
+      yearParam = "2016-2";
+    } else {
+      // Per gli altri anni, usa il valore direttamente
+      yearParam = year;
+    }
+    
+    console.log('✅ Click su barra istogramma per anno:', year, '- vado al dettaglio');
+    
+    // Reindirizza alla pagina dettaglio
+    window.location.href = 'dettaglio.html?year=' + encodeURIComponent(yearParam);
+  }
+  
+}
+// -------------------------------------
+
+
 // Funzione per aggiornare quale quesito è sotto il mouse
 function updateQuesitiHover() {
   hoveredQuesito = null;
@@ -3864,68 +3892,7 @@ function setupYearSlider() {
     };
     
     // Evento input per lo slider visibile
-    visibleSlider.addEventListener('input', (e) => {
-      if (isUpdating) return;
-      
-      const pos = parseFloat(e.target.value);
-      const newYear = findClosestYear(pos);
-
-      if (newYear && newYear !== selectedYear) {
-        isUpdating = true;
-        console.log('🔄 Cambio anno da slider visibile:', selectedYear, '->', newYear);
-        
-          selectedYear = newYear;
-          
-        // Aggiorna entrambi gli slider
-        updateSliders(yearToPosition[selectedYear] || pos, newYear);
-        
-        // Aggiorna grafica timeline
-          refreshVisuals();
-
-        // Reset selezioni
-          currentPresidenteMode = 0;
-          quesitiScrollOffset = 0;
-          presidenteDescScrollOffset = 0;
-          selectedQuesito = null;
-        selectedRegion = null;
-          
-        // Carica dati CSV per il nuovo anno
-          if (REFERENDUM_YEARS[newYear] && typeof loadCSVForYear === 'function') {
-          console.log('📊 Caricamento dati CSV per anno:', newYear, 'file:', REFERENDUM_YEARS[newYear]);
-             loadCSVForYear(REFERENDUM_YEARS[newYear]);
-        } else {
-          console.warn('⚠️ Nessun file CSV trovato per anno:', newYear);
-          redraw();
-          }
-          
-        // Carica immagini presidente
-          let presidenteData = contestoByYear[String(newYear)];
-          if (!presidenteData && !isNaN(newYear)) {
-            presidenteData = contestoByYear[parseInt(newYear)];
-          }
-          if (!presidenteData) {
-            const numericYear = getYearNumeric(String(newYear));
-            for (const key in contestoByYear) {
-              if (getYearNumeric(key) === numericYear) {
-                presidenteData = contestoByYear[key];
-                break;
-              }
-            }
-          }
-          
-          if (presidenteData && typeof loadPresidenteImages === 'function') {
-            console.log('📸 Caricamento immagini presidente per nuovo anno:', newYear);
-          loadPresidenteImages(presidenteData, false);
-        }
-        
-        setTimeout(() => {
-          isUpdating = false;
-        }, 100);
-          } else {
-        // Aggiorna solo la posizione dello slider visibile anche se l'anno non cambia
-        updateSliders(pos, selectedYear);
-      }
-    });
+    
   }
 
   // --- Evento Input Slider Visibile ---
@@ -3942,6 +3909,8 @@ function setupYearSlider() {
           console.log('🔄 Cambio anno da slider:', selectedYear, '->', newYear);
           
           selectedYear = newYear;
+          dataFile = REFERENDUM_YEARS[newYear]; 
+
           
           // Aggiorna grafica slider (accende nuovo, spegne vecchio)
           refreshVisuals();
@@ -6390,3 +6359,5 @@ function drawHelpModeBlur() {
 
   pop();
 }
+
+

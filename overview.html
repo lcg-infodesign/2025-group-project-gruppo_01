@@ -263,12 +263,31 @@ const COLORS = {
       // 1. Logica Hover
       background(245, 240, 220);
       updateHoverState();
+      if (hoveredIndex !== -1) {
+  console.log("HOVER ATTIVO - Provo a mettere pointer");
+  cursor('pointer');
+}
+
+
+
+  const canvasElement = document.querySelector('canvas');
+  if (canvasElement) {
+    if (hoveredIndex !== -1) {
+      canvasElement.style.cursor = 'pointer';
+    } else {
+      canvasElement.style.cursor = 'default';
+    }
+  }
+  // --------------------------------
+
+      
       
       // 2. Disegno;
       drawLegend(); 
       drawHistogram();
       // drawTimeline(); // Removed - using HTML timeline instead (same as dettaglio)
-      drawHoverInfo(); 
+      drawHoverInfo();
+
     }
     
     /**
@@ -309,6 +328,7 @@ const COLORS = {
           break;
         }
       }
+      
     }
     
     function drawPaperBackground() {
@@ -547,6 +567,38 @@ function drawHoverInfo() {
 function mouseMoved() {
         redraw();
 }
+
+function mousePressed() {
+  // Verifica se il click è su una barra dell'istogramma (hoveredIndex calcolato da updateHoverState)
+  
+  if (hoveredIndex !== -1) {
+    const year = years[hoveredIndex];
+    
+    // Converti il formato anno da overview a dettaglio (stesso formato della timeline)
+    let yearParam = year;
+    // Gestione specifica per i casi 2016
+    if (year === "2016(1)") {
+      yearParam = "2016-1";
+    } else if (year === "2016(2)") {
+      yearParam = "2016-2";
+    } else {
+      // Per gli altri anni, usa il valore direttamente
+      yearParam = year;
+    }
+    
+    console.log('✅ Click su barra istogramma per anno:', year, '- vado al dettaglio');
+    
+    // Reindirizza alla pagina dettaglio
+    window.location.href = 'dettaglio.html?year=' + encodeURIComponent(yearParam);
+  }
+  function mousePressed() {
+  if (mouseButton !== LEFT) return; // <--- AGGIUNGI QUESTO!
+  
+  // ... resto del codice ...
+}
+
+}
+
     
 function windowResized() {
       resizeCanvas(windowWidth, windowHeight);

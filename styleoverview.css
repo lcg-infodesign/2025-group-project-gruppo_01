@@ -232,3 +232,22 @@ html, body {
     z-index: 100;        /* deve essere più alto del canvas */
     pointer-events: none; /* opzionale, per evitare che blocchi il mouse sul canvas */
   }
+
+  /* --- AGGIUNTA FIX CURSORE --- */
+
+/* 1. Rendi il body e i wrapper trasparenti ai click */
+body, html {
+  pointer-events: none;
+}
+
+/* 2. Riabilita i click solo sugli elementi interattivi */
+#navbar, .navbar-wrapper, #footer, #help-toggle, input, button, a {
+  pointer-events: auto;
+}
+
+/* 3. Il canvas deve essere cliccabile e SOPRA il resto */
+canvas {
+  pointer-events: auto !important;
+  z-index: 1 !important; /* Alziamo lo z-index per sicurezza */
+}
+/* ---------------------------- */

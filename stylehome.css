@@ -49,12 +49,12 @@
     padding-left: 20px;
     padding-right: 20px; 
     padding-top: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    /*box-shadow: 0 4px 15px rgba(0,0,0,0.05);*/
   }
   
   /* Linea blu */
   .linea-parallela-top {
-    height: 4px;
+    height: 2px;
     background: var(--blue-color);
     width: 100%;
     margin: 5px 0px;
@@ -62,7 +62,7 @@
   }
   
   .linea-parallela-bottom {
-    height: 4px;
+    height: 2px;
     background: var(--blue-color);
     width: 100%;
     margin: 5px 0px;
@@ -88,7 +88,6 @@
   /* Data (sinistra) */
   .navbar-date {
     font-size: 15px;
-    font-weight: bold;
     margin: 0;
     color: var(--blue-color);
   }
@@ -132,7 +131,6 @@
   
   /* Pagina ATTIVA (SELEZIONATA) */
   .nav-link.active {
-    font-weight: bold;
     opacity: 1;
     border-bottom: 2px solid var(--blue-color);
   }

@@ -365,12 +365,30 @@ function calculateQuesitiPresidentiBounds() {
   const availableBottom = cardY + cardHeight - bottomPadding;
   const totalAvailableHeight = availableBottom - availableTop;
   
-  const presidentSliderHeight = 250;
-  const windowSpacing = 20;
-  const totalWindowsHeight = totalAvailableHeight - 20;
-  const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
-  const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
-  const presidentWindowTop = quesitiWindowTop + quesitiWindowHeight + windowSpacing;
+  // Parametri per il box di destra (copiati da calculateChartsBounds per precisione)
+  const windowSpacing = 10; // Spaziatura usata a destra
+  // Altezza di ogni finestra a destra
+  const rightWindowHeight = (totalAvailableHeight - windowSpacing * 2) / 3 * 0.95; 
+  // Calcoliamo dove inizia il primo box (Quesiti) per allineare tutto
+  const quesitiWindowSpacing = 20;
+  const totalWindowsHeightQuesiti = totalAvailableHeight - 20;
+  const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeightQuesiti) / 2;
+  
+  // Coordinate verticali dei grafici a DESTRA
+  const window1Top = quesitiWindowTop;
+  const window2Top = window1Top + rightWindowHeight + windowSpacing;
+  const window3Top = window2Top + rightWindowHeight + windowSpacing;
+  
+  // PUNTO DI ARRIVO COMUNE: Dove finisce l'ultimo grafico a destra
+  const targetBottomY = window3Top + rightWindowHeight;
+  
+  // Box Quesiti (Sinistra)
+  const presidentSliderHeight_Placeholder = 250; // Valore temporaneo solo per calcolare top
+  const quesitiWindowHeight = totalWindowsHeightQuesiti - presidentSliderHeight_Placeholder - quesitiWindowSpacing - 60;
+  const presidentWindowTop = quesitiWindowTop + quesitiWindowHeight + quesitiWindowSpacing;
+  
+  // CALCOLO ALTEZZA DINAMICA: Dallo start del box presidenti fino al targetBottomY
+  const dynamicPresidentHeight = targetBottomY - presidentWindowTop;
   
   const windowLeft = 40;
   const windowWidth = width * 0.34 - 60;
@@ -387,51 +405,49 @@ function calculateQuesitiPresidentiBounds() {
       x: windowLeft + bgPadding,
       y: presidentWindowTop,
       w: windowWidth - bgPadding * 2,
-      h: presidentSliderHeight
+      h: dynamicPresidentHeight // <--- ALTEZZA PERFETTA
     }
   };
 }
+
 
 // Helper function to calculate charts bounds (same as drawSezione3Background)
 function calculateChartsBounds() {
   const navbarHeight = 100;
   const sliderHeight = 130;
+  
   const cardX = 0;
   const cardY = navbarHeight;
   const cardWidth = width;
   const cardHeight = height - navbarHeight - sliderHeight;
+  
   const sectionStartY = cardY + 10;
-  const bottomPadding = 3;
+  // Margine dal fondo (uguale a quello usato per i Presidenti)
+  const bottomPadding = 20; 
   
   const chartAreaLeft = cardX + cardWidth * 0.67 + 5;
   const chartAreaWidth = cardWidth * 0.33 - 40;
   const bgPadding = 10;
-  const windowSpacing = 10;
   
+  // Calcolo altezza totale disponibile
   const availableTop = sectionStartY;
-  const availableBottom = cardY + cardHeight - bottomPadding;
+  const availableBottom = cardY + cardHeight - bottomPadding; // PUNTO FISSO IN BASSO
   const totalAvailableHeight = availableBottom - availableTop;
   
-  // All windows same height - divide available space equally, but reduce by 5% to make them slightly smaller
-  const windowHeight = ((totalAvailableHeight - windowSpacing * 2) / 3) * 0.95;
+  // --- CORREZIONE: Rimosso il 0.95 che accorciava la colonna ---
+  const windowSpacing = 10;
+  const windowHeight = (totalAvailableHeight - windowSpacing * 2) / 3; 
   
-  // Calculate quesitiWindowTop using the same method as drawQuesitiWindow to align windows
-  const presidentSliderHeight = 250;
+  // Allinea l'inizio con la colonna di sinistra
   const quesitiWindowSpacing = 20;
   const totalWindowsHeightQuesiti = totalAvailableHeight - 20;
   const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeightQuesiti) / 2;
   
-  // Window 1: Affluenza chart (top)
-  const window1Top = quesitiWindowTop;
-  // Window 2: Pie chart (middle)
-  const window2Top = window1Top + windowHeight + windowSpacing;
-  // Window 3: Gender chart (bottom)
-  const window3Top = window2Top + windowHeight + windowSpacing;
+  // Forza l'inizio allo stesso punto dei quesiti
+  const chartsTop = quesitiWindowTop;
   
-  // I bounds dei grafici comprendono tutte e tre le finestre
-  const chartsTop = window1Top;
-  const chartsBottom = window3Top + windowHeight;
-  const chartsHeight = chartsBottom - chartsTop;
+  // Forza la fine allo stesso punto dei presidenti (availableBottom)
+  const chartsHeight = availableBottom - chartsTop;
   
   return {
     x: chartAreaLeft + bgPadding,
@@ -441,52 +457,44 @@ function calculateChartsBounds() {
   };
 }
 
+
+
 // Helper function to calculate map bounds (same as drawGeoMap, including date header)
+// Funzione corretta per calcolare i bordi della mappa (usata sia per drawGeoMap che per l'Help)
 function calculateMapBounds() {
   const navbarHeight = 100;
   const sliderHeight = 130;
-  const cardX = 0;
-  const cardY = navbarHeight;
+  
+  // Dimensioni totali dell'area centrale
   const cardWidth = width;
   const cardHeight = height - navbarHeight - sliderHeight;
-  const sectionStartY = cardY + 20;
-  const bottomPadding = 3;
   
-  // Center map perfectly in the page (horizontally and vertically)
+  // Calcolo orizzontale: Mappa larga 34% e centrata
   const mapWidth = cardWidth * 0.34;
   const mapLeft = (cardWidth - mapWidth) / 2;
   
-  // Center map vertically - spostata più in basso
-  const availableTop = sectionStartY + 30;
-  const availableBottom = cardY + cardHeight - bottomPadding;
+  // Calcolo verticale: identico a come disegni la mappa
+  const sectionStartY = navbarHeight - 20; 
+  const availableTop = sectionStartY + 30; // 30px di spazio extra in alto
+  // Il margine inferiore deve essere 20px sopra lo slider, come gli altri box
+  const availableBottom = navbarHeight + cardHeight - 11; 
+  
   const totalAvailableHeight = availableBottom - availableTop;
-  const drawH = totalAvailableHeight - 20; // Leave some padding
-  const paddingTop = availableTop + (totalAvailableHeight - drawH) / 2; // Center vertically
+  const drawH = totalAvailableHeight - 20; // Padding interno
   
-  // La data viene disegnata a y=120 con sfondo che va da y=115 a y=155
-  // Includiamo l'area della data nei bounds della mappa
-  const dateY = 120;
-  const dateBgTop = dateY - 5; // 115
-  const dateBgHeight = 40;
-  const dateBgBottom = dateBgTop + dateBgHeight; // 155
-  
-  // La timeline inizia a height - 220, quindi il bordo della mappa deve finire prima
-  const timelineTop = height - 220;
-  
-  // I bounds della mappa devono includere la data sopra
-  // La mappa inizia a paddingTop, ma vogliamo includere anche la data sopra
-  const mapBoundsTop = Math.min(dateBgTop, paddingTop);
-  // Il bordo inferiore deve finire sopra la timeline
-  const mapBoundsBottom = timelineTop;
-  const mapBoundsHeight = mapBoundsBottom - mapBoundsTop;
-  
+  // La mappa viene disegnata centrata verticalmente in questo spazio
+  const paddingTop = availableTop + (totalAvailableHeight - drawH) / 2;
+
   return {
     x: mapLeft,
-    y: mapBoundsTop,
+    y: paddingTop,
     w: mapWidth,
-    h: mapBoundsHeight
+    h: drawH
   };
 }
+
+
+
 
 // Define help sections by their VISUAL AREAS on canvas
 const HELP_SECTIONS = {
@@ -937,6 +945,7 @@ function preload() {
 }
 
 function setup() {
+  createHtmlLegend();
   // --- LOGICA DI RICEZIONE ANNO DALL'URL ---
   const urlParams = new URLSearchParams(window.location.search);
   const yearFromUrl = urlParams.get('year');
@@ -2665,11 +2674,16 @@ function draw() {
 noStroke();
 fill(245, 240, 220);
 
-// colonna sinistra (quesiti + presidenti)
-rect(0, 90, width * 0.33, height - 170);
+  // Calcolo l'altezza corretta per arrivare fino allo slider
+  const colH = height - 90 - 130 - 10; // (Altezza totale - header - footer - margine)
 
-// colonna destra (grafici)
-rect(width * 0.67, 90, width * 0.33, height - 170);
+  rect(0, 90, width * 0.33, colH);            // Colonna sinistra allungata
+  rect(width * 0.67, 90, width * 0.33, colH); // Colonna destra allungata
+
+
+
+
+
 
 // NON disegnare nulla nella riga subito sopra la mappa (es. da y=60 a y=90)
 
@@ -3299,80 +3313,47 @@ function showTooltip(name, pct, mx, my) {
   pop();
 }
 
-function drawLegend() {
-  push();
-  const lx = width - 280;
-  const ly = 18;
+function createHtmlLegend() {
+  // Controlla se esiste già per non duplicarla
+  if (document.getElementById('html-legend')) return;
+
+  const legendDiv = document.createElement('div');
+  legendDiv.id = 'html-legend';
   
-  // Draw semi-transparent background for legend
-  const legendW = 280;
-  const legendH = 80;
-  fill(255, 255, 255, 200); // Semi-transparent white background
-  stroke(0, 0, 0, 150); // Semi-transparent black border
-  strokeWeight(1);
-  rect(lx - 10, ly - 5, legendW, legendH);
-  
-  fill(0, 0, 0, 220); // Semi-transparent black text
-  noStroke();
-  textSize(14);
-  textAlign(LEFT, TOP);
-  text('Legenda Affluenza 2025', lx, ly);
-  
-  // Calculate min/max values for legend
-  let minVal = 0, maxVal = 100;
-  if (geojsonData && geojsonData.features) {
-    const vals = geojsonData.features
-      .map(f => f.properties && f.properties.affluenza ? f.properties.affluenza : null)
-      .filter(v => v !== null);
-    if (vals.length > 0) {
-      minVal = Math.min(...vals);
-      maxVal = Math.max(...vals);
-    }
-  }
-  
-  // Draw color gradient bar
-  const barW = 200;
-  const barH = 20;
-  const barX = lx;
-  const barY = ly + 28;
-  
-  // Draw gradient showing opacity of the same base blue (left = transparent, right = opaque)
-  for (let i = 0; i <= barW; i++) {
-    const norm = i / barW; // 0 = low affluenza (transparent), 1 = high affluenza (opaque)
-    const r = THEME_BLUE[0];
-    const g = THEME_BLUE[1];
-    const b = THEME_BLUE[2];
-    const a = lerp(0, 255, norm);
-    stroke(r, g, b, a);
-    strokeWeight(2);
-    line(barX + i, barY, barX + i, barY + barH);
-  }
-  
-  // Draw border
-  noFill();
-  stroke(0, 0, 0, 150);
-  strokeWeight(1);
-  rect(barX, barY, barW, barH);
-  
-  // Labels
-  textSize(13);
-  fill(0, 0, 0, 220);
-  noStroke();
-  textAlign(LEFT, TOP);
-  text('Bassa (trasparente)', barX, barY + barH + 4);
-  textAlign(RIGHT, TOP);
-  text('Alta (opaco)', barX + barW, barY + barH + 4);
-  
-  // Values
-  textAlign(LEFT, TOP);
-  textSize(14);
-  fill(0, 0, 0, 180);
-  text(nf(minVal, 0, 1) + '%', barX, barY + barH + 18);
-  textAlign(RIGHT, TOP);
-  text(nf(maxVal, 0, 1) + '%', barX + barW, barY + barH + 18);
-  
-  pop();
+  // Stili CSS via JS per posizionarlo sopra il footer
+  Object.assign(legendDiv.style, {
+    position: 'absolute',
+    bottom: '38px',        // Altezza dal fondo (regola tu)
+    left: '40px',          // Distanza da sinistra
+    display: 'flex',
+    gap: '30px',
+    fontFamily: '"STIX Two Text", serif',
+    fontSize: '16px',
+    color: '#1E52A6',
+    zIndex: '2000',        // Z-Index altissimo per stare sopra a tutto!
+    pointerEvents: 'none'  // Così non interferisce coi click
+  });
+
+  // Contenuto HTML della legenda
+  legendDiv.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div style="width: 14px; height: 14px; border: 2px solid #1E52A6; border-radius: 50%;"></div>
+      <span>Quorum non richiesto</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div style="width: 16px; height: 16px; background-color: #a4afc1; border-radius: 50%;"></div>
+      <span>Quorum non raggiunto</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div style="width: 16px; height: 16px; background-color: #1E52A6; border-radius: 50%;"></div>
+      <span>Quorum raggiunto</span>
+    </div>
+  `;
+
+  // Appendi al body o al footer container
+  document.body.appendChild(legendDiv);
 }
+
 
 // Setup year slider with referendum years
 function setupYearSlider() {
@@ -5232,7 +5213,7 @@ pop();
   noFill();
   stroke(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2], 220);
   strokeWeight(1);
-  rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
+  //rect(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
   pop();
   
   const startY = quesitiWindowTop + 30;
@@ -5399,7 +5380,11 @@ pop();
     rect(scrollbarX, thumbY, scrollbarWidth, thumbHeight);
   }
   
-  drawPresidentSlider(windowLeft + bgPadding, presidentWindowTop, windowWidth - bgPadding * 2, presidentSliderHeight);
+  drawPresidentSlider(
+    windowLeft + bgPadding, 
+    presidentWindowTop, 
+    windowWidth - bgPadding * 2, 
+    presidentSliderHeight + 50);
   
   // Draw quorum legend below the boxes (not in a box)
   drawQuorumLegend(windowLeft + bgPadding, presidentWindowTop + presidentSliderHeight + 40, windowWidth - bgPadding * 2);
@@ -5409,46 +5394,7 @@ pop();
 
 // Draw quorum legend (small, without box)
 function drawQuorumLegend(x, y, w) {
-  push();
-  
-  const legendSpacing = 30;
-  const circleSize = 14;
-  const legendTextSize = 16; // Increased from 14
-  const startX = x + 5;
-  let currentX = startX;
-  
-  textSize(legendTextSize);
-  textFont('STIX Two Text');
-  textAlign(LEFT, CENTER);
-  fill('#0F3D88'); // Dark blue text
-  
-  // Quorum non richiesto
-  fill('#F6ECE1'); // Beige color
-  stroke('#1E52A6');
-  strokeWeight(2);
-  
-  ellipse(currentX, y, circleSize, circleSize);
-  fill('#0F3D88');
-  noStroke();
-  text('Quorum non richiesto', currentX + circleSize + 4, y);
-  currentX += textWidth('quorum non richiesto') + circleSize + 8 + legendSpacing;
-  
-  // Quorum non raggiunto
-  fill('#a4afc1ff'); // Light blue
-  noStroke();
-  ellipse(currentX, y, circleSize, circleSize);
-  fill('#0F3D88');
-  text('Quorum non raggiunto', currentX + circleSize + 4, y);
-  currentX += textWidth('quorum non raggiunto') + circleSize + 8 + legendSpacing;
-  
-  // Quorum raggiunto
-  fill('#1E52A6'); // Dark blue
-  noStroke();
-  ellipse(currentX, y, circleSize, circleSize);
-  fill('#1E52A6');
-  text('Quorum raggiunto', currentX + circleSize + 4, y);
-  
-  pop();
+
 }
 
 function drawPresidentSlider(x, y, w, h) {
@@ -5466,9 +5412,11 @@ function drawPresidentSlider(x, y, w, h) {
   }
   
   if (!presidenteData) {
-    fill(100);
-    textSize(14);
-    textAlign(CENTER, CENTER);
+    // Disegna comunque il box vuoto
+    noFill(); stroke(30, 82, 166); strokeWeight(1);
+    rect(x, y, w, h);
+    
+    fill(100); textSize(14); textAlign(CENTER, CENTER);
     text('Dati contesto non disponibili', x + w/2, y + h/2);
     pop();
     return;
@@ -5489,24 +5437,16 @@ function drawPresidentSlider(x, y, w, h) {
   strokeWeight(1);
   rect(x, y, w, h);
   
-  // Etichetta "contesto"
-  const pillW = 120;
-  const pillH = 26;
-  const pillX = x + w/2 - pillW/2;
-  const pillY = y - pillH/2;
-  
-  fill(nameColor);
-  stroke(borderColor);
-  strokeWeight(1);
-  rect(pillX, pillY, pillW, pillH, 12);
-  
-  fill(titleColor);
+  // --- NUOVO TITOLO CONTESTO (Stile QUESITI) ---
+  fill(titleColor); // Blu scuro
   noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(20);
+  textAlign(LEFT, TOP);
+  textSize(20); 
   textStyle(BOLD);
-  textFont('Stix Two Text');
-  text("contesto", x + w/2, y);
+  textFont('STIX Two Text');
+  
+  // Posizionato in alto a sinistra con un po' di margine
+  text("CONTESTO", x + 10, y + 10);
 
   // --- FUNZIONE INTERNA PER DISEGNARE UN PRESIDENTE ---
   function drawSinglePresident(pName, pRole, pImgFilename, px, py, align, pLink) {
@@ -5521,26 +5461,14 @@ function drawPresidentSlider(x, y, w, h) {
     }
     const imgCenterY = py;
 
-    // --- GESTIONE CLICK IMMAGINE ---
+    // Gestione Click e Hover Immagine
     if (pLink && pLink.length > 3) {
-        presidentClickZones.push({
-            type: 'circle',
-            x: imgCenterX,
-            y: imgCenterY,
-            r: imgSize/2,
-            url: pLink,
-            name: pName
-        });
-        
-        // SE IL MOUSE È SOPRA L'IMMAGINE -> CURSORE MANO
-        if (dist(mouseX, mouseY, imgCenterX, imgCenterY) < imgSize/2) {
-             cursor(HAND); 
-        }
+        presidentClickZones.push({ type: 'circle', x: imgCenterX, y: imgCenterY, r: imgSize/2, url: pLink, name: pName });
+        if (dist(mouseX, mouseY, imgCenterX, imgCenterY) < imgSize/2) cursor(HAND);
     }
 
     // Cerchio sfondo
-    noStroke();
-    fill(circleBgColor);
+    noStroke(); fill(circleBgColor);
     ellipse(imgCenterX, imgCenterY, imgSize, imgSize);
 
     // Immagine
@@ -5552,14 +5480,10 @@ function drawPresidentSlider(x, y, w, h) {
             drawingContext.beginPath();
             drawingContext.arc(imgCenterX, imgCenterY, imgSize/2, 0, TWO_PI);
             drawingContext.clip();
-            
             const aspect = img.width / img.height;
-            let dw = imgSize;
-            let dh = imgSize;
-            if (aspect > 1) dh = imgSize / aspect; 
-            else dw = imgSize * aspect;          
+            let dw = imgSize; let dh = imgSize;
+            if (aspect > 1) dh = imgSize / aspect; else dw = imgSize * aspect;          
             dw *= 1.1; dh *= 1.1;
-
             imageMode(CENTER);
             image(img, imgCenterX, imgCenterY, dw, dh);
             drawingContext.restore();
@@ -5569,7 +5493,7 @@ function drawPresidentSlider(x, y, w, h) {
         }
     }
 
-    // --- CALCOLO POSIZIONE TESTI (PER CENTRATURA VERTICALE) ---
+    // Posizione Testi
     let textX;
     let alignMode;
     if (align === 'left') {
@@ -5580,74 +5504,41 @@ function drawPresidentSlider(x, y, w, h) {
         alignMode = RIGHT;
     }
 
-    // Pre-calcolo delle righe del ruolo per capire l'altezza totale
+    // Calcolo altezza testo
     const roleLines = pRole.toUpperCase().split(" DEL");
     const hasSecondLine = roleLines.length > 1;
-
-    // Calcolo altezza totale blocco testo:
-    // Nome (22px) + Spazio (6px) + Ruolo Riga 1 (15px) + [Eventuale Riga 2 (18px)]
     let totalTextHeight = 22 + 6 + 15; 
     if (hasSecondLine) totalTextHeight += 18;
 
-    // Punto di partenza Y per centrare il blocco rispetto al centro immagine
-    let currentY = imgCenterY - (totalTextHeight / 2) + 8; // +8 compensa l'allineamento del font
+    let currentY = imgCenterY - (totalTextHeight / 2) + 8;
 
     push();
-    textAlign(alignMode, BASELINE); // Uso BASELINE per controllo preciso
+    textAlign(alignMode, BASELINE); 
     
-    // --- NOME DEL PRESIDENTE ---
-    fill(nameColor);
-    noStroke();
-    textSize(22);
-    textStyle(ITALIC);
-    textFont('Stix Two Text'); 
-
+    // NOME
+    fill(nameColor); noStroke(); textSize(22); textStyle(ITALIC); textFont('STIX Two Text'); 
     text(pName, textX, currentY);
     
-    // --- GESTIONE HOVER E CLICK SUL NOME ---
-    const nameW = textWidth(pName);
-    const nameH = 22; // Altezza del font
-    
-    // Calcolo box preciso per il click
+    // Click su Nome
+    const nameW = textWidth(pName); const nameH = 22; 
     let linkBoxX = (alignMode === LEFT) ? textX : textX - nameW;
-    let linkBoxY = currentY - nameH + 5; // Aggiusto leggermente per coprire il testo
+    let linkBoxY = currentY - nameH + 5; 
     
     if (pLink && pLink.length > 3) {
-        presidentClickZones.push({
-            type: 'rect',
-            x: linkBoxX,
-            y: linkBoxY,
-            w: nameW,
-            h: nameH,
-            url: pLink,
-            name: pName
-        });
-        
-        // CONTROLLO HOVER SUL TESTO
-        if (mouseX >= linkBoxX && mouseX <= linkBoxX + nameW && 
-            mouseY >= linkBoxY && mouseY <= linkBoxY + nameH) {
-            
-            cursor(HAND); // Forza il cursore a mano
-            
-            // Sottolineatura
-            stroke(nameColor);
-            strokeWeight(2);
-            line(linkBoxX, currentY + 3, linkBoxX + nameW, currentY + 3);
-            noStroke();
+        presidentClickZones.push({ type: 'rect', x: linkBoxX, y: linkBoxY, w: nameW, h: nameH, url: pLink, name: pName });
+        if (mouseX >= linkBoxX && mouseX <= linkBoxX + nameW && mouseY >= linkBoxY && mouseY <= linkBoxY + nameH) {
+            cursor(HAND); stroke(nameColor); strokeWeight(2);
+            line(linkBoxX, currentY + 3, linkBoxX + nameW, currentY + 3); noStroke();
         }
     }
 
-    // Avanzamento Y per il ruolo
-    currentY += 22; // Spazio dopo il nome
+    currentY += 22; // Spazio
 
-    // --- RUOLO ---
-    fill(titleColor);
-    textSize(15);
-    textStyle(BOLD);
-    
+    // RUOLO
+    fill(titleColor); textSize(15); textStyle(BOLD); noStroke();
     if (hasSecondLine) {
         text(roleLines[0] + (pRole.toUpperCase().includes("DELL") ? "" : ""), textX, currentY);
-        currentY += 18; // Spazio tra le righe del ruolo
+        currentY += 18; 
         text(pRole.toUpperCase().replace(roleLines[0], "").trim(), textX, currentY);
     } else {
         text(pRole.toUpperCase(), textX, currentY);
@@ -5655,11 +5546,16 @@ function drawPresidentSlider(x, y, w, h) {
     pop();
   }
 
-  // --- POSIZIONAMENTO ---
-  const contentYStart = y + 20;
-  const availableH = h - 20;
-  const repY = contentYStart + availableH * 0.30; 
-  const consY = contentYStart + availableH * 0.70; 
+  // --- POSIZIONAMENTO CONTENUTI ---
+  const titleOffset = 40; // Spazio per il titolo "CONTESTO"
+  
+  // Area disponibile per i contenuti (escludendo titolo e padding)
+  const contentYStart = y + titleOffset;
+  const availableContentH = h - titleOffset - 10;
+  
+  // Dividiamo l'altezza disponibile in due per i due presidenti
+  const repY = contentYStart + (availableContentH * 0.25); 
+  const consY = contentYStart + (availableContentH * 0.75); 
 
   // 1. Presidente della Repubblica
   drawSinglePresident(
@@ -5685,6 +5581,8 @@ function drawPresidentSlider(x, y, w, h) {
 
   pop();
 }
+
+
 
 function mouseWheel(event) {
   // Handle scrolling for quesiti list - use same coordinates as drawQuesitiWindow

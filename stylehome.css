@@ -282,7 +282,7 @@
       /* Prima visual: mantieni gli omini su una sola riga e abilita lo scroll orizzontale se necessario */
       .section-row:first-of-type .visual-col {
         flex-wrap: nowrap;
-        overflow-x: auto;
+        overflow: hidden;
         -webkit-overflow-scrolling: touch;
         justify-content: flex-start; /* Allinea a sinistra nella prima visual */
       }

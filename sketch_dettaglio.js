@@ -343,9 +343,10 @@ let stixFont = null;
 let stixFontBold = null;
 let stixFontItalic = null;
 
-// SVG omini per il grafico SI/NO
+// SVG omini per i grafici a destra
 let omino1Img = null; // omino1.svg (per SI)
 let omino2Img = null; // omino2.svg (per NO)
+let omino3Img = null; // omino3.svg (omino grigio per "dato assente")
 
 
 // ==================== HELP MODE STATE ====================
@@ -942,6 +943,7 @@ function preload() {
   // Load omini SVG
   omino1Img = loadImage('omino1.svg');
   omino2Img = loadImage('omino2.svg');
+  omino3Img = loadImage('omino3.svg');
 }
 
 function setup() {
@@ -4306,8 +4308,51 @@ function calculateAffluenzaForChart() {
     }
   }
 
-  // Fallback finale: se non riusciamo a calcolare affluenza per quesito, mostra quella totale
+// Fallback finale: se non riusciamo a calcolare affluenza per quesito, mostra quella totale
   return calculateTotalAffluenza();
+}
+
+
+// Placeholder generico con omino grigio quando i dati non sono disponibili
+function drawNoDataPlaceholder(windowTop, windowHeight, mainMessage) {
+  if (!window.sezione3ChartAreaLeft || !window.sezione3ChartAreaWidth || !omino3Img) {
+    return;
+  }
+
+  const chartAreaLeft  = window.sezione3ChartAreaLeft;
+  const chartAreaWidth = window.sezione3ChartAreaWidth;
+  const bgPadding      = window.sezione3BgPadding || 10;
+
+  const centerX = chartAreaLeft + chartAreaWidth / 2;
+  const centerY = windowTop + windowHeight / 2;
+
+  // Mantieni le proporzioni originali dell'SVG
+  const maxH = windowHeight * 0.45;
+  const maxW = chartAreaWidth * 0.35;
+  const aspect = omino3Img.width / omino3Img.height || 1;
+
+  let drawW = maxW;
+  let drawH = drawW / aspect;
+
+  if (drawH > maxH) {
+    drawH = maxH;
+    drawW = drawH * aspect;
+  }
+
+  push();
+  imageMode(CENTER);
+  // Omino grigio (lo stile grigio è già nell'SVG, quindi niente filtro colore qui)
+  image(omino3Img, centerX, centerY - drawH * 0.1, drawW, drawH);
+
+  // Testo "Dati non disponibili" più in basso rispetto all'omino
+  noStroke();
+  fill(20, 50, 100);
+  textFont('STIX Two Text');
+  textAlign(CENTER, TOP);
+  textSize(16);
+  text(mainMessage || 'Dati non disponibili', centerX, centerY + drawH * 0.6);
+
+  pop();
 }
 
 
@@ -4318,10 +4363,6 @@ function drawAffluenzaChart() {
   const cLightBlue = color(200, 220, 242);
 
   const affluenza = calculateAffluenzaForChart();
-  
-  if (affluenza === null || affluenza === undefined || !isFinite(affluenza)) {
-    return; 
-  }
   
   // 2. RECUPERO NOME REGIONE (Logica Estesa)
   let regionName = null;
@@ -4370,6 +4411,12 @@ function drawAffluenzaChart() {
   const bgPadding = window.sezione3BgPadding;
   const windowTop = window.sezione3Window1Top;
   const windowHeight = window.sezione3WindowHeight;
+
+  // Se i dati di affluenza non sono disponibili, mostra l'omino grigio al centro della finestra
+  if (affluenza === null || affluenza === undefined || !isFinite(affluenza)) {
+    drawNoDataPlaceholder(windowTop, windowHeight, 'Dati affluenza non disponibili');
+    return;
+  }
   
   // Centra orizzontalmente considerando il padding
   const windowLeft = chartAreaLeft + bgPadding;
@@ -4662,34 +4709,15 @@ function drawPieChart() {
   const baselineY          = windowTop + windowHeight - bottomPadding;
   const pieChartTitleStart = windowTop + 8;
 
-  // Se non ci sono dati, messaggio
+  // Se non ci sono dati, mostra omino grigio al posto del grafico
   if (votiSi === 0 && votiNo === 0) {
-    push();
- fill("#1B4A95");
-    noStroke();
-    textSize(20);
-    textFont('Stix Two Text');
-    textStyle(BOLD);
-    textAlign(CENTER, CENTER);
-    text('Dati non disponibili', chartX, windowTop + windowHeight / 2);
-    textSize(11);
-    textStyle(NORMAL);
-    fill(100, 100, 100, 200);
-    pop();
+    drawNoDataPlaceholder(windowTop, windowHeight, 'Dati SI/NO non disponibili');
     return;
   }
 
   const total = votiSi + votiNo;
   if (total === 0 || !isFinite(total)) {
-    push();
-    fill(22, 50, 100);
-    noStroke();
-    textSize(17);
-    textFont('Stix Two Text');
-    textStyle(BOLD);
-    textAlign(CENTER, CENTER);
-    text('Dati SI/NO non disponibili', chartX, windowTop + windowHeight / 2);
-    pop();
+    drawNoDataPlaceholder(windowTop, windowHeight, 'Dati SI/NO non disponibili');
     return;
   }
 
@@ -4942,20 +4970,9 @@ function drawGenderChart() {
   const windowHeight = window.sezione3WindowHeight;
   const chartX = chartAreaLeft + chartAreaWidth / 2;
 
-  // Se non ci sono dati, mostra messaggio
+  // Se non ci sono dati, mostra omino grigio al posto del grafico
   if (maschi === 0 && femmine === 0) {
-    push();
-    fill("#1B4A95");
-    noStroke();
-    textSize(20);
-    textFont('Stix Two Text');
-    textStyle(BOLD);
-    textAlign(CENTER, CENTER);
-    text('Dati non disponibili', chartX, windowTop + windowHeight / 2);
-    textSize(11);
-    textStyle(NORMAL);
-    fill(100, 100, 100, 200);
-    pop();
+    drawNoDataPlaceholder(windowTop, windowHeight, 'Dati genere non disponibili');
     return;
   }
   const titleAreaHeight = 25;

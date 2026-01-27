@@ -2748,11 +2748,11 @@ fill(245, 240, 220);
  push();
   
  // 1. STILE DEL TESTO
- fill("#1E52A6"); // Blu Scuro
- textSize(30);   // Grande
+ fill("#1B4A95"); // Blu Scuro
+ textSize(25);   // Grande
  textFont('Stix Two Text');
  textStyle(BOLD); // Grassetto
- textAlign(CENTER, TOP); 
+ textAlign(CENTER, CENTER); 
 
  // 2. RECUPERO DEL DATO (DATA DEL REFERENDUM)
  let dateText = '';
@@ -2765,35 +2765,46 @@ fill(245, 240, 220);
    dateText = String(selectedYear);
  }
 
- // 3. POSIZIONAMENTO E SFONDO
- // PROVA 1: Posizione 60px sotto l'inizio.
- // SE NON FUNZIONA, VAI AL PASSO 3.
+ // 3. RECUPERO NOME REGIONE O ITALIA
+ let locationText = 'Italia'
+ if (selectedRegion) {
+   let rawName = selectedRegion.properties.reg_name || selectedRegion.properties.denominazione_reg || selectedRegion.properties.denominazione || selectedRegion.properties.nome || 'ITALIA';
+   // Rimuovi la parte " - SUDTIROL" se presente
+   locationText = rawName.replace('/Südtirol', '').replace('/Südtirol', '').trim();
+ }
+
+ // 4. CREAZIONE TESTO COMPLETO
+ const fullText = dateText + '  ' + locationText;
+
+ // 5. POSIZIONAMENTO E SFONDO
  let dateY = 120; 
  const dateX = width / 2;
  
  // Disegna uno sfondo beige (stesso colore della pagina) per pulizia
- const textW = textWidth(dateText);
- const padding = 18; 
- const bgHeight = 40;
+ const textW = textWidth(fullText);
+ const padding = 20; 
+ const bgHeight = 45;
  fill(245, 240, 220); 
  noStroke();
- rect(dateX - textW/2 - padding, dateY - 5, textW + padding * 2, bgHeight);
+ rect(dateX - textW/2 - padding, dateY - bgHeight/3, textW + padding * 2, bgHeight);
 
- // 4. DISEGNO TESTO
- fill("#1E52A6"); 
- text(dateText, dateX, dateY);
+ // 6. DISEGNO TESTO - DATA IN BOLD E LOCATION IN REGULAR
+ fill("#1B4A95");
  
- // 5. DISEGNO NOME REGIONE (se selezionata)
- if (selectedRegion) {
-   const regionName = selectedRegion.properties.reg_name || selectedRegion.properties.denominazione_reg || selectedRegion.properties.denominazione || selectedRegion.properties.nome || 'Unknown';
-   const regionY = dateY + 35; // Posizionato sotto la data
-   
-   // Stile per il nome della regione (più piccolo)
-   fill("#1E52A6");
-   textSize(16); // Più piccolo della data
-   textStyle(NORMAL); // Non grassetto
-   text(regionName, dateX, regionY);
- }
+ // Calcola posizioni per disegnare i due testi separatamente
+ const dateTextW = textWidth(dateText);
+ const fullTextW = textWidth(fullText);
+ const startX = dateX - fullTextW / 2;
+ 
+ // Disegna data in BOLD
+ textStyle(BOLD);
+ text(dateText, startX + dateTextW / 2, dateY + 18);
+ 
+ // Disegna location in NORMAL (regular)
+ textStyle(NORMAL);
+ const locationStartX = startX + dateTextW + textWidth('  ');
+ const locationTextW = textWidth(locationText);
+ text(locationText, locationStartX + locationTextW / 2, dateY + 18);
  
  pop();
  // --- FINE: BLOCCO RISOLUTIVO PER LA DATA (TITOLO) ---
@@ -3337,15 +3348,15 @@ function createHtmlLegend() {
   // Contenuto HTML della legenda
   legendDiv.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px;">
-      <div style="width: 14px; height: 14px; border: 2px solid #1E52A6; border-radius: 50%;"></div>
+      <div style="width: 14px; height: 14px; border: 2px solid #1E52A6; border-radius: 4px;"></div>
       <span>Quorum non richiesto</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px;">
-      <div style="width: 16px; height: 16px; background-color: #a4afc1; border-radius: 50%;"></div>
+      <div style="width: 16px; height: 16px; background-color: #a4afc1; border-radius: 4px;"></div>
       <span>Quorum non raggiunto</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px;">
-      <div style="width: 16px; height: 16px; background-color: #1E52A6; border-radius: 50%;"></div>
+      <div style="width: 16px; height: 16px; background-color: #1E52A6; border-radius: 4px;"></div>
       <span>Quorum raggiunto</span>
     </div>
   `;
@@ -4302,7 +4313,7 @@ function calculateAffluenzaForChart() {
 
 function drawAffluenzaChart() {
   // 1. Definizioni colori locali per sicurezza
-  const cDark = color(22, 50, 100);
+  const cDark = color("#1B4A95");
   const cBlue = color(30, 82, 166);
   const cLightBlue = color(200, 220, 242);
 
@@ -4399,34 +4410,43 @@ function drawAffluenzaChart() {
     affluenzaColor = getColor(affluenza);
   }
   
-  // Draw background arc
+  // Draw complete colored arc (always filled)
   push();
-  stroke(0, 0, 0, 20);
   strokeWeight(18);
   strokeCap(ROUND);
   noFill();
-  arc(centerX, centerY, radius * 2, radius * 2, startAngle, endAngle);
-
-  // Draw filled arc
-  const segments = 80; 
-  const filledSpan = progressAngle - startAngle;
-  const filledSegments = Math.max(0, Math.round((filledSpan / (endAngle - startAngle)) * segments));
   
-  strokeWeight(18);
-  strokeCap(ROUND);
-  for (let i = 0; i < filledSegments; i++) {
+  // Draw the complete arc with gradient color
+  const segments = 80;
+  for (let i = 0; i < segments; i++) {
     const t0 = i / segments;
     const t1 = (i + 1) / segments;
     const a0 = startAngle + t0 * (endAngle - startAngle);
     const a1 = startAngle + t1 * (endAngle - startAngle);
-    if (a0 >= progressAngle) break;
-    const drawEnd = Math.min(a1, progressAngle);
-    const mix = (a0 - startAngle) / (endAngle - startAngle);
     
+    const mix = (a0 - startAngle) / (endAngle - startAngle);
     const col = lerpColor(cLightBlue, cBlue, mix);
     stroke(col);
-    arc(centerX, centerY, radius * 2, radius * 2, a0, drawEnd);
+    arc(centerX, centerY, radius * 2, radius * 2, a0, a1);
   }
+  
+  pop();
+  
+  // Draw indicator line (tacca) at the current affluenza percentage
+  push();
+  const indicatorAngle = progressAngle;
+  const indicatorInnerRadius = radius-18;
+  const indicatorOuterRadius = radius+18;
+  
+  const x1 = centerX + indicatorInnerRadius * cos(indicatorAngle);
+  const y1 = centerY + indicatorInnerRadius * sin(indicatorAngle);
+  const x2 = centerX + indicatorOuterRadius * cos(indicatorAngle);
+  const y2 = centerY + indicatorOuterRadius * sin(indicatorAngle);
+  
+  stroke("#1B4A95"); 
+  strokeWeight(5);
+  strokeCap(ROUND);
+  line(x1, y1, x2, y2);
   pop();
   
   // Draw percentage text
@@ -4471,7 +4491,7 @@ function drawAffluenzaChart() {
     push();
     textAlign(RIGHT, TOP);
     textSize(16);
-    fill(22, 50, 100, 180); 
+    fill("#1B4A95"); 
     text(subtitle, titleX, titleY + 22);
     pop();
   }
@@ -4553,21 +4573,65 @@ function drawPieChart() {
   if (selectedQuesito !== null && quesitiVotes[selectedQuesito]) {
     votiSi = quesitiVotes[selectedQuesito].si || 0;
     votiNo = quesitiVotes[selectedQuesito].no || 0;
-    chartTitle = `Quesito ${selectedQuesito} - Voti Referendum ${getYearDisplayName(selectedYear)}`;
+    chartTitle = `Quesito ${selectedQuesito} - Voti Referendum}`;
     regionName = null;
 
-  } else if (selectedRegion && regionVotes && regionVotes[selectedRegion]) {
-    // Priority 2: se c'è una regione selezionata e abbiamo i voti per quella regione
-    votiSi = regionVotes[selectedRegion].si || 0;
-    votiNo = regionVotes[selectedRegion].no || 0;
-    chartTitle = 'VOTI REFERENDUM ' + getYearDisplayName(selectedYear);
-    regionName = selectedRegion; // es. "BASILICATA", "EMILIA-ROMAGNA"
+  } else if (selectedRegion) {
+    // Priority 2: se c'è una regione selezionata, prova a trovare i voti
+    let regionNameFromFeature = null;
+    
+    // Estrai il nome della regione dal feature GeoJSON
+    if (typeof selectedRegion === 'object' && selectedRegion.properties) {
+      regionNameFromFeature = selectedRegion.properties.reg_name || 
+                              selectedRegion.properties.denominazione_reg || 
+                              selectedRegion.properties.denominazione || 
+                              selectedRegion.properties.nome || null;
+    } else if (typeof selectedRegion === 'string') {
+      regionNameFromFeature = selectedRegion;
+    }
+    
+    if (regionNameFromFeature) {
+      regionName = regionNameFromFeature;
+      let matchedVotes = null;
+      
+      // Prova a trovare i voti con vari metodi di matching
+      if (regionVotes && regionVotes[regionNameFromFeature]) {
+        matchedVotes = regionVotes[regionNameFromFeature];
+      } else if (regionVotes && REGION_NAME_MAP[regionNameFromFeature] && regionVotes[REGION_NAME_MAP[regionNameFromFeature]]) {
+        matchedVotes = regionVotes[REGION_NAME_MAP[regionNameFromFeature]];
+      } else if (regionVotes) {
+        // Prova normalizzazione
+        const normalizedName = normalizeName(regionNameFromFeature);
+        for (const key of Object.keys(regionVotes)) {
+          if (normalizeName(key) === normalizedName) {
+            matchedVotes = regionVotes[key];
+            break;
+          }
+        }
+      }
+      
+      if (matchedVotes) {
+        votiSi = matchedVotes.si || 0;
+        votiNo = matchedVotes.no || 0;
+      } else {
+        // Fallback: usa i totali nazionali
+        votiSi = totalVotiSi || 0;
+        votiNo = totalVotiNo || 0;
+      }
+    } else {
+      // Fallback: usa i totali nazionali
+      votiSi = totalVotiSi || 0;
+      votiNo = totalVotiNo || 0;
+      regionName = null;
+    }
+    
+    chartTitle = 'VOTI REFERENDUM';
 
   } else {
     // Fallback: usa i totali nazionali
     votiSi = totalVotiSi || 0;
     votiNo = totalVotiNo || 0;
-    chartTitle = 'VOTI REFERENDUM ' + getYearDisplayName(selectedYear);
+    chartTitle = 'VOTI REFERENDUM' ;
     regionName = null;
   }
 
@@ -4601,7 +4665,7 @@ function drawPieChart() {
   // Se non ci sono dati, messaggio
   if (votiSi === 0 && votiNo === 0) {
     push();
-    fill(50, 50, 100);
+ fill("#1B4A95");
     noStroke();
     textSize(20);
     textFont('Stix Two Text');
@@ -4647,13 +4711,30 @@ function drawPieChart() {
   } catch (e) {}
 
   // Titolo
-fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
+fill("#1B4A95");
   noStroke();
-  textSize(15);
+  textSize(20);
   textFont('STIX Two Text');
   const pieTitleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
   textAlign(RIGHT, TOP);
   text(chartTitle, pieTitleX, pieChartTitleStart);
+
+  // Sottotitolo
+  let subtitle = null;
+  if (selectedQuesito !== null && regionName) {
+    subtitle = `Quesito ${selectedQuesito} - ${regionName}`;
+  } else if (selectedQuesito !== null) {
+    subtitle = `Quesito ${selectedQuesito} - Italia`;
+  } else if (regionName) {
+    subtitle = regionName;
+  }
+  
+  if (subtitle) {
+    textAlign(RIGHT, TOP);
+    textSize(16);
+    fill("#1B4A95");
+    text(subtitle, pieTitleX, pieChartTitleStart + 22);
+  }
 
   // Layout con omini + barre - barre partono dal fondo
   const maxBarHeight = Math.min(radius * 1.0, availableHeight * 0.5); // Barre più alte
@@ -4864,13 +4945,13 @@ function drawGenderChart() {
   // Se non ci sono dati, mostra messaggio
   if (maschi === 0 && femmine === 0) {
     push();
-    fill(50, 50, 70);
+    fill("#1B4A95");
     noStroke();
     textSize(20);
     textFont('Stix Two Text');
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
-    text('Dati non disponibili', chartX, windowTop + windowHeight / 2-30);
+    text('Dati non disponibili', chartX, windowTop + windowHeight / 2);
     textSize(11);
     textStyle(NORMAL);
     fill(100, 100, 100, 200);
@@ -4906,7 +4987,7 @@ function drawGenderChart() {
   text(chartTitle, genderTitleX, titleY);
 
   // Sottotitolo
-  let subtitle = 'Italia';
+  let subtitle = ' ';
   if (selectedQuesito !== null) {
     subtitle = `Quesito ${selectedQuesito}`;
     if (regionName) subtitle += ` " ${regionName}`;
@@ -4916,7 +4997,7 @@ function drawGenderChart() {
   }
   textAlign(RIGHT, TOP);
   textSize(16);
-  fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
+  fill("#1B4A95");
   text(subtitle, genderTitleX, titleY + 22);
 
   drawSplitSemicircle(centerX, centerY, radius, maschiPct, THEME_BLUE, THEME_ORANGE, 16);
@@ -5159,6 +5240,7 @@ function drawStickFigure(x, y, size, col, isMale) {
 // Draw quesiti window on the left
 function drawQuesitiWindow() {
   const quesiti2025 = quesitiList.length > 0 ? quesitiList : [];
+  const titleColor = color(30, 82, 166);  // Blu per i titoli
   
   const navbarHeight = 100;
   const sliderHeight = 130; // Space for slider, year labels and back button at bottom
@@ -5339,7 +5421,7 @@ pop();
     // Text aligned
     push();
     noStroke();
-    fill(22, 50, 100, 255);
+    fill(titleColor);
     textStyle(NORMAL);
     textSize(18);
     textAlign(LEFT, TOP);
@@ -5505,7 +5587,7 @@ function drawPresidentSlider(x, y, w, h) {
     }
 
     // Calcolo altezza testo
-    const roleLines = pRole.toUpperCase().split(" DEL");
+    const roleLines = pRole.split(" DEL");
     const hasSecondLine = roleLines.length > 1;
     let totalTextHeight = 22 + 6 + 15; 
     if (hasSecondLine) totalTextHeight += 18;
@@ -5535,13 +5617,13 @@ function drawPresidentSlider(x, y, w, h) {
     currentY += 22; // Spazio
 
     // RUOLO
-    fill(titleColor); textSize(15); textStyle(BOLD); noStroke();
+    fill(titleColor); textSize(18); textStyle(NORMAL); noStroke();
     if (hasSecondLine) {
-        text(roleLines[0] + (pRole.toUpperCase().includes("DELL") ? "" : ""), textX, currentY);
+        text(roleLines[0] + (pRole.includes("DELL") ? "" : ""), textX, currentY);
         currentY += 18; 
-        text(pRole.toUpperCase().replace(roleLines[0], "").trim(), textX, currentY);
+        text(pRole.replace(roleLines[0], "").trim(), textX, currentY);
     } else {
-        text(pRole.toUpperCase(), textX, currentY);
+        text(pRole, textX, currentY);
     }
     pop();
   }
@@ -5560,7 +5642,7 @@ function drawPresidentSlider(x, y, w, h) {
   // 1. Presidente della Repubblica
   drawSinglePresident(
       presidenteData.presidenteRepubblica, 
-      "PRESIDENTE DELLA REPUBBLICA", 
+      "Presidente della Repubblica", 
       presidenteData.imgRepubblica, 
       x + padding, 
       repY, 
@@ -5571,7 +5653,7 @@ function drawPresidentSlider(x, y, w, h) {
   // 2. Presidente del Consiglio
   drawSinglePresident(
       presidenteData.presidenteConsiglio, 
-      "PRESIDENTE DEL CONSIGLIO", 
+      "Presidente del Consiglio", 
       presidenteData.imgConsiglio, 
       x, 
       consY, 

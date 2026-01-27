@@ -363,13 +363,14 @@ function drawLegend() {
     // Disegna testo
     fill(COLORS.INK);
     noStroke();
-    text(item.text, markerX + 20, y);
+    text(item.text, markerX + 20, y+7);
 
-    // Disegna marker cerchio
-    fill(item.color);
+   fill(item.color);
     stroke(COLORS.INK);
     strokeWeight(1);
-    circle(markerX, y, 12);
+    rectMode(CENTER);
+    rect(markerX, y+8, 12, 12, 3);
+    rectMode(CORNER);
   }
 }
 

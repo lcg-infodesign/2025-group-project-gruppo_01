@@ -201,7 +201,7 @@ function updateSvgRegionOpacityFromAffluenza() {
 
       // 2. Fallback generico (Spazi invece di underscore)
       if (val === undefined) {
-          const spaceKey = id.replace(/_/g, ' '); 
+          const spaceKey = id.replace(/_/g, ' ');
           val = regionValues[spaceKey] ?? regionValues[spaceKey.toUpperCase()];
       }
       
@@ -209,6 +209,20 @@ function updateSvgRegionOpacityFromAffluenza() {
       if (val === undefined) {
            const dashKey = id.replace(/_/g, '-');
            val = regionValues[dashKey] ?? regionValues[dashKey.toUpperCase()];
+      }
+
+      // 4. Fuzzy normalization fallback: match abbreviations/punctuation variants
+      if (val === undefined) {
+          const normalize = s => (s || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
+          const targetNorm = normalize(id.replace(/_/g, ' '));
+          for (const k of Object.keys(regionValues)) {
+              if (!k) continue;
+              const keyNorm = normalize(k);
+              if (keyNorm === targetNorm || keyNorm.includes(targetNorm) || targetNorm.includes(keyNorm)) {
+                  val = regionValues[k];
+                  break;
+              }
+          }
       }
 
       // Applica Opacità
@@ -306,12 +320,8 @@ window.onRegionSelected = function(regionId) {
   // E. Aggiorna il nome della regione nel header
   const regionNameElement = document.getElementById('selected-region');
   if (regionNameElement) {
-      let displayName = normalized;
-      // Se è una feature GeoJSON, estrai il nome dalla proprietà giusta
-      if (typeof selectedRegion === 'object' && selectedRegion.properties) {
-          displayName = selectedRegion.properties.reg_name || selectedRegion.properties.denominazione_reg || selectedRegion.properties.denominazione || selectedRegion.properties.nome || normalized;
-      }
-      regionNameElement.textContent = displayName;
+      // Usa sempre il nome normalizzato (che è pulito e standardizzato)
+      regionNameElement.textContent = normalized;
   }
   
   // F. Forza aggiornamento
@@ -2259,6 +2269,7 @@ const CSV_REGION_NAME_VARIANTS = {
   'ABRUZZI': 'ABRUZZO',
   'ABRUZZO': 'ABRUZZO',
   'EMILIA R.': 'EMILIA-ROMAGNA',
+  'EMILIA ROM.': 'EMILIA-ROMAGNA', // Abbreviazione usata nel 1993
   'EMILIA-ROMAGNA': 'EMILIA-ROMAGNA',
   'FRIULI V.G.': 'FRIULI-VENEZIA GIULIA',
   'FRIULI V. G.': 'FRIULI-VENEZIA GIULIA', // Variante usata nel 1993 (con spazi)
@@ -2271,6 +2282,7 @@ const CSV_REGION_NAME_VARIANTS = {
   'TRENTINO-ALTO ADIGE': 'TRENTINO-ALTO ADIGE',
   // Varianti per Valle d'Aosta nei CSV storici
   'VAL D\'AOSTA': 'VALLE D\'AOSTA',
+  'VALLE D\'AOS.': 'VALLE D\'AOSTA', // Abbreviazione usata nel 1993
   'VALLE D\'AOSTA': 'VALLE D\'AOSTA',
   'VALLE D\'AOSTA/VALLÃ‰E D\'AOSTE': 'VALLE D\'AOSTA'
 };
@@ -2503,6 +2515,7 @@ function joinGeoJSONData(gj) {
   }
   
   redraw();
+  
 }
 
 // Normalize names for robust matching (remove diacritics, punctuation, collapse spaces)
@@ -5030,44 +5043,29 @@ function drawGenderChart() {
   push();
   textAlign(CENTER, TOP);
   textSize(20);
-  textStyle(BOLD);
   textFont('Stix Two Text');
+   textStyle(BOLD);
   fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
   text('UOMINI', leftLabelX, labelTopY);
   text(maschiPct.toFixed(1) + '%', leftLabelX, percentY);
   textSize(16);
+  textStyle(NORMAL);
   text(maschi.toLocaleString('it-IT'), leftLabelX, countY);
   pop();
 
-  // Femmine - con bordo bianco per maggiore visibilità
+  // Femmine
   push();
   textAlign(CENTER, TOP);
   textFont('Stix Two Text');
   textStyle(BOLD);
   
-  // Disegna "DONNE" con bordo bianco
-  fill(255, 255, 255); // Bordo bianco
-  stroke(255, 255, 255);
-  strokeWeight(4);
-  textSize(20);
-  text('DONNE', rightLabelX, labelTopY);
-  
-  // Disegna testo principale "DONNE"
+  // Disegna "DONNE"
   noStroke();
   fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2]);
   textSize(20);
   text('DONNE', rightLabelX, labelTopY);
   
-  // Disegna percentuale con bordo bianco
-  fill(255, 255, 255); // Bordo bianco
-  stroke(255, 255, 255);
-  strokeWeight(4);
-  textSize(20);
-  text(femminePct.toFixed(1) + '%', rightLabelX, percentY);
-  
-  // Disegna percentuale principale
-  noStroke();
-  fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2]);
+  // Disegna percentuale
   textSize(20);
   text(femminePct.toFixed(1) + '%', rightLabelX, percentY);
   
@@ -5582,7 +5580,7 @@ function drawPresidentSlider(x, y, w, h) {
             const aspect = img.width / img.height;
             let dw = imgSize; let dh = imgSize;
             if (aspect > 1) dh = imgSize / aspect; else dw = imgSize * aspect;          
-            dw *= 1.1; dh *= 1.1;
+            dw *= 1.0; dh *= 1.0;
             imageMode(CENTER);
             image(img, imgCenterX, imgCenterY, dw, dh);
             drawingContext.restore();

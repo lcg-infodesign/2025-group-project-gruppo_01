@@ -1,4 +1,10 @@
 let tableRows = null;
+// Stato per l'animazione dei presidenti (zoom fluido)
+let presidentAnimState = {
+  rep: 1.0,   // Scala corrente Repubblica
+  cons: 1.0   // Scala corrente Consiglio
+};
+
 let regionValues = {};
 let geojsonData = null; // loaded GeoJSON FeatureCollection
 // Current selected year (can be a number or string like '2016-1' or '2016-2')
@@ -201,7 +207,7 @@ function updateSvgRegionOpacityFromAffluenza() {
 
       // 2. Fallback generico (Spazi invece di underscore)
       if (val === undefined) {
-          const spaceKey = id.replace(/_/g, ' '); 
+          const spaceKey = id.replace(/_/g, ' ');
           val = regionValues[spaceKey] ?? regionValues[spaceKey.toUpperCase()];
       }
       
@@ -209,6 +215,20 @@ function updateSvgRegionOpacityFromAffluenza() {
       if (val === undefined) {
            const dashKey = id.replace(/_/g, '-');
            val = regionValues[dashKey] ?? regionValues[dashKey.toUpperCase()];
+      }
+
+      // 4. Fuzzy normalization fallback: match abbreviations/punctuation variants
+      if (val === undefined) {
+          const normalize = s => (s || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
+          const targetNorm = normalize(id.replace(/_/g, ' '));
+          for (const k of Object.keys(regionValues)) {
+              if (!k) continue;
+              const keyNorm = normalize(k);
+              if (keyNorm === targetNorm || keyNorm.includes(targetNorm) || targetNorm.includes(keyNorm)) {
+                  val = regionValues[k];
+                  break;
+              }
+          }
       }
 
       // Applica Opacità
@@ -306,12 +326,8 @@ window.onRegionSelected = function(regionId) {
   // E. Aggiorna il nome della regione nel header
   const regionNameElement = document.getElementById('selected-region');
   if (regionNameElement) {
-      let displayName = normalized;
-      // Se è una feature GeoJSON, estrai il nome dalla proprietà giusta
-      if (typeof selectedRegion === 'object' && selectedRegion.properties) {
-          displayName = selectedRegion.properties.reg_name || selectedRegion.properties.denominazione_reg || selectedRegion.properties.denominazione || selectedRegion.properties.nome || normalized;
-      }
-      regionNameElement.textContent = displayName;
+      // Usa sempre il nome normalizzato (che è pulito e standardizzato)
+      regionNameElement.textContent = normalized;
   }
   
   // F. Forza aggiornamento
@@ -2259,6 +2275,7 @@ const CSV_REGION_NAME_VARIANTS = {
   'ABRUZZI': 'ABRUZZO',
   'ABRUZZO': 'ABRUZZO',
   'EMILIA R.': 'EMILIA-ROMAGNA',
+  'EMILIA ROM.': 'EMILIA-ROMAGNA', // Abbreviazione usata nel 1993
   'EMILIA-ROMAGNA': 'EMILIA-ROMAGNA',
   'FRIULI V.G.': 'FRIULI-VENEZIA GIULIA',
   'FRIULI V. G.': 'FRIULI-VENEZIA GIULIA', // Variante usata nel 1993 (con spazi)
@@ -2271,6 +2288,7 @@ const CSV_REGION_NAME_VARIANTS = {
   'TRENTINO-ALTO ADIGE': 'TRENTINO-ALTO ADIGE',
   // Varianti per Valle d'Aosta nei CSV storici
   'VAL D\'AOSTA': 'VALLE D\'AOSTA',
+  'VALLE D\'AOS.': 'VALLE D\'AOSTA', // Abbreviazione usata nel 1993
   'VALLE D\'AOSTA': 'VALLE D\'AOSTA',
   'VALLE D\'AOSTA/VALLÃ‰E D\'AOSTE': 'VALLE D\'AOSTA'
 };
@@ -2503,6 +2521,7 @@ function joinGeoJSONData(gj) {
   }
   
   redraw();
+  
 }
 
 // Normalize names for robust matching (remove diacritics, punctuation, collapse spaces)
@@ -2646,11 +2665,12 @@ async function runCartogram() {
 }
 
 function draw() {
- 
-  // Resetta il cursore a "default" all'inizio di ogni frame
-  document.querySelector('canvas').style.cursor = 'default';
+  function draw() {
+    document.body.style.cursor = 'default'; // <--- AGGIUNGI QUESTA RIGA IN CIMA
+    
+
+  }
   
-  // ... resto del codice ...
 
 
   // Hide debug panel if it exists
@@ -3955,10 +3975,87 @@ function setupYearSlider() {
           // Reset flag dopo un breve delay
           setTimeout(() => {
             isUpdating = false;
+            if (window.updateYearArrowsState) window.updateYearArrowsState();
           }, 100);
       }
   });
+
+  // --- Frecce anno precedente / successivo ---
+  const yearPrevBtn = document.getElementById('year-prev-btn');
+  const yearNextBtn = document.getElementById('year-next-btn');
+  window.updateYearArrowsState = function() {
+    if (!yearPrevBtn || !yearNextBtn) return;
+    const idx = REFERENDUM_YEARS_ARRAY.findIndex(k => String(k) === String(selectedYear));
+    const i = idx >= 0 ? idx : REFERENDUM_YEARS_ARRAY.length - 1;
+    yearPrevBtn.disabled = i <= 0;
+    yearNextBtn.disabled = i >= REFERENDUM_YEARS_ARRAY.length - 1;
+  };
+  if (yearPrevBtn && yearNextBtn) {
+    window.updateYearArrowsState();
+    yearPrevBtn.addEventListener('click', () => { window.navigateToYear(-1); window.updateYearArrowsState(); });
+    yearNextBtn.addEventListener('click', () => { window.navigateToYear(1); window.updateYearArrowsState(); });
+  }
 }
+
+
+// Naviga all'anno precedente (-1) o successivo (+1)
+window.navigateToYear = function(direction) {
+  const idx = REFERENDUM_YEARS_ARRAY.findIndex(k => String(k) === String(selectedYear));
+  const i = idx >= 0 ? idx : 0;
+  const newIndex = Math.max(0, Math.min(REFERENDUM_YEARS_ARRAY.length - 1, i + direction));
+  const newYear = REFERENDUM_YEARS_ARRAY[newIndex];
+  if (newYear == null || String(newYear) === String(selectedYear)) return;
+
+  const visibleSlider = document.getElementById('year-slider-visible');
+  const yearToPosition = {};
+  REFERENDUM_YEARS_ARRAY.forEach((yearKey, index) => {
+    const position = (REFERENDUM_YEARS_ARRAY.length > 1)
+      ? (index / (REFERENDUM_YEARS_ARRAY.length - 1)) * 100
+      : 0;
+    yearToPosition[yearKey] = position;
+  });
+
+  selectedYear = newYear;
+  dataFile = REFERENDUM_YEARS[newYear];
+
+  if (window.refreshSliderDots) window.refreshSliderDots();
+  if (visibleSlider && yearToPosition[newYear] !== undefined) {
+    visibleSlider.value = yearToPosition[newYear];
+  }
+
+  currentPresidenteMode = 0;
+  quesitiScrollOffset = 0;
+  presidenteDescScrollOffset = 0;
+  selectedQuesito = null;
+  selectedRegion = null;
+  if (window.onRegionSelected) window.onRegionSelected(null);
+
+  if (REFERENDUM_YEARS[newYear] && typeof loadCSVForYear === 'function') {
+    loadCSVForYear(REFERENDUM_YEARS[newYear]);
+  } else {
+    redraw();
+  }
+
+  let presidenteData = contestoByYear[String(newYear)];
+  if (!presidenteData && !isNaN(newYear)) presidenteData = contestoByYear[parseInt(newYear)];
+  if (!presidenteData) {
+    const numericYear = getYearNumeric(String(newYear));
+    for (const key in contestoByYear) {
+      if (getYearNumeric(key) === numericYear) {
+        presidenteData = contestoByYear[key];
+        break;
+      }
+    }
+  }
+  if (presidenteData && typeof loadPresidenteImages === 'function') {
+    loadPresidenteImages(presidenteData, false);
+  }
+
+  try {
+    const url = 'dettaglio.html?year=' + encodeURIComponent(newYear);
+    window.history.replaceState(null, '', url);
+  } catch (e) {}
+};
 
 
 // Load CSV for a specific year
@@ -4357,203 +4454,131 @@ function drawNoDataPlaceholder(windowTop, windowHeight, mainMessage) {
 
 
 function drawAffluenzaChart() {
-  // 1. Definizioni colori locali per sicurezza
-  const cDark = color("#1B4A95");
-  const cBlue = color(30, 82, 166);
-  const cLightBlue = color(200, 220, 242);
+  // 1. Definizioni colori
+  const cLightBlue = color(200, 220, 242); 
+  const cBlue = color(30, 82, 166);        
+  const cDark = color(22, 50, 100);
+  const cYellow = color(255, 183, 0);
 
-  const affluenza = calculateAffluenzaForChart();
-  
-  // 2. RECUPERO NOME REGIONE (Logica Estesa)
-  let regionName = null;
-  
-  if (selectedRegion) {
-    let rawName = "";
+  // 2. Controllo e Calcolo Valori
+  if (!window.sezione3Window1Top) return;
 
-    // CASO A: È un oggetto GeoJSON (come per Lombardia, Veneto, ecc.)
-    if (typeof selectedRegion === 'object' && selectedRegion.properties) {
-        rawName = selectedRegion.properties.reg_name || 
-                 selectedRegion.properties.denominazione_reg || 
-                 selectedRegion.properties.denominazione || 
-                 selectedRegion.properties.nome || 
-                 "";
-    } 
-    // CASO B: È una stringa ID (Il caso di Trentino e Val d'Aosta!)
-    else if (typeof selectedRegion === 'string') {
-        rawName = selectedRegion;
-    }
-
-    // Se abbiamo trovato un nome (o un ID), lo formattiamo bene
-    if (rawName) {
-         let cleanName = rawName.replace(/_/g, ' ').replace(/-/g, ' '); 
-         let upperName = cleanName.toUpperCase();
-
-         if (upperName.includes("VAL") && upperName.includes("AOSTA")) {
-             regionName = "Valle d'Aosta";
-         } else if (upperName.includes("TRENTINO") || upperName.includes("ALTO ADIGE")) {
-             regionName = "Trentino-Alto Adige";
-         } else if (upperName.includes("FRIULI") || upperName.includes("VENEZIA")) {
-             regionName = "Friuli-Venezia Giulia";
-         } else if (upperName.includes("EMILIA")) {
-             regionName = "Emilia-Romagna";
-         } else {
-             // Capitalizza standard
-             regionName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1).toLowerCase();
-         }
-    }
-  }
-  
-  // Use window 1 (top window) for affluenza chart
-  if (!window.sezione3Window1Top) return; 
-  
   const chartAreaLeft = window.sezione3ChartAreaLeft;
   const chartAreaWidth = window.sezione3ChartAreaWidth;
   const bgPadding = window.sezione3BgPadding;
   const windowTop = window.sezione3Window1Top;
   const windowHeight = window.sezione3WindowHeight;
 
-  // Se i dati di affluenza non sono disponibili, mostra l'omino grigio al centro della finestra
-  if (affluenza === null || affluenza === undefined || !isFinite(affluenza)) {
-    drawNoDataPlaceholder(windowTop, windowHeight, 'Dati affluenza non disponibili');
-    return;
-  }
-  
-  // Centra orizzontalmente considerando il padding
   const windowLeft = chartAreaLeft + bgPadding;
   const windowWidth = chartAreaWidth - bgPadding * 2;
-  const affluenzaChartX = windowLeft + windowWidth / 2; // Centrato orizzontalmente nella finestra
-  const radius = getAffluenzaSemicircleRadius();
-  // Abbassa il grafico spostandolo più in basso nella finestra
-  const affluenzaChartY = windowTop + windowHeight * 0.65; // Spostato leggermente più in basso (65%)
+  const affluenzaChartX = windowLeft + windowWidth / 2;
+  const radius = getAffluenzaSemicircleRadius(); 
+  const affluenzaChartY = windowTop + windowHeight * 0.65; 
+
+  let affluenza = calculateAffluenzaForChart();
   
-  push();
-  
+  if (typeof affluenza === 'string') affluenza = parseFloat(affluenza);
+  if (affluenza === null || affluenza === undefined || !isFinite(affluenza)) return;
+
+  const startAngle = PI;
+  const endAngle = 2 * PI;
+  const totalAngle = PI;
+  const progressAngle = Math.min(startAngle + (affluenza / 100) * totalAngle, endAngle);
   const centerX = affluenzaChartX;
   const centerY = affluenzaChartY;
-  
-  const startAngle = PI; 
-  const endAngle = 2 * PI; 
-  const totalAngle = PI; 
-  
-  const progressAngle = Math.min(startAngle + (affluenza / 100) * totalAngle, endAngle);
-  
-  let affluenzaColor;
-  if (selectedRegion) {
-      // Se è un oggetto usa le proprietà, altrimenti cerca nei valori globali
-      if (typeof selectedRegion === 'object' && selectedRegion.properties && selectedRegion.properties.affluenza !== undefined) {
-          affluenzaColor = getColor(selectedRegion.properties.affluenza);
-      } else if (typeof selectedRegion === 'string') {
-          // Fallback per ID stringa
-          let val = regionValues[selectedRegion]; 
-          // Se non trova con l'ID esatto, prova correzioni comuni
-          if (!val) val = regionValues[selectedRegion.replace(/_/g, ' ')];
-          if (!val && selectedRegion.includes('TRENTINO')) val = regionValues['TRENTINO-ALTO ADIGE'];
-          
-          affluenzaColor = getColor(val || affluenza);
-      } else {
-          affluenzaColor = getColor(affluenza);
-      }
-  } else {
-    affluenzaColor = getColor(affluenza);
-  }
-  
-  // Draw complete colored arc (always filled)
+
+  // 3. Disegna SFONDO (Arco Grigio)
+  push();
+  stroke(0, 0, 0, 20);
+  strokeWeight(18);
+  strokeCap(ROUND); // Lo sfondo lo lasciamo tutto tondo per bellezza
+  noFill();
+  arc(centerX, centerY, radius * 2, radius * 2, startAngle, endAngle);
+  pop();
+
+  // 4. Disegna ARCO CON GRADIENTE (Misto: Inizio Tondo, Fine Piatta)
   push();
   strokeWeight(18);
-  strokeCap(ROUND);
+  strokeCap(SQUARE); // ✅ IMPORTANTE: Usiamo SQUARE per default (fine piatta)
   noFill();
-  
-  // Draw the complete arc with gradient color
-  const segments = 80;
-  for (let i = 0; i < segments; i++) {
-    const t0 = i / segments;
-    const t1 = (i + 1) / segments;
-    const a0 = startAngle + t0 * (endAngle - startAngle);
-    const a1 = startAngle + t1 * (endAngle - startAngle);
+
+  if (progressAngle > startAngle) {
+    const steps = 80;
+    const angleSpan = progressAngle - startAngle;
+    const fullSpan = endAngle - startAngle;
     
-    const mix = (a0 - startAngle) / (endAngle - startAngle);
-    const col = lerpColor(cLightBlue, cBlue, mix);
-    stroke(col);
-    arc(centerX, centerY, radius * 2, radius * 2, a0, a1);
+    // A. Disegna il gradiente a segmenti
+    for (let i = 0; i < steps; i++) {
+      const t1 = i / steps;
+      const t2 = (i + 1) / steps;
+      
+      const a1 = startAngle + t1 * angleSpan;
+      const a2 = startAngle + t2 * angleSpan;
+      
+      const globalT = (a1 - startAngle) / fullSpan; 
+      const col = lerpColor(cLightBlue, cBlue, globalT);
+      
+      stroke(col);
+      // Piccola sovrapposizione per evitare buchi
+      arc(centerX, centerY, radius * 2, radius * 2, a1, a2 + 0.015);
+    }
+
+    // B. Aggiungi MANUALMENTE il "tappo" rotondo solo all'inizio (0%)
+    // Disegniamo un punto (point) dello spessore della linea esattamente all'inizio
+    stroke(cLightBlue); // Colore iniziale
+    strokeWeight(18);   // Stesso spessore dell'arco
+    strokeCap(ROUND);
+    // Calcoliamo le coordinate esatte dell'inizio dell'arco (a sinistra)
+    const startX = centerX + radius * cos(startAngle);
+    const startY = centerY + radius * sin(startAngle);
+    point(startX, startY);
   }
-  
   pop();
-  
-  // Draw indicator line (tacca) at the current affluenza percentage
+
+  // 5. Asticella (Needle)
   push();
-  const indicatorAngle = progressAngle;
-  const indicatorInnerRadius = radius-18;
-  const indicatorOuterRadius = radius+18;
-  
-  const x1 = centerX + indicatorInnerRadius * cos(indicatorAngle);
-  const y1 = centerY + indicatorInnerRadius * sin(indicatorAngle);
-  const x2 = centerX + indicatorOuterRadius * cos(indicatorAngle);
-  const y2 = centerY + indicatorOuterRadius * sin(indicatorAngle);
-  
-  stroke("#1B4A95"); 
-  strokeWeight(5);
+  stroke(cYellow);
+  strokeWeight(4);
   strokeCap(ROUND);
-  line(x1, y1, x2, y2);
+  const indicatorAngle = progressAngle;
+  const rOuter = radius + 18;
+  const rInner = radius - 18;
+  line(
+    centerX + rInner * cos(indicatorAngle), centerY + rInner * sin(indicatorAngle),
+    centerX + rOuter * cos(indicatorAngle), centerY + rOuter * sin(indicatorAngle)
+  );
   pop();
-  
-  // Draw percentage text
+
+  // 6. Testi e Etichette
+  push();
   noStroke();
-  fill(cDark); 
-  
-  textFont('STIX Two Text'); 
-  textSize(45); 
+  fill(cBlue);
+  if (typeof stixFont !== 'undefined') textFont(stixFont);
+  textSize(45);
   textAlign(CENTER, CENTER);
-  text(affluenza.toFixed(1) + '%', centerX, centerY);
-  
-  // Small window title
+  text(affluenza.toFixed(1) + "%", centerX, centerY);
+  pop();
+
+  push();
+  textSize(14);
+  fill(cBlue);
+  textAlign(CENTER, CENTER);
+  text("0%", centerX - radius - 25, centerY);
+  text("100%", centerX + radius + 25, centerY);
+  pop();
+
+  // Titolo
   const titleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
   const titleY = windowTop + 8;
   push();
-  
   textAlign(RIGHT, TOP);
   textSize(20);
-  fill(cDark); 
-  text('AFFLUENZA', titleX, titleY);
-  pop();
-
-  // Small subtitle
-  let subtitle = null;
-  
-  // Se abbiamo un nome regione valido (trovato con la logica sopra)
-  if (regionName) {
-      if (selectedQuesito !== null) {
-          subtitle = `Quesito ${selectedQuesito} - ${regionName}`;
-      } else {
-          subtitle = regionName;
-      }
-  } else {
-      // Fallback Italia se nessun nome regione trovato
-      if (selectedQuesito !== null) {
-          subtitle = `Quesito ${selectedQuesito} - Italia`;
-      }
-      // Se non c'è quesito e non c'è regione, non mostrare nulla (o "Italia")
-  }
-
-  if (subtitle) {
-    push();
-    textAlign(RIGHT, TOP);
-    textSize(16);
-    fill("#1B4A95"); 
-    text(subtitle, titleX, titleY + 22);
-    pop();
-  }
-
-  // Draw 0% and 100% labels
-  push();
-  textSize(20);
-  fill(cBlue); 
-  textAlign(CENTER, CENTER);
-  text('0%', centerX - radius, centerY + radius * 0.3);
-  text('100%', centerX + radius, centerY + radius * 0.3);
-  pop();
-  
+  fill(cDark);
+  if (typeof stixFont !== 'undefined') textFont(stixFont);
+  text("AFFLUENZA", titleX, titleY);
   pop();
 }
+
 
 
 
@@ -4620,7 +4645,7 @@ function drawPieChart() {
   if (selectedQuesito !== null && quesitiVotes[selectedQuesito]) {
     votiSi = quesitiVotes[selectedQuesito].si || 0;
     votiNo = quesitiVotes[selectedQuesito].no || 0;
-    chartTitle = `Quesito ${selectedQuesito} - Voti Referendum}`;
+    chartTitle = null; // Un solo titolo: "Quesito X - Italia" (sottotitolo sotto)
     regionName = null;
 
   } else if (selectedRegion) {
@@ -4738,16 +4763,7 @@ function drawPieChart() {
     drawingContext.clip();
   } catch (e) {}
 
-  // Titolo
-fill("#1B4A95");
-  noStroke();
-  textSize(20);
-  textFont('STIX Two Text');
-  const pieTitleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
-  textAlign(RIGHT, TOP);
-  text(chartTitle, pieTitleX, pieChartTitleStart);
-
-  // Sottotitolo
+  // Titolo: "Voti referendum" sopra e "Quesito X - Italia" sotto (quando c'è un quesito), altrimenti solo "VOTI REFERENDUM"
   let subtitle = null;
   if (selectedQuesito !== null && regionName) {
     subtitle = `Quesito ${selectedQuesito} - ${regionName}`;
@@ -4756,12 +4772,20 @@ fill("#1B4A95");
   } else if (regionName) {
     subtitle = regionName;
   }
-  
+
+  fill("#1B4A95");
+  noStroke();
+  textFont('STIX Two Text');
+  const pieTitleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
+  textAlign(RIGHT, TOP);
   if (subtitle) {
-    textAlign(RIGHT, TOP);
     textSize(16);
-    fill("#1B4A95");
-    text(subtitle, pieTitleX, pieChartTitleStart + 22);
+    text('Voti referendum', pieTitleX, pieChartTitleStart);
+    textSize(20);
+    text(subtitle, pieTitleX, pieChartTitleStart + 20);
+  } else if (chartTitle) {
+    textSize(20);
+    text(chartTitle, pieTitleX, pieChartTitleStart);
   }
 
   // Layout con omini + barre - barre partono dal fondo
@@ -4860,7 +4884,6 @@ function drawGenderChart() {
                  feature.properties.nome || null;
 
     regionName = name;
-
     let matchedKey = null;
 
     // Trova il match nel CSV
@@ -4961,7 +4984,7 @@ function drawGenderChart() {
   const maschiPct = total > 0 ? (maschi / total) * 100 : 0;
   const femminePct = total > 0 ? (femmine / total) * 100 : 0;
 
-  // --- DISEGNO GRAFICO (tutto invariato) ---
+  // --- DISEGNO GRAFICO ---
   if (!window.sezione3Window3Top) return;
   const chartAreaLeft = window.sezione3ChartAreaLeft;
   const chartAreaWidth = window.sezione3ChartAreaWidth;
@@ -4970,11 +4993,12 @@ function drawGenderChart() {
   const windowHeight = window.sezione3WindowHeight;
   const chartX = chartAreaLeft + chartAreaWidth / 2;
 
-  // Se non ci sono dati, mostra omino grigio al posto del grafico
+  // Se non ci sono dati, mostra placeholder
   if (maschi === 0 && femmine === 0) {
     drawNoDataPlaceholder(windowTop, windowHeight, 'Dati genere non disponibili');
     return;
   }
+
   const titleAreaHeight = 25;
   const symbolSize = 18;
   const rowSpacing = 8;
@@ -5017,69 +5041,57 @@ function drawGenderChart() {
   fill("#1B4A95");
   text(subtitle, genderTitleX, titleY + 22);
 
+  // Disegna l'arco
   drawSplitSemicircle(centerX, centerY, radius, maschiPct, THEME_BLUE, THEME_ORANGE, 16);
 
   const sideOffset = 70;
   const leftLabelX = centerX - radius - sideOffset;
   const rightLabelX = centerX + radius + sideOffset;
+  // Alzo leggermente le etichette per centrarle meglio verticalmente senza il numero assoluto
   const labelTopY = centerY - radius * 0.8;
-  const percentY = centerY - radius * 0.6;
-  const countY = percentY + 22;
+  const percentY = centerY - radius * 0.5;
 
-  // Maschi
+  // --- MASCHI (UOMINI) ---
   push();
   textAlign(CENTER, TOP);
+  
+  // Titolo
   textSize(20);
-  textStyle(BOLD);
   textFont('Stix Two Text');
+  textStyle(BOLD);
   fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
   text('UOMINI', leftLabelX, labelTopY);
+  
+  // Percentuale (INGRANDITA A 32px)
+  textSize(32); 
   text(maschiPct.toFixed(1) + '%', leftLabelX, percentY);
-  textSize(16);
-  text(maschi.toLocaleString('it-IT'), leftLabelX, countY);
+  
+  // Numero assoluto RIMOSSO
   pop();
 
-  // Femmine - con bordo bianco per maggiore visibilità
+  // --- FEMMINE (DONNE) ---
   push();
   textAlign(CENTER, TOP);
   textFont('Stix Two Text');
   textStyle(BOLD);
   
-  // Disegna "DONNE" con bordo bianco
-  fill(255, 255, 255); // Bordo bianco
-  stroke(255, 255, 255);
-  strokeWeight(4);
-  textSize(20);
-  text('DONNE', rightLabelX, labelTopY);
-  
-  // Disegna testo principale "DONNE"
+  // Titolo
   noStroke();
   fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2]);
   textSize(20);
   text('DONNE', rightLabelX, labelTopY);
   
-  // Disegna percentuale con bordo bianco
-  fill(255, 255, 255); // Bordo bianco
-  stroke(255, 255, 255);
-  strokeWeight(4);
-  textSize(20);
+  // Percentuale (INGRANDITA A 32px)
+  textSize(28);
   text(femminePct.toFixed(1) + '%', rightLabelX, percentY);
   
-  // Disegna percentuale principale
-  noStroke();
-  fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2]);
-  textSize(20);
-  text(femminePct.toFixed(1) + '%', rightLabelX, percentY);
-  
-  // Numero totale
-  textSize(16);
-  fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2], 200);
-  text(femmine.toLocaleString('it-IT'), rightLabelX, countY);
+  // Numero assoluto RIMOSSO
   pop();
 
   drawingContext.restore();
   pop();
 }
+
 
 
 // Draw national totals gender chart at the bottom of the right window
@@ -5514,7 +5526,6 @@ function drawPresidentSlider(x, y, w, h) {
     // Disegna comunque il box vuoto
     noFill(); stroke(30, 82, 166); strokeWeight(1);
     rect(x, y, w, h);
-    
     fill(100); textSize(14); textAlign(CENTER, CENTER);
     text('Dati contesto non disponibili', x + w/2, y + h/2);
     pop();
@@ -5536,19 +5547,17 @@ function drawPresidentSlider(x, y, w, h) {
   strokeWeight(1);
   rect(x, y, w, h);
   
-  // --- NUOVO TITOLO CONTESTO (Stile QUESITI) ---
-  fill(titleColor); // Blu scuro
+  // --- TITOLO CONTESTO ---
+  fill(titleColor); 
   noStroke();
   textAlign(LEFT, TOP);
   textSize(20); 
   textStyle(BOLD);
   textFont('STIX Two Text');
-  
-  // Posizionato in alto a sinistra con un po' di margine
   text("CONTESTO", x + 10, y + 10);
 
   // --- FUNZIONE INTERNA PER DISEGNARE UN PRESIDENTE ---
-  function drawSinglePresident(pName, pRole, pImgFilename, px, py, align, pLink) {
+  function drawSinglePresident(pName, pRole, pImgFilename, px, py, align, pLink, type) {
     if (!pName) return;
 
     // Coordinate Immagine
@@ -5560,39 +5569,62 @@ function drawPresidentSlider(x, y, w, h) {
     }
     const imgCenterY = py;
 
-    // Gestione Click e Hover Immagine
-    if (pLink && pLink.length > 3) {
-        presidentClickZones.push({ type: 'circle', x: imgCenterX, y: imgCenterY, r: imgSize/2, url: pLink, name: pName });
-        if (dist(mouseX, mouseY, imgCenterX, imgCenterY) < imgSize/2) cursor(HAND);
+    // --- ANIMAZIONE SMOOTH & HOVER ---
+    let targetScale = 1.0; 
+    
+    // Check Hover: Usa DOM cursor per affidabilità
+    if (dist(mouseX, mouseY, imgCenterX, imgCenterY) < imgSize/2) {
+        document.body.style.cursor = 'pointer'; // FORZA IL CURSORE
+        targetScale = 1.15; // Target zoom (115%)
+    } else {
+        // Se c'è un link testuale sotto e siamo sopra il testo, gestiamo dopo
     }
 
+    // Aggiorna lo stato dell'animazione (lerp)
+    if (presidentAnimState[type] !== undefined) {
+        presidentAnimState[type] = lerp(presidentAnimState[type], targetScale, 0.15);
+    } else {
+        presidentAnimState[type] = 1.0;
+    }
+
+    const currentScale = presidentAnimState[type];
+
+    // Gestione Click (URL) - per l'immagine
+    if (pLink && pLink.length > 3) {
+        presidentClickZones.push({ type: 'circle', x: imgCenterX, y: imgCenterY, r: imgSize/2, url: pLink, name: pName });
+    }
+
+    // --- DISEGNO IMMAGINE ---
+    push();
+    translate(imgCenterX, imgCenterY); 
+    scale(currentScale); // Zoom fluido
+    
     // Cerchio sfondo
     noStroke(); fill(circleBgColor);
-    ellipse(imgCenterX, imgCenterY, imgSize, imgSize);
+    ellipse(0, 0, imgSize, imgSize); 
 
     // Immagine
     if (pImgFilename && pImgFilename.trim() !== '') {
         const img = presidenteImages[pImgFilename];
         if (img && img.width > 0) {
-            push();
             drawingContext.save();
             drawingContext.beginPath();
-            drawingContext.arc(imgCenterX, imgCenterY, imgSize/2, 0, TWO_PI);
+            drawingContext.arc(0, 0, imgSize/2, 0, TWO_PI);
             drawingContext.clip();
             const aspect = img.width / img.height;
             let dw = imgSize; let dh = imgSize;
             if (aspect > 1) dh = imgSize / aspect; else dw = imgSize * aspect;          
-            dw *= 1.1; dh *= 1.1;
+            dw *= 1.0; dh *= 1.0;
             imageMode(CENTER);
-            image(img, imgCenterX, imgCenterY, dw, dh);
+            image(img, 0, 0, dw, dh);
             drawingContext.restore();
-            pop();
         } else {
              if (img && img.width === 0) loadPresidenteImages(presidenteData, true);
         }
     }
+    pop(); 
 
-    // Posizione Testi
+    // --- POSIZIONE TESTI ---
     let textX;
     let alignMode;
     if (align === 'left') {
@@ -5618,15 +5650,17 @@ function drawPresidentSlider(x, y, w, h) {
     fill(nameColor); noStroke(); textSize(22); textStyle(ITALIC); textFont('STIX Two Text'); 
     text(pName, textX, currentY);
     
-    // Click su Nome
+    // Click su Nome (Link testuale)
     const nameW = textWidth(pName); const nameH = 22; 
     let linkBoxX = (alignMode === LEFT) ? textX : textX - nameW;
     let linkBoxY = currentY - nameH + 5; 
     
     if (pLink && pLink.length > 3) {
         presidentClickZones.push({ type: 'rect', x: linkBoxX, y: linkBoxY, w: nameW, h: nameH, url: pLink, name: pName });
+        // Se il mouse è sopra il nome, attiviamo anche qui la manina
         if (mouseX >= linkBoxX && mouseX <= linkBoxX + nameW && mouseY >= linkBoxY && mouseY <= linkBoxY + nameH) {
-            cursor(HAND); stroke(nameColor); strokeWeight(2);
+            document.body.style.cursor = 'pointer'; // FORZA IL CURSORE ANCHE QUI
+            stroke(nameColor); strokeWeight(2);
             line(linkBoxX, currentY + 3, linkBoxX + nameW, currentY + 3); noStroke();
         }
     }
@@ -5646,13 +5680,10 @@ function drawPresidentSlider(x, y, w, h) {
   }
 
   // --- POSIZIONAMENTO CONTENUTI ---
-  const titleOffset = 40; // Spazio per il titolo "CONTESTO"
-  
-  // Area disponibile per i contenuti (escludendo titolo e padding)
+  const titleOffset = 40; 
   const contentYStart = y + titleOffset;
   const availableContentH = h - titleOffset - 10;
   
-  // Dividiamo l'altezza disponibile in due per i due presidenti
   const repY = contentYStart + (availableContentH * 0.25); 
   const consY = contentYStart + (availableContentH * 0.75); 
 
@@ -5664,7 +5695,8 @@ function drawPresidentSlider(x, y, w, h) {
       x + padding, 
       repY, 
       'left',
-      presidenteData.linkRepubblica 
+      presidenteData.linkRepubblica,
+      'rep' 
   );
 
   // 2. Presidente del Consiglio
@@ -5675,7 +5707,8 @@ function drawPresidentSlider(x, y, w, h) {
       x, 
       consY, 
       'right',
-      presidenteData.linkConsiglio 
+      presidenteData.linkConsiglio,
+      'cons' 
   );
 
   pop();
@@ -5683,85 +5716,72 @@ function drawPresidentSlider(x, y, w, h) {
 
 
 
+
+
 function mouseWheel(event) {
-  // Handle scrolling for quesiti list - use same coordinates as drawQuesitiWindow
+  // Handle scrolling for quesiti list - STESSE coordinate e formule di drawQuesitiWindow (righe 5195-5290)
   const navbarHeight = 100;
-  const sliderHeight = 130; // Space for slider, year labels and back button at bottom
-  const cardMargin = 0;
+  const sliderHeight = 130;
   const cardX = 0;
   const cardY = navbarHeight;
   const cardWidth = width;
   const cardHeight = height - navbarHeight - sliderHeight;
-  const sectionStartY = cardY + 20;
+  const sectionStartY = cardY + 10;
   const bottomPadding = 3;
-  const windowLeft = cardX + 20;
-    const windowWidth = cardWidth * 0.34 - 40; // Width matching the left divider at 34%
+  const windowLeft = cardX + 40;
+  const windowWidth = cardWidth * 0.34 - 60;
   const bgPadding = 15;
-  const presidentSliderHeight = 280;
+  const presidentSliderHeight = 250;
   const windowSpacing = 20;
   
-  // Calculate window positions (same as drawQuesitiWindow)
   const availableTop = sectionStartY;
   const availableBottom = cardY + cardHeight - bottomPadding;
   const totalAvailableHeight = availableBottom - availableTop;
   const totalWindowsHeight = totalAvailableHeight - 20;
-  const quesitiWindowHeight = (totalWindowsHeight - presidentSliderHeight - windowSpacing);
+  const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
   const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
   
-  const circleRadius = 11;
-  const quesitiAreaTop = quesitiWindowTop + 20 + circleRadius + 5;
+  const startY = quesitiWindowTop + 30;
+  const circleRadius = 15;
+  const quesitiAreaTop = startY + circleRadius + 5;
   const quesitiAreaBottom = quesitiWindowTop + quesitiWindowHeight - bgPadding;
+  const quesitiAreaHeight = quesitiAreaBottom - quesitiAreaTop;
   
   // Check if mouse is over quesiti area
   if (mouseX >= windowLeft + bgPadding && mouseX < windowLeft + windowWidth - bgPadding &&
       mouseY >= quesitiAreaTop && mouseY < quesitiAreaBottom) {
-    // Scroll quesiti
     const scrollSpeed = 30;
     quesitiScrollOffset += event.delta > 0 ? scrollSpeed : -scrollSpeed;
     
-    // Calculate heights for quesiti (same logic as drawQuesitiWindow)
+    // Calcolo altezze identico a drawQuesitiWindow (textSize 18, lineHeight 23, minQuesitoHeight 40)
     const quesiti2025 = quesitiList.length > 0 ? quesitiList : [];
-    const minQuesitoHeight = 50;
-    const quesitiHeights = [];
-    let totalQuesitiHeight = 0;
-    
-    // Calculate text width for wrapping (same as drawQuesitiWindow)
+    const minQuesitoHeight = 40;
+    const rightPaddingExtra = 30;
     const textStartX = windowLeft + bgPadding * 2 + 30;
-    const rightPaddingExtra = 30; // Extra padding to avoid slider
     const textEndX = windowLeft + windowWidth - bgPadding * 2 - rightPaddingExtra;
     const maxTextWidth = textEndX - textStartX;
-    const lineHeight = 22; // Allineato con la nuova dimensione del testo
+    const lineHeight = 23;
     
-    // Calculate height for each quesito
-    textSize(16); // Allineato con drawQuesitiWindow
+    textSize(18);
     textStyle(NORMAL);
+    let totalQuesitiHeight = 0;
     quesiti2025.forEach((quesito) => {
       const words = quesito.testo.split(' ');
       let line = '';
       let lineCount = 1;
-      
       for (let i = 0; i < words.length; i++) {
         const testLine = line + (line ? ' ' : '') + words[i];
-        const testWidth = textWidth(testLine);
-        
-        if (testWidth > maxTextWidth && line.length > 0) {
+        if (textWidth(testLine) > maxTextWidth && line.length > 0) {
           line = words[i];
           lineCount++;
         } else {
           line = testLine;
         }
       }
-      
-      const quesitoHeight = Math.max(minQuesitoHeight, 20 + (lineCount * lineHeight) + 5); // Reduced padding to decrease spacing
-      quesitiHeights.push(quesitoHeight);
+      const quesitoHeight = Math.max(minQuesitoHeight, 20 + lineCount * lineHeight);
       totalQuesitiHeight += quesitoHeight;
     });
     
-    // Calculate max scroll offset (same as drawQuesitiWindow)
-    const circleRadius = 11;
-    const quesitiAreaTopPadding = circleRadius + 5;
-    const quesitiAreaHeight = quesitiAreaBottom - quesitiAreaTop;
-    // Use full area height (padding is already accounted for in quesitiAreaHeight)
     const needsScroll = totalQuesitiHeight > quesitiAreaHeight;
     const maxScrollOffset = needsScroll ? Math.max(0, totalQuesitiHeight - quesitiAreaHeight) : 0;
     quesitiScrollOffset = constrain(quesitiScrollOffset, 0, maxScrollOffset);

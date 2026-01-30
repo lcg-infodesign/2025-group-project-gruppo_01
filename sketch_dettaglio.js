@@ -3975,10 +3975,87 @@ function setupYearSlider() {
           // Reset flag dopo un breve delay
           setTimeout(() => {
             isUpdating = false;
+            if (window.updateYearArrowsState) window.updateYearArrowsState();
           }, 100);
       }
   });
+
+  // --- Frecce anno precedente / successivo ---
+  const yearPrevBtn = document.getElementById('year-prev-btn');
+  const yearNextBtn = document.getElementById('year-next-btn');
+  window.updateYearArrowsState = function() {
+    if (!yearPrevBtn || !yearNextBtn) return;
+    const idx = REFERENDUM_YEARS_ARRAY.findIndex(k => String(k) === String(selectedYear));
+    const i = idx >= 0 ? idx : REFERENDUM_YEARS_ARRAY.length - 1;
+    yearPrevBtn.disabled = i <= 0;
+    yearNextBtn.disabled = i >= REFERENDUM_YEARS_ARRAY.length - 1;
+  };
+  if (yearPrevBtn && yearNextBtn) {
+    window.updateYearArrowsState();
+    yearPrevBtn.addEventListener('click', () => { window.navigateToYear(-1); window.updateYearArrowsState(); });
+    yearNextBtn.addEventListener('click', () => { window.navigateToYear(1); window.updateYearArrowsState(); });
+  }
 }
+
+
+// Naviga all'anno precedente (-1) o successivo (+1)
+window.navigateToYear = function(direction) {
+  const idx = REFERENDUM_YEARS_ARRAY.findIndex(k => String(k) === String(selectedYear));
+  const i = idx >= 0 ? idx : 0;
+  const newIndex = Math.max(0, Math.min(REFERENDUM_YEARS_ARRAY.length - 1, i + direction));
+  const newYear = REFERENDUM_YEARS_ARRAY[newIndex];
+  if (newYear == null || String(newYear) === String(selectedYear)) return;
+
+  const visibleSlider = document.getElementById('year-slider-visible');
+  const yearToPosition = {};
+  REFERENDUM_YEARS_ARRAY.forEach((yearKey, index) => {
+    const position = (REFERENDUM_YEARS_ARRAY.length > 1)
+      ? (index / (REFERENDUM_YEARS_ARRAY.length - 1)) * 100
+      : 0;
+    yearToPosition[yearKey] = position;
+  });
+
+  selectedYear = newYear;
+  dataFile = REFERENDUM_YEARS[newYear];
+
+  if (window.refreshSliderDots) window.refreshSliderDots();
+  if (visibleSlider && yearToPosition[newYear] !== undefined) {
+    visibleSlider.value = yearToPosition[newYear];
+  }
+
+  currentPresidenteMode = 0;
+  quesitiScrollOffset = 0;
+  presidenteDescScrollOffset = 0;
+  selectedQuesito = null;
+  selectedRegion = null;
+  if (window.onRegionSelected) window.onRegionSelected(null);
+
+  if (REFERENDUM_YEARS[newYear] && typeof loadCSVForYear === 'function') {
+    loadCSVForYear(REFERENDUM_YEARS[newYear]);
+  } else {
+    redraw();
+  }
+
+  let presidenteData = contestoByYear[String(newYear)];
+  if (!presidenteData && !isNaN(newYear)) presidenteData = contestoByYear[parseInt(newYear)];
+  if (!presidenteData) {
+    const numericYear = getYearNumeric(String(newYear));
+    for (const key in contestoByYear) {
+      if (getYearNumeric(key) === numericYear) {
+        presidenteData = contestoByYear[key];
+        break;
+      }
+    }
+  }
+  if (presidenteData && typeof loadPresidenteImages === 'function') {
+    loadPresidenteImages(presidenteData, false);
+  }
+
+  try {
+    const url = 'dettaglio.html?year=' + encodeURIComponent(newYear);
+    window.history.replaceState(null, '', url);
+  } catch (e) {}
+};
 
 
 // Load CSV for a specific year
@@ -4568,7 +4645,7 @@ function drawPieChart() {
   if (selectedQuesito !== null && quesitiVotes[selectedQuesito]) {
     votiSi = quesitiVotes[selectedQuesito].si || 0;
     votiNo = quesitiVotes[selectedQuesito].no || 0;
-    chartTitle = `Quesito ${selectedQuesito} - Voti Referendum}`;
+    chartTitle = null; // Un solo titolo: "Quesito X - Italia" (sottotitolo sotto)
     regionName = null;
 
   } else if (selectedRegion) {
@@ -4686,16 +4763,7 @@ function drawPieChart() {
     drawingContext.clip();
   } catch (e) {}
 
-  // Titolo
-fill("#1B4A95");
-  noStroke();
-  textSize(20);
-  textFont('STIX Two Text');
-  const pieTitleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
-  textAlign(RIGHT, TOP);
-  text(chartTitle, pieTitleX, pieChartTitleStart);
-
-  // Sottotitolo
+  // Titolo: "Voti referendum" sopra e "Quesito X - Italia" sotto (quando c'è un quesito), altrimenti solo "VOTI REFERENDUM"
   let subtitle = null;
   if (selectedQuesito !== null && regionName) {
     subtitle = `Quesito ${selectedQuesito} - ${regionName}`;
@@ -4704,12 +4772,20 @@ fill("#1B4A95");
   } else if (regionName) {
     subtitle = regionName;
   }
-  
+
+  fill("#1B4A95");
+  noStroke();
+  textFont('STIX Two Text');
+  const pieTitleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
+  textAlign(RIGHT, TOP);
   if (subtitle) {
-    textAlign(RIGHT, TOP);
     textSize(16);
-    fill("#1B4A95");
-    text(subtitle, pieTitleX, pieChartTitleStart + 22);
+    text('Voti referendum', pieTitleX, pieChartTitleStart);
+    textSize(20);
+    text(subtitle, pieTitleX, pieChartTitleStart + 20);
+  } else if (chartTitle) {
+    textSize(20);
+    text(chartTitle, pieTitleX, pieChartTitleStart);
   }
 
   // Layout con omini + barre - barre partono dal fondo
@@ -5643,84 +5719,69 @@ function drawPresidentSlider(x, y, w, h) {
 
 
 function mouseWheel(event) {
-  // Handle scrolling for quesiti list - use same coordinates as drawQuesitiWindow
+  // Handle scrolling for quesiti list - STESSE coordinate e formule di drawQuesitiWindow (righe 5195-5290)
   const navbarHeight = 100;
-  const sliderHeight = 130; // Space for slider, year labels and back button at bottom
-  const cardMargin = 0;
+  const sliderHeight = 130;
   const cardX = 0;
   const cardY = navbarHeight;
   const cardWidth = width;
   const cardHeight = height - navbarHeight - sliderHeight;
-  const sectionStartY = cardY + 20;
+  const sectionStartY = cardY + 10;
   const bottomPadding = 3;
-  const windowLeft = cardX + 20;
-    const windowWidth = cardWidth * 0.34 - 40; // Width matching the left divider at 34%
+  const windowLeft = cardX + 40;
+  const windowWidth = cardWidth * 0.34 - 60;
   const bgPadding = 15;
-  const presidentSliderHeight = 280;
+  const presidentSliderHeight = 250;
   const windowSpacing = 20;
   
-  // Calculate window positions (same as drawQuesitiWindow)
   const availableTop = sectionStartY;
   const availableBottom = cardY + cardHeight - bottomPadding;
   const totalAvailableHeight = availableBottom - availableTop;
   const totalWindowsHeight = totalAvailableHeight - 20;
-  const quesitiWindowHeight = (totalWindowsHeight - presidentSliderHeight - windowSpacing);
+  const quesitiWindowHeight = totalWindowsHeight - presidentSliderHeight - windowSpacing - 60;
   const quesitiWindowTop = availableTop + (totalAvailableHeight - totalWindowsHeight) / 2;
   
-  const circleRadius = 11;
-  const quesitiAreaTop = quesitiWindowTop + 20 + circleRadius + 5;
+  const startY = quesitiWindowTop + 30;
+  const circleRadius = 15;
+  const quesitiAreaTop = startY + circleRadius + 5;
   const quesitiAreaBottom = quesitiWindowTop + quesitiWindowHeight - bgPadding;
+  const quesitiAreaHeight = quesitiAreaBottom - quesitiAreaTop;
   
   // Check if mouse is over quesiti area
   if (mouseX >= windowLeft + bgPadding && mouseX < windowLeft + windowWidth - bgPadding &&
       mouseY >= quesitiAreaTop && mouseY < quesitiAreaBottom) {
-    // Scroll quesiti
     const scrollSpeed = 30;
     quesitiScrollOffset += event.delta > 0 ? scrollSpeed : -scrollSpeed;
     
-    // Calculate heights for quesiti (same logic as drawQuesitiWindow)
+    // Calcolo altezze identico a drawQuesitiWindow (textSize 18, lineHeight 23, minQuesitoHeight 40)
     const quesiti2025 = quesitiList.length > 0 ? quesitiList : [];
-    const minQuesitoHeight = 50;
-    const quesitiHeights = [];
-    let totalQuesitiHeight = 0;
-    
-    // Calculate text width for wrapping (same as drawQuesitiWindow)
+    const minQuesitoHeight = 40;
+    const rightPaddingExtra = 30;
     const textStartX = windowLeft + bgPadding * 2 + 30;
-    const rightPaddingExtra = 30; // Extra padding to avoid slider
     const textEndX = windowLeft + windowWidth - bgPadding * 2 - rightPaddingExtra;
     const maxTextWidth = textEndX - textStartX;
-    const lineHeight = 22; // Allineato con la nuova dimensione del testo
+    const lineHeight = 23;
     
-    // Calculate height for each quesito
-    textSize(16); // Allineato con drawQuesitiWindow
+    textSize(18);
     textStyle(NORMAL);
+    let totalQuesitiHeight = 0;
     quesiti2025.forEach((quesito) => {
       const words = quesito.testo.split(' ');
       let line = '';
       let lineCount = 1;
-      
       for (let i = 0; i < words.length; i++) {
         const testLine = line + (line ? ' ' : '') + words[i];
-        const testWidth = textWidth(testLine);
-        
-        if (testWidth > maxTextWidth && line.length > 0) {
+        if (textWidth(testLine) > maxTextWidth && line.length > 0) {
           line = words[i];
           lineCount++;
         } else {
           line = testLine;
         }
       }
-      
-      const quesitoHeight = Math.max(minQuesitoHeight, 20 + (lineCount * lineHeight) + 5); // Reduced padding to decrease spacing
-      quesitiHeights.push(quesitoHeight);
+      const quesitoHeight = Math.max(minQuesitoHeight, 20 + lineCount * lineHeight);
       totalQuesitiHeight += quesitoHeight;
     });
     
-    // Calculate max scroll offset (same as drawQuesitiWindow)
-    const circleRadius = 11;
-    const quesitiAreaTopPadding = circleRadius + 5;
-    const quesitiAreaHeight = quesitiAreaBottom - quesitiAreaTop;
-    // Use full area height (padding is already accounted for in quesitiAreaHeight)
     const needsScroll = totalQuesitiHeight > quesitiAreaHeight;
     const maxScrollOffset = needsScroll ? Math.max(0, totalQuesitiHeight - quesitiAreaHeight) : 0;
     quesitiScrollOffset = constrain(quesitiScrollOffset, 0, maxScrollOffset);

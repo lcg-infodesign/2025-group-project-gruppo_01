@@ -74,6 +74,10 @@
     <!-- FILE INPUT (nascosto, può essere usato per caricare CSV manualmente) -->
     <input type="file" id="csvfile" accept=".csv" style="display: none;">
 
+    <!-- Frecce navigazione anno (sinistra / destra) -->
+    <button type="button" id="year-prev-btn" class="year-nav-arrow year-nav-arrow-left" title="Anno precedente" aria-label="Anno precedente">‹</button>
+    <button type="button" id="year-next-btn" class="year-nav-arrow year-nav-arrow-right" title="Anno successivo" aria-label="Anno successivo">›</button>
+
     <!-- MAPPA SVG REGIONI -->
     <div id="mappa-container" style="position:fixed; top:150px; left:50%; transform:translateX(-50%); z-index:200; max-width:1200px; width:100%; pointer-events:none;">
       <svg id="mappa-regioni" viewBox="0 0 800 600" style="pointer-events:auto;">
@@ -279,6 +283,46 @@
       
       #back-to-overview-btn:active {
         transform: scale(0.95);
+      }
+
+      /* Frecce navigazione anno */
+      .year-nav-arrow {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 56px;
+        height: 56px;
+        border: none;
+        border-radius: 50%;
+        background: none;
+        color: #1E52A6;
+        font-size: 34px;
+        line-height: 1;
+        cursor: pointer;
+        z-index: 250;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        transition: color 0.2s ease, transform 0.2s ease;
+        font-family: 'STIX Two Text', serif;
+      }
+      .year-nav-arrow:hover {
+        color: #0F3D88;
+        transform: translateY(-50%) scale(1.1);
+      }
+      .year-nav-arrow:active {
+        transform: translateY(-50%) scale(0.95);
+      }
+      .year-nav-arrow:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .year-nav-arrow-left {
+        left: 4px;
+      }
+      .year-nav-arrow-right {
+        right: 4px;
       }
     </style>
 

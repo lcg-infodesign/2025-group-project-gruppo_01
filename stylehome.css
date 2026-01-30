@@ -23,7 +23,7 @@
       /* --- VARIABILI COLORI --- */
       :root {
         --bg-color: #f5f0dc;
-        --blue-color: #073789;
+        --blue-color: rgb(30, 82, 166);
         --yellow-color: #FFB700;
         --gray-color: #aaaaaa;
       }
@@ -87,7 +87,7 @@
   
   /* Data (sinistra) */
   .navbar-date {
-    font-size: 15px;
+    font-size: 18px;
     margin: 0;
     color: var(--blue-color);
   }
@@ -230,7 +230,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 60px; /* Ridotto leggermente il gap per dare spazio agli omini */
+        gap: 0px; /* Ridotto leggermente il gap per dare spazio agli omini */
         padding-bottom: 50px;
         
         /* Stato INIZIALE */
@@ -249,7 +249,8 @@
 
       /* Colonne */
       .text-col {
-        flex: 0.8; /* Il testo occupa un po' meno spazio rispetto agli omini ora */
+        padding-right: 20px;
+        flex: 0.98; /* Il testo occupa un po' meno spazio rispetto agli omini ora */
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -267,16 +268,15 @@
         align-items: center; 
         text-align: center; 
         width: 100%;
-        max-width: 900px;
+        max-width: 1000px;
       }
 
       .visual-col {
-        flex: 1.2; /* Più spazio per gli omini grandi */
+        flex: 1.5; /* Più spazio per gli omini grandi */
         display: flex;
         flex-wrap: wrap;
         gap: 15px; /* Spazio tra gli omini */
-        align-items: center;
-        max-width: 900px; /* Impedisce che si disperdano troppo */
+        max-width: 1300px; /* Impedisce che si disperdano troppo */
       }
       
       /* Prima visual: mantieni gli omini su una sola riga e abilita lo scroll orizzontale se necessario */
@@ -564,7 +564,7 @@
 .hero .referendum-icon{
     position: absolute;
     left: 40px;
-    top: 210px;
+    top: 250px;
     z-index: 1;
 }
 
@@ -573,8 +573,23 @@
     height: auto;
 }
 
+.hero h3{
+    font-size: 25px;
+    color: var(--blue-color);
+    justify-content: flex-start;
+    margin-top: 80px;
+    margin-bottom: 10px;
+}
+
 .hero p{
+  font-size: 18px;
     margin-top: 30px;
+    line-height: 1.5;
+}
+.text-block {
+    width: 40%;
+    justify-content: flex-start;
+    margin-left: 180px;
 }
 
 .text-block h2{
@@ -586,16 +601,13 @@
     margin-bottom: 10px;
 }
 
-.text-block {
-    width: 40%;
-    justify-content: flex-start;
-    margin-left: 180px;
-}
+
 
 .text-block h3 {
     font-size: 28px;
     color: var(--blue-color);
 }
+
 
 .highlight {
     font-size: 28px;
@@ -605,27 +617,36 @@
     z-index: 2;    
 }
 
-.highlight-right {
+.info h3 {
     font-size: 28px;
-    color: #0047AB;
+    color: var(--blue-color);
+    font-family: 'STIX Two Text', serif;
     font-weight: bold;
     position: relative;
     z-index: 2;
     text-align: right;  
     justify-self: flex-end; 
+    margin-right: 70px;
 }
+ .referendum h3 {
+    font-size: 28px;
+    color: var(--blue-color);
+    font-family: 'STIX Two Text', serif;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+    text-align: left;  
+    justify-self: flex-start; 
+    margin-left: 10%;
+} 
 
-.highlight .referendum{
-    margin-top: 50px;
-    margin-left: 40px;  
-}
 
 /* Immagine */
 .image-block {
     position: absolute;
     width: 30%;
-    margin-left: 70%;
-    margin-top: -20%;
+    right: 60px;
+    margin-top: -27%;
 }
 
 .image-block img {
@@ -651,18 +672,18 @@
 
 /* Contenitore dati + immagine */
 .info {
+ padding-top: 20px;
     width: 100%;
-    margin-top: 50px;
     position: relative;
 }
 
 /* SEZIONE DATI: immagine a sinistra, testo a destra */
 /* Contenitore dati + immagine a sinistra, testo a destra */
-.info .dati {
+.dati {
   display: flex;                 
-  justify-content: flex-end;      
-  align-items: flex-start;                         
-  width: 100%;
+  justify-content: space-between;
+  align-items: flex-start; /* ⬅️ allineamento in alto */
+  padding-top: 0  ;
 }
 
 .info .dati h2 {
@@ -677,25 +698,23 @@
 
 /* Immagine dati */
 .image-block-dati {
-  width: 40%;                    
+  width: 40%;
   border-radius: 5px;
-  position: relative;            
+  margin-left: 10%;
+  position: absolute; /* ⬅️ NON absolute */
+
 }
 
 .image-block-dati img {
   width: 100%;
   height: auto;
-  display: block;
   border-radius: 5px;
 }
 
 /* Testo dati */
 .dati-content {
-  width: 55%;
   text-align: right;
-  display: flex;
   flex-direction: column;
-  justify-content: flex-start;
 }
 
 .dati-h2,
@@ -704,21 +723,34 @@
   font-size: 36px;
   color: var(--blue-color);
   margin-bottom: 10px;
+  margin-top: 90px;
 }
 
 /* Testo normale */
 .info .dati p {
+  margin-left: 60%;
   font-weight: 400; 
-  font-family: 13px;             /* torna normale */
+  font-size: 18px;  
+  line-height: 1.5; 
+  text-align: right;   
+  width: 40%;          /* ⬅️ restringe l’area testo */
+  max-width: 520px;    /* ⬅️ linee più corte e leggibili */
 }
 /* SEZIONE REFERENDUM: testo a sinistra, immagine a destra */
 .info .referendum {
   display: flex;
   align-items: flex-start;
   gap: 20px;
-  margin-top: 50px;
-}
+  margin-top: 120px;
 
+ 
+}
+.info .referendum-icon {
+  position: absolute;
+  left: 20px;
+  top: 520px;
+  z-index: 1;
+}
 .info .referendum-icon img {
   width: 100px;
   height: auto;
@@ -728,14 +760,18 @@
   margin-bottom: 20px;
 }
 
-.info .referendum p {
-  margin: 0;
-  margin-top: 15px;
+.referendum p {
+  margin-left: 10%;
+  font-size: 18px;
   line-height: 1.5;
-  width: 60%;
+  width: 50%;
+   max-width: 520px;
 }
 
 .info .referendum-image {
+  position: absolute;
+  right: 60px;
+  top: 330px;
   width: 35%;
 }
 
@@ -747,13 +783,6 @@
 }
 
 /* Titolo "I DATI" in grassetto */
-.dati-h2 {
-  font-weight: bold;
-  font-size: 28px;              /* opzionale */
-  color: var(--blue-color);     /* mantiene il tuo colore */
-  margin-bottom: 15px;
-}
-
 /* Link sottolineato ma dello stesso colore del testo */
 .external-link {
   color: inherit;               /* prende il colore del testo */
@@ -778,6 +807,8 @@
     width: 100%;
     text-align: left;
     margin-bottom: 20px;
+    margin-top: 18px;
+    line-height: 1.5;
   }
 }
 
@@ -789,7 +820,7 @@
 
 .dati p {
     margin: 0;
-    margin-top: 15px;
+    margin-top: 18px;
     line-height: 1.5;
     width: 100%;
 }
@@ -885,19 +916,6 @@
     height: 4px;
 }
 
-.frame-left {
-    left: 0;
-    top: 30px;
-    bottom: 20px;
-    width: 4px;
-}
-
-.frame-right {
-    right: 0;
-    top: 30px;
-    bottom: 20px;
-    width: 4px;
-}
 
 .linea-parallela {
     height: 4px;

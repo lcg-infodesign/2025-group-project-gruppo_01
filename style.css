@@ -30,7 +30,7 @@ html, body {
       /* --- VARIABILI COLORI --- */
       :root {
         --bg-color: #f5f0dc;
-        --blue-color: #073789;
+        --blue-color: rgb(30, 82, 166);
         --yellow-color: #FFB700;
         --gray-color: #aaaaaa;
       }

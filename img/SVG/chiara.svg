@@ -1,49 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Livello_2" data-name="Livello 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72.98 144.52">
+<svg id="Livello_2" data-name="Livello 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68.75 139.51">
   <defs>
     <style>
       .cls-1 {
-        fill: #fcdf71;
+        stroke: #fab611;
+        stroke-width: 11px;
       }
 
-      .cls-2 {
-        fill: #fbe5b2;
-      }
-
-      .cls-3 {
-        stroke: #fff;
-        stroke-width: 4px;
-      }
-
-      .cls-3, .cls-4 {
+      .cls-1, .cls-2, .cls-3 {
         fill: none;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4 {
         stroke-linecap: round;
         stroke-miterlimit: 10;
       }
 
-      .cls-4 {
-        stroke: #efb436;
-        stroke-width: 11px;
+      .cls-5 {
+        fill: #fab611;
       }
 
-      .cls-5 {
-        fill: #efb436;
+      .cls-2 {
+        stroke-width: 3px;
+      }
+
+      .cls-2, .cls-3 {
+        stroke: #fff;
+      }
+
+      .cls-3 {
+        stroke-width: 6px;
+      }
+
+      .cls-4 {
+        fill: #ffe14a;
+        stroke: #ffe14a;
+        stroke-width: 2px;
       }
     </style>
   </defs>
   <g id="Livello_1-2" data-name="Livello 1">
-    <path class="cls-1" d="M12.96,68.24c10.71,6.74,35.41,6.11,46.65,1.27S90.59,6.28,39.94.37C-8.27-5.26-6.89,55.76,12.96,68.24Z"/>
+    <path class="cls-4" d="M59.07,58.74C81.57,25.19,55.58.6,34.71,1.01,11.59,1.46-13.05,25.19,10.63,59.05"/>
     <g>
-      <circle class="cls-5" cx="36.49" cy="33.22" r="32.61"/>
-      <polyline class="cls-4" points="31.6 51.45 31.6 139.02 17.25 139.02"/>
-      <polyline class="cls-4" points="43.9 51.45 43.9 139.02 58.31 139.02"/>
+      <path class="cls-5" d="M65.19,33.81c1.03,16.8-13.64,30.47-30.47,30.47S4.24,50.64,4.24,33.81,17.89,2.83,34.71,3.33c15.67.47,29.46,14.05,30.47,30.47Z"/>
+      <polyline class="cls-1" points="41.05 60.49 41.05 134.01 54.11 134.01"/>
+      <polyline class="cls-1" points="28.11 60.49 28.11 134.01 15.05 134.01"/>
+      <path class="cls-1" d="M52.52,53.74c1.59,4.86,3.25,43.51,3.21,56.82"/>
+      <path class="cls-1" d="M16.73,53.74c-1.59,4.86-3.25,43.51-3.21,56.82"/>
+      <line class="cls-3" x1="41.79" y1="26.5" x2="50.47" y2="26.5"/>
+      <line class="cls-3" x1="18.96" y1="26.5" x2="27.64" y2="26.5"/>
     </g>
-    <g>
-      <line class="cls-3" x1="41.44" y1="28.75" x2="50.81" y2="28.75"/>
-      <line class="cls-3" x1="20.2" y1="28.75" x2="29.57" y2="28.75"/>
-    </g>
-    <path class="cls-1" d="M9.64,16.17h53.73S59.34.23,35.89.23s-26.25,15.94-26.25,15.94Z"/>
-    <path class="cls-3" d="M29.08,44.94s7.22,3.92,13.86,0"/>
-    <path class="cls-2" d="M36.49,54c3.22,0,3.22-5,0-5s-3.22,5,0,5h0Z"/>
+    <path class="cls-2" d="M28.4,47.4s5.96,4.8,12.62,0"/>
+    <path class="cls-4" d="M18.14,8.01s-4.41,5.9-3.97,8.94l40.09.21s-.52-6.05-3.78-9.86-21.96-9.69-32.33.71Z"/>
+    <circle class="cls-4" cx="35.24" cy="54.26" r=".53"/>
   </g>
 </svg>

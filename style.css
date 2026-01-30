@@ -135,7 +135,6 @@ canvas {
   font-size: 10px;
   font-weight: 700;
   transition: all 0.3s ease;
-
 }
 
 .help-toggle-btn:hover {
@@ -393,4 +392,11 @@ canvas {
   .footer-column {
       margin-bottom: 20px;
   }
+}
+
+/* Forza lo spostamento verso l'alto della seconda linea */
+.linea-parallela-bottom {
+  margin-top: -5px; /* Prova valori negativi: -5px, -10px, ecc. */
+  position: relative; /* Serve per far funzionare top/z-index se necessario */
+  top: -8px;          /* Alternativa al margin-top se quello non va */
 }

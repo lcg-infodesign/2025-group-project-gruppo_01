@@ -5,6 +5,22 @@ let presidentAnimState = {
   cons: 1.0   // Scala corrente Consiglio
 };
 
+// --- VARIABILI ANIMAZIONE ESISTENTI ---
+let currentAffluenzaAnim = 0;
+let lastAffluenzaYear = null;
+
+// --- NUOVE VARIABILI ANIMAZIONE (DA AGGIUNGERE) ---
+// Per i voti SI/NO (barre)
+let currentVotiSiAnim = 0;
+let currentVotiNoAnim = 0;
+let lastVotiRefYear = null; // Per resettare quando cambia anno/regione
+
+// Per il genere (archi)
+let currentMaschiAnim = 0;
+let currentFemmineAnim = 0;
+let lastGenderYear = null;
+
+
 let regionValues = {};
 let geojsonData = null; // loaded GeoJSON FeatureCollection
 // Current selected year (can be a number or string like '2016-1' or '2016-2')
@@ -2788,12 +2804,34 @@ fill(245, 240, 220);
  }
 
  // 3. RECUPERO NOME REGIONE O ITALIA
- let locationText = 'Italia'
- if (selectedRegion) {
-   let rawName = selectedRegion.properties.reg_name || selectedRegion.properties.denominazione_reg || selectedRegion.properties.denominazione || selectedRegion.properties.nome || 'ITALIA';
-   // Rimuovi la parte " - SUDTIROL" se presente
-   locationText = rawName.replace('/Südtirol', '').replace('/Südtirol', '').trim();
- }
+   // 3. RECUPERO NOME REGIONE O "ITALIA"
+   let locationText = "Italia";
+   if (selectedRegion) {
+     let rawName = selectedRegion.properties.reg_name || 
+                   selectedRegion.properties.denominazione_reg || 
+                   selectedRegion.properties.denominazione || 
+                   selectedRegion.properties.nome;
+     
+     // --- PULIZIA NOMI PER IL TITOLO MAPPA ---
+     if (rawName) {
+         const upper = rawName.toUpperCase();
+         
+         if (upper.includes("VALLE") || upper.includes("AOSTA")) {
+             locationText = "Valle d'Aosta";
+         } 
+         else if (upper.includes("TRENTINO") || upper.includes("TIROL")) {
+             locationText = "Trentino-Alto Adige";
+         } 
+         else {
+             // Pulizie generiche per le altre regioni se servono
+             locationText = rawName.replace("- SUDTIROL", "")
+                                   .replace("/SUDTIROL", "")
+                                   .replace("/Vallée d'Aoste", "") // Caso specifico se sfugge all'if sopra
+                                   .trim(); 
+         }
+     }
+   }
+ 
 
  // 4. CREAZIONE TESTO COMPLETO
  const fullText = dateText + '  ' + locationText;
@@ -4475,15 +4513,40 @@ function drawAffluenzaChart() {
   const radius = getAffluenzaSemicircleRadius(); 
   const affluenzaChartY = windowTop + windowHeight * 0.65; 
 
-  let affluenza = calculateAffluenzaForChart();
+  // --- INIZIO LOGICA ANIMAZIONE ---
+  let targetAffluenza = calculateAffluenzaForChart();
   
-  if (typeof affluenza === 'string') affluenza = parseFloat(affluenza);
-  if (affluenza === null || affluenza === undefined || !isFinite(affluenza)) return;
+  // Pulizia del dato target
+  if (typeof targetAffluenza === 'string') targetAffluenza = parseFloat(targetAffluenza);
+  
+  // Se il dato non è valido, non disegniamo nulla (o reset a 0)
+  if (targetAffluenza === null || targetAffluenza === undefined || !isFinite(targetAffluenza)) {
+    return;
+  }
+
+  // Se l'anno è cambiato rispetto all'ultimo frame disegnato, resetta l'animazione a 0
+  if (lastAffluenzaYear !== selectedYear) {
+      currentAffluenzaAnim = 0;
+      lastAffluenzaYear = selectedYear;
+  }
+
+  // Calcola il passo dell'animazione (Lerp)
+  // 0.05 è la velocità: più basso (es. 0.02) è più lento, più alto (es. 0.1) è più veloce
+  currentAffluenzaAnim = lerp(currentAffluenzaAnim, targetAffluenza, 0.05);
+
+  // Se siamo molto vicini al target (es. 99.9% vs 100%), scatta al valore finale per evitare micro-decimali
+  if (Math.abs(currentAffluenzaAnim - targetAffluenza) < 0.1) {
+      currentAffluenzaAnim = targetAffluenza;
+  }
+
+  // Usiamo il valore ANIMATO per tutto il disegno
+  const displayAffluenza = currentAffluenzaAnim;
+  // --- FINE LOGICA ANIMAZIONE ---
 
   const startAngle = PI;
   const endAngle = 2 * PI;
   const totalAngle = PI;
-  const progressAngle = Math.min(startAngle + (affluenza / 100) * totalAngle, endAngle);
+  const progressAngle = Math.min(startAngle + (displayAffluenza / 100) * totalAngle, endAngle);
   const centerX = affluenzaChartX;
   const centerY = affluenzaChartY;
 
@@ -4491,15 +4554,15 @@ function drawAffluenzaChart() {
   push();
   stroke(0, 0, 0, 20);
   strokeWeight(18);
-  strokeCap(ROUND); // Lo sfondo lo lasciamo tutto tondo per bellezza
+  strokeCap(ROUND);
   noFill();
   arc(centerX, centerY, radius * 2, radius * 2, startAngle, endAngle);
   pop();
 
-  // 4. Disegna ARCO CON GRADIENTE (Misto: Inizio Tondo, Fine Piatta)
+  // 4. Disegna ARCO CON GRADIENTE
   push();
   strokeWeight(18);
-  strokeCap(SQUARE); // ✅ IMPORTANTE: Usiamo SQUARE per default (fine piatta)
+  strokeCap(SQUARE);
   noFill();
 
   if (progressAngle > startAngle) {
@@ -4519,23 +4582,21 @@ function drawAffluenzaChart() {
       const col = lerpColor(cLightBlue, cBlue, globalT);
       
       stroke(col);
-      // Piccola sovrapposizione per evitare buchi
+      // Piccola sovrapposizione (+0.015) per evitare linee bianche tra i segmenti
       arc(centerX, centerY, radius * 2, radius * 2, a1, a2 + 0.015);
     }
 
-    // B. Aggiungi MANUALMENTE il "tappo" rotondo solo all'inizio (0%)
-    // Disegniamo un punto (point) dello spessore della linea esattamente all'inizio
-    stroke(cLightBlue); // Colore iniziale
-    strokeWeight(18);   // Stesso spessore dell'arco
+    // B. Aggiungi il "tappo" rotondo all'inizio (0%)
+    stroke(cLightBlue);
+    strokeWeight(18);
     strokeCap(ROUND);
-    // Calcoliamo le coordinate esatte dell'inizio dell'arco (a sinistra)
     const startX = centerX + radius * cos(startAngle);
     const startY = centerY + radius * sin(startAngle);
     point(startX, startY);
   }
   pop();
 
-  // 5. Asticella (Needle)
+  // 5. Asticella (Needle) che segue l'animazione
   push();
   stroke(cYellow);
   strokeWeight(4);
@@ -4550,21 +4611,25 @@ function drawAffluenzaChart() {
   pop();
 
   // 6. Testi e Etichette
+  
+  // Percentuale Grande al centro (anch'essa animata!)
   push();
   noStroke();
   fill(cBlue);
   if (typeof stixFont !== 'undefined') textFont(stixFont);
   textSize(45);
   textAlign(CENTER, CENTER);
-  text(affluenza.toFixed(1) + "%", centerX, centerY);
+  text(displayAffluenza.toFixed(1) + "%", centerX, centerY);
   pop();
 
+  // Etichette 0% e 100%
   push();
-  textSize(14);
+  textSize(18);
+  textStyle(BOLD);
   fill(cBlue);
   textAlign(CENTER, CENTER);
-  text("0%", centerX - radius - 25, centerY);
-  text("100%", centerX + radius + 25, centerY);
+  text("0%", centerX - radius - 30, centerY); 
+  text("100%", centerX + radius + 35, centerY);
   pop();
 
   // Titolo
@@ -4573,11 +4638,13 @@ function drawAffluenzaChart() {
   push();
   textAlign(RIGHT, TOP);
   textSize(20);
-  fill(cDark);
+  fill("#1B4A95");
   if (typeof stixFont !== 'undefined') textFont(stixFont);
   text("AFFLUENZA", titleX, titleY);
   pop();
 }
+
+
 
 
 
@@ -4638,120 +4705,100 @@ function getAffluenzaSemicircleRadius() {
 
 // Draw pie chart comparing SI and NO votes for 2025
 function drawPieChart() {
-  // Determine which data to use: selected quesito, selected region, or national totals
-  let votiSi = 0, votiNo = 0, chartTitle, regionName = null;
+  // 1. Definizioni base e controlli
+  let votiSi = 0, votiNo = 0;
+  const chartTitle = 'VOTI REFERENDUM'; 
+  let regionName = null;
+  let displayRegionName = null;
 
-  // Priority 1: se c'è un quesito selezionato, usa quello (logica invariata)
+  // Recupero nome regione (con pulizia nomi per visualizzazione)
+  if (selectedRegion) {
+     let rawName = null;
+     if (typeof selectedRegion === 'object' && selectedRegion.properties) {
+        rawName = selectedRegion.properties.reg_name || selectedRegion.properties.denominazione_reg || selectedRegion.properties.denominazione || selectedRegion.properties.nome;
+     } else if (typeof selectedRegion === 'string') {
+        rawName = selectedRegion;
+     }
+     if (rawName) {
+        if (rawName.toUpperCase().includes("VALLE") || rawName.toUpperCase().includes("AOSTA")) displayRegionName = "Valle d'Aosta";
+        else if (rawName.toUpperCase().includes("TRENTINO") || rawName.toUpperCase().includes("TIROL")) displayRegionName = "Trentino-Alto Adige";
+        else displayRegionName = rawName; 
+     }
+  }
+
+  // Recupero Dati (Logica esistente)
   if (selectedQuesito !== null && quesitiVotes[selectedQuesito]) {
     votiSi = quesitiVotes[selectedQuesito].si || 0;
     votiNo = quesitiVotes[selectedQuesito].no || 0;
-    chartTitle = null; // Un solo titolo: "Quesito X - Italia" (sottotitolo sotto)
-    regionName = null;
-
   } else if (selectedRegion) {
-    // Priority 2: se c'è una regione selezionata, prova a trovare i voti
-    let regionNameFromFeature = null;
-    
-    // Estrai il nome della regione dal feature GeoJSON
-    if (typeof selectedRegion === 'object' && selectedRegion.properties) {
-      regionNameFromFeature = selectedRegion.properties.reg_name || 
-                              selectedRegion.properties.denominazione_reg || 
-                              selectedRegion.properties.denominazione || 
-                              selectedRegion.properties.nome || null;
-    } else if (typeof selectedRegion === 'string') {
-      regionNameFromFeature = selectedRegion;
-    }
-    
-    if (regionNameFromFeature) {
-      regionName = regionNameFromFeature;
-      let matchedVotes = null;
-      
-      // Prova a trovare i voti con vari metodi di matching
-      if (regionVotes && regionVotes[regionNameFromFeature]) {
-        matchedVotes = regionVotes[regionNameFromFeature];
-      } else if (regionVotes && REGION_NAME_MAP[regionNameFromFeature] && regionVotes[REGION_NAME_MAP[regionNameFromFeature]]) {
-        matchedVotes = regionVotes[REGION_NAME_MAP[regionNameFromFeature]];
-      } else if (regionVotes) {
-        // Prova normalizzazione
-        const normalizedName = normalizeName(regionNameFromFeature);
+    regionName = displayRegionName;
+    let matchedVotes = null;
+    if (regionName) {
+      if (regionVotes && regionVotes[regionName]) matchedVotes = regionVotes[regionName];
+      else if (regionVotes && REGION_NAME_MAP[regionName] && regionVotes[REGION_NAME_MAP[regionName]]) matchedVotes = regionVotes[REGION_NAME_MAP[regionName]];
+      else if (regionVotes) {
+        const normalizedName = normalizeName(regionName);
         for (const key of Object.keys(regionVotes)) {
-          if (normalizeName(key) === normalizedName) {
-            matchedVotes = regionVotes[key];
-            break;
-          }
+          if (normalizeName(key) === normalizedName) { matchedVotes = regionVotes[key]; break; }
         }
       }
-      
-      if (matchedVotes) {
-        votiSi = matchedVotes.si || 0;
-        votiNo = matchedVotes.no || 0;
-      } else {
-        // Fallback: usa i totali nazionali
-        votiSi = totalVotiSi || 0;
-        votiNo = totalVotiNo || 0;
-      }
-    } else {
-      // Fallback: usa i totali nazionali
-      votiSi = totalVotiSi || 0;
-      votiNo = totalVotiNo || 0;
-      regionName = null;
     }
-    
-    chartTitle = 'VOTI REFERENDUM';
-
+    if (matchedVotes) { votiSi = matchedVotes.si || 0; votiNo = matchedVotes.no || 0; }
+    else { votiSi = totalVotiSi || 0; votiNo = totalVotiNo || 0; }
   } else {
-    // Fallback: usa i totali nazionali
     votiSi = totalVotiSi || 0;
     votiNo = totalVotiNo || 0;
-    chartTitle = 'VOTI REFERENDUM' ;
-    regionName = null;
   }
 
-  // Ensure votiSi and votiNo are numbers
   votiSi = Number(votiSi) || 0;
   votiNo = Number(votiNo) || 0;
+  const total = votiSi + votiNo;
 
-  // Use window 2 (middle window) for pie chart
-  if (!window.sezione3Window2Top) return; // Wait for background to be drawn
+  if (!window.sezione3Window2Top) return; 
 
+  // --- LOGICA ANIMAZIONE ---
+  // Calcolo i target (percentuali)
+  let targetSi = (total > 0) ? (votiSi / total) * 100 : 0;
+  let targetNo = (total > 0) ? (votiNo / total) * 100 : 0;
+
+  // Se cambia il contesto (Anno, Regione o Quesito), resetta l'animazione
+  // Usiamo una stringa composta per rilevare qualsiasi cambiamento
+  let currentContextKey = String(selectedYear) + "-" + String(selectedRegion) + "-" + String(selectedQuesito);
+  
+  if (lastVotiRefYear !== currentContextKey) {
+      currentVotiSiAnim = 0;
+      currentVotiNoAnim = 0;
+      lastVotiRefYear = currentContextKey;
+  }
+
+  // Animazione Lerp (0.05 è la velocità, uguale all'affluenza)
+  currentVotiSiAnim = lerp(currentVotiSiAnim, targetSi, 0.05);
+  currentVotiNoAnim = lerp(currentVotiNoAnim, targetNo, 0.05);
+
+  // Snap al valore finale se molto vicini
+  if (Math.abs(currentVotiSiAnim - targetSi) < 0.1) currentVotiSiAnim = targetSi;
+  if (Math.abs(currentVotiNoAnim - targetNo) < 0.1) currentVotiNoAnim = targetNo;
+
+  // Valori da usare per il disegno
+  const siPercent = currentVotiSiAnim;
+  const noPercent = currentVotiNoAnim;
+  // -------------------------
+
+  // Setup Layout
   const chartAreaLeft   = window.sezione3ChartAreaLeft;
   const chartAreaWidth  = window.sezione3ChartAreaWidth;
   const bgPadding       = window.sezione3BgPadding;
   const windowTop       = window.sezione3Window2Top;
   const windowHeight    = window.sezione3WindowHeight;
-
-  const windowWidthHalf = (chartAreaWidth - bgPadding * 2) /2;
-  const leftHalfX       = chartAreaLeft + bgPadding;
-  const rightHalfX      = chartAreaLeft + bgPadding + windowWidthHalf;
-
   const chartX          = chartAreaLeft + chartAreaWidth / 2;
   const titleHeight     = 20;
-  const availableHeight = windowHeight - titleHeight - 15;
   const radius          = getCommonSemicircleRadius();
-  const bottomPadding   = 10; // Padding dal fondo della finestra
-
-  // Baseline at the bottom of the window
+  const bottomPadding   = 10; 
   const baselineY          = windowTop + windowHeight - bottomPadding;
   const pieChartTitleStart = windowTop + 8;
-
-  // Se non ci sono dati, mostra omino grigio al posto del grafico
-  if (votiSi === 0 && votiNo === 0) {
-    drawNoDataPlaceholder(windowTop, windowHeight, 'Dati SI/NO non disponibili');
-    return;
-  }
-
-  const total = votiSi + votiNo;
-  if (total === 0 || !isFinite(total)) {
-    drawNoDataPlaceholder(windowTop, windowHeight, 'Dati SI/NO non disponibili');
-    return;
-  }
-
-  const siPercent = (votiSi / total) * 100;
-  const noPercent = (votiNo / total) * 100;
+  const availableHeight = windowHeight - titleHeight - 15;
 
   push();
-
-  // Clip alla finestra dei SI/NO
   try {
     drawingContext.save();
     const clipLeft = chartAreaLeft + bgPadding;
@@ -4763,42 +4810,59 @@ function drawPieChart() {
     drawingContext.clip();
   } catch (e) {}
 
-  // Titolo: "Voti referendum" sopra e "Quesito X - Italia" sotto (quando c'è un quesito), altrimenti solo "VOTI REFERENDUM"
-  let subtitle = null;
-  if (selectedQuesito !== null && regionName) {
-    subtitle = `Quesito ${selectedQuesito} - ${regionName}`;
-  } else if (selectedQuesito !== null) {
-    subtitle = `Quesito ${selectedQuesito} - Italia`;
-  } else if (regionName) {
-    subtitle = regionName;
-  }
-
+  // Titoli
   fill("#1B4A95");
   noStroke();
+  textSize(20);
   textFont('STIX Two Text');
   const pieTitleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
   textAlign(RIGHT, TOP);
+  text(chartTitle, pieTitleX, pieChartTitleStart);
+
+  let subtitle = null;
+  if (selectedQuesito !== null) {
+      subtitle = displayRegionName ? `Quesito ${selectedQuesito} - ${displayRegionName}` : `Quesito ${selectedQuesito} - Italia`;
+  } else {
+      subtitle = displayRegionName ? displayRegionName : null;
+  }
+  
   if (subtitle) {
+    textAlign(RIGHT, TOP);
     textSize(16);
-    text('Voti referendum', pieTitleX, pieChartTitleStart);
-    textSize(20);
-    text(subtitle, pieTitleX, pieChartTitleStart + 20);
-  } else if (chartTitle) {
-    textSize(20);
-    text(chartTitle, pieTitleX, pieChartTitleStart);
+    fill("#1B4A95");
+    text(subtitle, pieTitleX, pieChartTitleStart + 22);
   }
 
-  // Layout con omini + barre - barre partono dal fondo
-  const maxBarHeight = Math.min(radius * 1.0, availableHeight * 0.5); // Barre più alte
+  // Disegno Barre
+  const maxBarHeight = Math.min(radius * 1.0, availableHeight * 0.5); 
   const barWidth     = radius * 0.5;
-
-  const gapBetweenBars = radius * 0.7;
+  const gapBetweenBars = radius * 0.9; 
   const leftBarX  = chartX - gapBetweenBars / 2;
   const rightBarX = chartX + gapBetweenBars / 2;
 
+  // Altezza basata sui valori animati
   const siBarHeight = (siPercent / 100) * maxBarHeight;
   const noBarHeight = (noPercent / 100) * maxBarHeight;
 
+  rectMode(CORNER);
+
+  // Barra SI (giallo)
+  push();
+  fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2]);
+  noStroke();
+  const siBarY = baselineY - siBarHeight; 
+  rect(leftBarX - barWidth / 2, siBarY, barWidth, siBarHeight);
+  pop();
+
+  // Barra NO (blu)
+  push();
+  fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
+  noStroke();
+  const noBarY = baselineY - noBarHeight; 
+  rect(rightBarX - barWidth / 2, noBarY, barWidth, noBarHeight);
+  pop();
+
+  // Omini
   function drawPersonIcon(px, py, personHeight, img) {
     if (!img) return;
     push();
@@ -4808,289 +4872,219 @@ function drawPieChart() {
     image(img, px, py - personHeight / 2, imgWidth, personHeight);
     pop();
   }
-
-  rectMode(CORNER);
-
-  // SI (giallo) - barra parte dal fondo
-  push();
-  fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2]);
-  noStroke();
-  const siBarY = baselineY - siBarHeight; // Parte dal fondo
-  rect(leftBarX - barWidth / 2, siBarY, barWidth, siBarHeight);
-  pop();
-
-  // NO (blu) - barra parte dal fondo
-  push();
-  fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
-  noStroke();
-  const noBarY = baselineY - noBarHeight; // Parte dal fondo
-  rect(rightBarX - barWidth / 2, noBarY, barWidth, noBarHeight);
-  pop();
-
-  // Omini più grandi
-  const personHeight     = Math.min(radius * 1.3, maxBarHeight * 1.2); // Omini più grandi
+  const personHeight = Math.min(radius * 1.3, maxBarHeight * 1.2); 
   const personBaseOffset = radius * 0.05;
-
   drawPersonIcon(leftBarX,  siBarY - personBaseOffset, personHeight, omino1Img);
   drawPersonIcon(rightBarX, noBarY  - personBaseOffset, personHeight, omino2Img);
 
-  // Percentuali ai lati - posizionate sopra le barre
-  textAlign(LEFT, CENTER);
-  textSize(16);
-  textStyle(BOLD);
+  // Etichette Testo
+  const barDist = 105; 
+  const centerY = baselineY - maxBarHeight / 2; 
 
-  const siLabelX       = leftBarX - barWidth / 2 - 45;
-  const commonLabelY   = baselineY - maxBarHeight / 2; // Centrato rispetto all'altezza massima delle barre
-  const siLabelY       = commonLabelY;
-  fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2]);
-  text(`${siPercent.toFixed(1)}%`, siLabelX, siLabelY);
-
-  textAlign(RIGHT, CENTER);
-  const noLabelX = rightBarX + barWidth / 2 + 45;
-  const noLabelY = commonLabelY;
-  fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
-  text(`${noPercent.toFixed(1)}%`, noLabelX, noLabelY);
-
-  // Etichette "SI" e "NO"
-  textSize(20);
   textFont('Stix Two Text');
   textStyle(BOLD);
 
-  textAlign(LEFT, BOTTOM);
+  // Gruppo SI
+  const siGroupRefX = leftBarX - barDist; 
+  textAlign(CENTER, BOTTOM); 
   fill(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2]);
-  const commonLabelTextY = commonLabelY - 3;
-  text('SI', siLabelX, commonLabelTextY);
+  textSize(24);
+  text('SI', siGroupRefX, centerY - 2);
+  textAlign(CENTER, TOP); 
+  textSize(32);
+  // Usa il valore animato per il testo
+  text(`${siPercent.toFixed(1)}%`, siGroupRefX, centerY + 2);
 
-  textAlign(RIGHT, BOTTOM);
+  // Gruppo NO
+  const noGroupRefX = rightBarX + barDist; 
+  textAlign(CENTER, BOTTOM); 
   fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
-  text('NO', noLabelX, commonLabelTextY);
+  textSize(24);
+  text('NO', noGroupRefX, centerY - 2);
+  textAlign(CENTER, TOP); 
+  textSize(32);
+  // Usa il valore animato per il testo
+  text(`${noPercent.toFixed(1)}%`, noGroupRefX, centerY + 2);
 
   try { drawingContext.restore(); } catch (e) {}
-
   pop();
 }
+
+
 
 
 // Draw gender chart with stick figures (3 males and 3 females)
 function drawGenderChart() {
-  let maschi = 0, femmine = 0, chartTitle = 'VOTANTI PER GENERE', regionName = null;
-
-  // --- CASO 1: QUESITO + REGIONE ---
-  if (selectedQuesito !== null && selectedRegion && geojsonData && selectedRegion.properties) {
-    const feature = selectedRegion;
-    const name = feature.properties.reg_name || 
-                 feature.properties.denominazione_reg || 
-                 feature.properties.denominazione || 
-                 feature.properties.nome || null;
-
-    regionName = name;
-    let matchedKey = null;
-
-    // Trova il match nel CSV
-    if (REGION_NAME_MAP[name] && regionQuesitoGender[REGION_NAME_MAP[name]] && regionQuesitoGender[REGION_NAME_MAP[name]][selectedQuesito]) {
-      matchedKey = REGION_NAME_MAP[name];
-    } else if (regionQuesitoGender[normalizeName(name)] && regionQuesitoGender[normalizeName(name)][selectedQuesito]) {
-      matchedKey = normalizeName(name);
-    } else if (regionQuesitoGender[name.toUpperCase()] && regionQuesitoGender[name.toUpperCase()][selectedQuesito]) {
-      matchedKey = name.toUpperCase();
-    }
-
-    if (!matchedKey) {
-      for (const csvKey of Object.keys(regionQuesitoGender)) {
-        const normalizedCSVKey = normalizeName(csvKey);
-        if (normalizedCSVKey.includes(normalizeName(name)) || normalizeName(name).includes(normalizedCSVKey)) {
-          if (regionQuesitoGender[csvKey][selectedQuesito]) {
-            matchedKey = csvKey;
-            break;
-          }
-        }
-      }
-    }
-
-    if (matchedKey) {
-      const data = regionQuesitoGender[matchedKey][selectedQuesito];
-      maschi = data.maschi || 0;
-      femmine = data.femmine || 0;
-    } else if (quesitoGender[selectedQuesito]) {
-      // fallback nazionale quesito
-      maschi = quesitoGender[selectedQuesito].maschi || 0;
-      femmine = quesitoGender[selectedQuesito].femmine || 0;
-      regionName = null;
-    } else {
-      maschi = totalMaschi || 0;
-      femmine = totalFemmine || 0;
-      regionName = null;
-    }
-
-  // --- CASO 2: SOLO QUESITO ---
-  } else if (selectedQuesito !== null) {
-    if (quesitoGender[selectedQuesito]) {
-      maschi = quesitoGender[selectedQuesito].maschi || 0;
-      femmine = quesitoGender[selectedQuesito].femmine || 0;
-    } else {
-      maschi = totalMaschi || 0;
-      femmine = totalFemmine || 0;
-    }
-
-  // --- CASO 3: SOLO REGIONE ---
-  } else if (selectedRegion && geojsonData && selectedRegion.properties) {
-    const feature = selectedRegion;
-    const name = feature.properties.reg_name || 
-                 feature.properties.denominazione_reg || 
-                 feature.properties.denominazione || 
-                 feature.properties.nome || null;
-
-    regionName = name;
-    let matchedKey = null;
-
-    if (REGION_NAME_MAP[name] && regionGender[REGION_NAME_MAP[name]]) matchedKey = REGION_NAME_MAP[name];
-    if (!matchedKey && regionGender[name]) matchedKey = name;
-    if (!matchedKey && regionGender[name.toUpperCase()]) matchedKey = name.toUpperCase();
-
-    if (!matchedKey && name.includes('/')) {
-      const firstPart = name.split('/')[0].trim();
-      if (regionGender[firstPart]) matchedKey = firstPart;
-      else if (REGION_NAME_MAP[firstPart] && regionGender[REGION_NAME_MAP[firstPart]]) matchedKey = REGION_NAME_MAP[firstPart];
-    }
-
-    if (!matchedKey) {
-      const normalizedName = normalizeName(name);
-      for (const csvKey of Object.keys(regionGender)) {
-        if (normalizeName(csvKey) === normalizedName) {
-          matchedKey = csvKey;
-          break;
-        }
-      }
-    }
-
-    if (matchedKey) {
-      maschi = regionGender[matchedKey].maschi || 0;
-      femmine = regionGender[matchedKey].femmine || 0;
-    } else {
-      maschi = totalMaschi || 0;
-      femmine = totalFemmine || 0;
-      regionName = null;
-    }
-
-  // --- CASO 4: NESSUNA SELEZIONE â†' ITALIA ---
-  } else {
-    maschi = totalMaschi || 0;
-    femmine = totalFemmine || 0;
-    regionName = null;
-  }
-
-  // --- CALCOLO PERCENTUALI ---
-  let total = maschi + femmine;
-  const maschiPct = total > 0 ? (maschi / total) * 100 : 0;
-  const femminePct = total > 0 ? (femmine / total) * 100 : 0;
-
-  // --- DISEGNO GRAFICO ---
+  // 1. Definizioni base e colori
+  const cMale = color(THEME_YELLOW[0], THEME_YELLOW[1], THEME_YELLOW[2]); 
+  const cFemale = color(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);     
+  
   if (!window.sezione3Window3Top) return;
-  const chartAreaLeft = window.sezione3ChartAreaLeft;
-  const chartAreaWidth = window.sezione3ChartAreaWidth;
-  const bgPadding = window.sezione3BgPadding;
-  const windowTop = window.sezione3Window3Top;
-  const windowHeight = window.sezione3WindowHeight;
-  const chartX = chartAreaLeft + chartAreaWidth / 2;
 
-  // Se non ci sono dati, mostra placeholder
-  if (maschi === 0 && femmine === 0) {
-    drawNoDataPlaceholder(windowTop, windowHeight, 'Dati genere non disponibili');
-    return;
+  const chartAreaLeft   = window.sezione3ChartAreaLeft;
+  const chartAreaWidth  = window.sezione3ChartAreaWidth;
+  const bgPadding       = window.sezione3BgPadding;
+  const windowTop       = window.sezione3Window3Top;
+  const windowHeight    = window.sezione3WindowHeight;
+  const chartX          = chartAreaLeft + chartAreaWidth / 2;
+  const titleHeight     = 20;
+  const centerY         = windowTop + windowHeight * 0.65; 
+  const radius          = getCommonSemicircleRadius(); 
+
+  // 2. Recupero Dati (Logica generica adattata)
+  let m = 0, f = 0;
+
+  // --- INSERISCI QUI LA TUA LOGICA DI RECUPERO DATI ESATTA ---
+  // (Copia quella che avevi funzionante prima, qui metto un esempio standard)
+  if (selectedQuesito !== null && quesitiVotes[selectedQuesito]) {
+      // Se hai i dati per quesito
+      if (typeof quesitoGender !== 'undefined' && quesitoGender[selectedQuesito]) {
+          m = quesitoGender[selectedQuesito].maschi || 0;
+          f = quesitoGender[selectedQuesito].femmine || 0;
+      }
+  } else if (selectedRegion) {
+     // Logica per regione
+     let displayRegionName = null;
+     if (typeof selectedRegion === 'object' && selectedRegion.properties) {
+        displayRegionName = selectedRegion.properties.reg_name || selectedRegion.properties.nome;
+     } else {
+        displayRegionName = selectedRegion;
+     }
+     
+     // Normalizzazione rapida per trovare la chiave giusta in regionGender
+     if (displayRegionName) {
+         // Cerca match esatto o normalizzato
+         if (regionGender[displayRegionName]) {
+             m = regionGender[displayRegionName].maschi || 0;
+             f = regionGender[displayRegionName].femmine || 0;
+         } else {
+             // Fallback: cerca normalizzando
+             const normTarget = normalizeName(displayRegionName);
+             for (const key of Object.keys(regionGender)) {
+                 if (normalizeName(key) === normTarget) {
+                     m = regionGender[key].maschi || 0;
+                     f = regionGender[key].femmine || 0;
+                     break;
+                 }
+             }
+         }
+     }
+  } else {
+     m = totalMaschi || 0;
+     f = totalFemmine || 0;
+  }
+  // -----------------------------------------------------------
+
+  const total = m + f;
+
+  // --- FIX 1: GESTIONE DATI NON DISPONIBILI ---
+  if (total === 0) {
+      // Disegna il placeholder "Dati non disponibili" (omino grigio)
+      drawNoDataPlaceholder(windowTop, windowHeight, 'Dati genere non disponibili');
+      
+      // Disegna comunque il titolo per coerenza
+      const titleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
+      const titleY = windowTop + 8;
+      push();
+      textAlign(RIGHT, TOP);
+      textSize(20);
+      fill("#1B4A95");
+      textFont('STIX Two Text');
+      text("VOTANTI PER GENERE", titleX, titleY); // o DISTRIBUZIONE GENERE
+      pop();
+      return; 
   }
 
-  const titleAreaHeight = 25;
-  const symbolSize = 18;
-  const rowSpacing = 8;
-  const textHeight = 12;
-  const labelHeight = 25;
-  const totalSymbolsHeight = textHeight + symbolSize + rowSpacing + textHeight + symbolSize + labelHeight;
+  // --- LOGICA ANIMAZIONE ---
+  let targetM = (m / total) * 100;
+  let targetF = (f / total) * 100;
+
+  let currentContextKey = String(selectedYear) + "-" + String(selectedRegion) + "-" + String(selectedQuesito);
+  if (lastGenderYear !== currentContextKey) {
+      currentMaschiAnim = 0;
+      currentFemmineAnim = 0;
+      lastGenderYear = currentContextKey;
+  }
+
+  currentMaschiAnim = lerp(currentMaschiAnim, targetM, 0.05);
+  currentFemmineAnim = lerp(currentFemmineAnim, targetF, 0.05);
+
+  if (Math.abs(currentMaschiAnim - targetM) < 0.1) currentMaschiAnim = targetM;
+  if (Math.abs(currentFemmineAnim - targetF) < 0.1) currentFemmineAnim = targetF;
+
+  const pctM = currentMaschiAnim;
+  const pctF = currentFemmineAnim;
+  // -------------------------
+
+  // 3. Disegno Archi
+  const startAngle = PI;
+  const totalArchAngle = PI; 
+  
+  const angleM = (pctM / 100) * totalArchAngle;
+  const angleF = (pctF / 100) * totalArchAngle;
+
+  push();
+  noFill();
+  strokeWeight(18);
+  
+  // --- FIX 2: PUNTE STONDATE (ROUND) ---
+  strokeCap(ROUND); 
+
+  // Arco Maschi (Giallo)
+  stroke(cMale);
+  if (pctM > 0.5) {
+      // Disegna arco normale
+      arc(chartX, centerY, radius * 2, radius * 2, startAngle, startAngle + angleM);
+  }
+
+  // Arco Femmine (Blu)
+  stroke(cFemale);
+  if (pctF > 0.5) {
+      // Calcola punto di inizio preciso
+      // Se usiamo ROUND, le punte si estendono oltre l'angolo. 
+      // Per farli toccare bene senza sovrapporsi troppo "stranamente", li facciamo partire dallo stesso punto.
+      // L'ordine di disegno (prima Giallo, poi Blu sopra) gestisce la sovrapposizione centrale.
+      
+      // Disegna arco femmine
+      arc(chartX, centerY, radius * 2, radius * 2, startAngle + angleM, startAngle + angleM + angleF);
+  }
+  pop();
+
+  // 4. Testi e Titoli
+  const titleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
   const titleY = windowTop + 8;
-  // Abbassa il grafico spostandolo più in basso nella finestra
-  const chartY = windowTop + titleAreaHeight + (windowHeight - titleAreaHeight - totalSymbolsHeight) / 2 + textHeight + symbolSize / 2 + windowHeight * 0.15;
-
-  const radius = getCommonSemicircleRadius();
-  const centerX = chartX;
-  const centerY = chartY + 40;
 
   push();
-  drawingContext.save();
-  drawingContext.beginPath();
-  drawingContext.rect(chartAreaLeft + bgPadding, windowTop, chartAreaWidth - bgPadding * 2, windowHeight);
-  drawingContext.clip();
-
-  fill(0, 71, 171);
-  noStroke();
+  textAlign(RIGHT, TOP);
   textSize(20);
-  textStyle(BOLD);
-  const genderTitleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
-  textAlign(RIGHT, TOP);
-  text(chartTitle, genderTitleX, titleY);
-
-  // Sottotitolo
-  let subtitle = ' ';
-  if (selectedQuesito !== null) {
-    subtitle = `Quesito ${selectedQuesito}`;
-    if (regionName) subtitle += ` " ${regionName}`;
-    else subtitle += ` Italia`;
-  } else if (regionName) {
-    subtitle = regionName;
-  }
-  textAlign(RIGHT, TOP);
-  textSize(16);
   fill("#1B4A95");
-  text(subtitle, genderTitleX, titleY + 22);
-
-  // Disegna l'arco
-  drawSplitSemicircle(centerX, centerY, radius, maschiPct, THEME_BLUE, THEME_ORANGE, 16);
-
-  const sideOffset = 70;
-  const leftLabelX = centerX - radius - sideOffset;
-  const rightLabelX = centerX + radius + sideOffset;
-  // Alzo leggermente le etichette per centrarle meglio verticalmente senza il numero assoluto
-  const labelTopY = centerY - radius * 0.8;
-  const percentY = centerY - radius * 0.5;
-
-  // --- MASCHI (UOMINI) ---
-  push();
-  textAlign(CENTER, TOP);
-  
-  // Titolo
-  textSize(20);
-  textFont('Stix Two Text');
-  textStyle(BOLD);
-  fill(THEME_BLUE[0], THEME_BLUE[1], THEME_BLUE[2]);
-  text('UOMINI', leftLabelX, labelTopY);
-  
-  // Percentuale (INGRANDITA A 32px)
-  textSize(32); 
-  text(maschiPct.toFixed(1) + '%', leftLabelX, percentY);
-  
-  // Numero assoluto RIMOSSO
+  textFont('STIX Two Text');
+  text("VOTANTI PER GENERE", titleX, titleY);
   pop();
 
-  // --- FEMMINE (DONNE) ---
+  // Etichette Percentuali
   push();
-  textAlign(CENTER, TOP);
-  textFont('Stix Two Text');
-  textStyle(BOLD);
-  
-  // Titolo
-  noStroke();
-  fill(THEME_ORANGE[0], THEME_ORANGE[1], THEME_ORANGE[2]);
-  textSize(20);
-  text('DONNE', rightLabelX, labelTopY);
-  
-  // Percentuale (INGRANDITA A 32px)
   textSize(28);
-  text(femminePct.toFixed(1) + '%', rightLabelX, percentY);
+  textStyle(BOLD);
+  textAlign(CENTER, TOP);
   
-  // Numero assoluto RIMOSSO
-  pop();
-
-  drawingContext.restore();
+  // Maschi (Sinistra)
+  fill(cMale);
+  text(`${pctM.toFixed(1)}%`, chartX - radius/1.5, centerY + 25);
+  
+  // Femmine (Destra)
+  fill(cFemale);
+  text(`${pctF.toFixed(1)}%`, chartX + radius/1.5, centerY + 25);
+  
+  // Etichette UOMINI / DONNE (Opzionale, come da tuo screenshot)
+  textSize(16);
+  fill(cMale);
+  text("UOMINI", chartX - radius/1.5, centerY + 5);
+  fill(cFemale);
+  text("DONNE", chartX + radius/1.5, centerY + 5);
   pop();
 }
+
 
 
 

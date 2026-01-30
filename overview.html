@@ -67,8 +67,13 @@
     
   </div>
   <div class="legend-icon">
-    <img src="img/Senza titolo-1.svg" alt="Icona referendum">
+    <img src="img/SVG/omino.svg" alt="Icona referendum">
 
+  </div>
+   <div class="txt-overview">
+    <p>
+      Seleziona un'anno
+    </p>
   </div>
  
   </div>
@@ -287,7 +292,7 @@ const COLORS = {
       drawHistogram();
       // drawTimeline(); // Removed - using HTML timeline instead (same as dettaglio)
       drawHoverInfo();
-
+     updateHoverIndex();
     }
     
     /**
@@ -295,9 +300,9 @@ const COLORS = {
      * includendo l'area della linea del tempo.
      */
     function updateHoverState() {
-      let chartX = CHART_PADDING;
-      let chartWidth = width - 2 * CHART_PADDING;
-      let chartY = TOP_MARGIN;
+        let chartX = CHART_PADDING-65;
+      let chartY = TOP_MARGIN - 10;
+      let chartWidth = width - 2 * CHART_PADDING + 130;
       let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
       let timelineY = chartY + chartHeight + 20;
     
@@ -381,12 +386,23 @@ function getBarColor(year) {
       else return COLORS.NON_RICHIESTO;
 }
     
+function updateHoverIndex() {
+    hoveredIndex = -1;
+
+    for (let i = 0; i < numReferendums; i++) {
+        hoveredIndex = i;
+        break;
+    }
+}
+
+
 function drawHistogram() {
-      let chartX = CHART_PADDING-40;
-      let chartY = TOP_MARGIN;
-      let chartWidth = width - 2 * CHART_PADDING + 85;
+      let chartX = CHART_PADDING-65;
+      let chartY = TOP_MARGIN - 10;
+      let chartWidth = width - 2 * CHART_PADDING + 130;
       let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
       let baselineY = chartY + chartHeight;
+      
       
       // Calculate positions aligned with timeline dots (uniform distribution)
       const yearToPosition = {};
@@ -408,14 +424,9 @@ function drawHistogram() {
       // Draw 50+1 with subtle outline for better readability
       push();
       // Draw outline (white/light background) first
-      stroke(255, 255, 255, 180);
-      strokeWeight(3);
-      fill(COLORS.QUORUM_LINE);
-      text('50+1', chartX +1400, quorumY-20);
-      // Draw main text on top
       noStroke();
       fill(COLORS.QUORUM_LINE);
-      text('50+1', chartX +1400, quorumY-20);
+      text('50+1', chartX +1400, quorumY-15);
       pop();
       
       textSize(14);
@@ -423,10 +434,6 @@ function drawHistogram() {
       // Draw QUORUM with subtle outline for better readability
       push();
       // Draw outline (white/light background) first
-      stroke(255, 255, 255, 180);
-      strokeWeight(2);
-      fill(COLORS.QUORUM_LINE);
-      text('QUORUM', chartX +1400, quorumY + 15);
       // Draw main text on top
       noStroke();
       fill(COLORS.QUORUM_LINE);
@@ -459,13 +466,22 @@ function drawHistogram() {
         
         rect(x, barTopY, barWidth, barHeight, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS);
     
-        if (hoveredIndex === i) {
-            stroke(COLORS.HOVER_HIGHLIGHT);
-            strokeWeight(3.5);
-            noFill();
-            rect(x, barTopY, barWidth, barHeight, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS);
-        }
+      if (hoveredIndex === i) {
+    push();
+    noFill();
+    stroke(COLORS.HOVER_HIGHLIGHT);
+    strokeWeight(4);
+    rect(
+        x - 2,
+        barTopY - 2,
+        barWidth + 4,
+        barHeight + 4,
+        BAR_RADIUS
+    );
+    pop();
+}
       }
+
 }
 
 
@@ -511,60 +527,66 @@ function drawTimeline() {
 }
     
 function drawHoverInfo() {
-        if (hoveredIndex === -1) return;
-    
-        let chartX = CHART_PADDING;
-        let chartWidth = width - 2 * CHART_PADDING;
-        let chartY = TOP_MARGIN;
-        let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
-        
-        // Calculate positions aligned with timeline dots (same as histogram)
-        const yearToPosition = {};
-        years.forEach((year, index) => {
-          const position = (years.length > 1) 
-            ? (index / (years.length - 1)) * 100 
+    if (hoveredIndex === -1) return;
+
+    let chartX = CHART_PADDING - 65;
+    let chartY = TOP_MARGIN - 10;
+    let chartWidth = width - 2 * CHART_PADDING + 130;
+    let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
+    let baselineY = chartY + chartHeight;
+
+    // Calcolo posizioni identico a drawHistogram()
+    const yearToPosition = {};
+    years.forEach((year, index) => {
+        const position = (years.length > 1)
+            ? (index / (years.length - 1)) * 100
             : 0;
-          yearToPosition[year] = position;
-        });
-        
-        let i = hoveredIndex;
-        const percentage = yearToPosition[years[i]];
-        const centerX = (chartX -40) + (percentage / 100) * (chartWidth+85) ;
-        let affluence = affluenceData[i];
-        let year = years[i];
-        let barHeight = (affluence / 100) * chartHeight;
-        let barTopY = chartY + chartHeight - barHeight;
-    
-        stroke(COLORS.INK);
-        drawingContext.setLineDash([6, 6]);
-        line(centerX, barTopY , centerX, barTopY-20);
-        drawingContext.setLineDash([]);
-    
-        // Display percentage without box - bold, STIX Two Text, blue, large
-        // Remove any shadow from text - use push/pop to isolate context changes
-        push();
-        // Completely reset shadow properties
-        drawingContext.shadowBlur = 0;
-        drawingContext.shadowColor = 'rgba(0,0,0,0)';
-        drawingContext.shadowOffsetX = 0;
-        drawingContext.shadowOffsetY = 0;
-        // Disable all filter effects
-        drawingContext.filter = 'none';
-        // Set globalCompositeOperation to ensure clean rendering
-        drawingContext.globalCompositeOperation = 'source-over';
-       
-        fill(COLORS.INK); // Blue color
-        noStroke(); // Make sure no stroke is applied
-        textFont('STIX Two Text');
-        textSize(25); // Large size
-        textAlign(CENTER, CENTER);
-        textStyle(normal);
-        
-        // Draw text without any effects
-        text(`${affluence.toFixed(2)}%`, centerX, barTopY-30);
-        pop();
- }
-    
+        yearToPosition[year] = position;
+    });
+
+    let i = hoveredIndex;
+    let affluence = affluenceData[i];
+
+    // === STESSA LARGHEZZA BARRA DELL'ISTOGRAMMA ===
+    const barWidthPercent = 2;
+    const barWidth = (chartWidth * barWidthPercent) / 100;
+
+    // === STESSO CALCOLO X DELL'ISTOGRAMMA ===
+    const percentage = yearToPosition[years[i]];
+    const x = chartX + (percentage / 100) * chartWidth - barWidth / 2;
+    const centerX = x + barWidth / 2;
+
+    // Altezza barra
+    let barHeight = (affluence / 100) * chartHeight;
+    let barTopY = baselineY - barHeight;
+
+    // Linea tratteggiata
+    stroke(COLORS.INK);
+    strokeWeight(1.5);
+    drawingContext.setLineDash([6, 6]);
+    line(centerX, barTopY, centerX, barTopY - 20);
+    drawingContext.setLineDash([]);
+
+    // Percentuale (senza ombre o effetti)
+    push();
+    drawingContext.shadowBlur = 0;
+    drawingContext.shadowColor = 'rgba(0,0,0,0)';
+    drawingContext.shadowOffsetX = 0;
+    drawingContext.shadowOffsetY = 0;
+    drawingContext.filter = 'none';
+    drawingContext.globalCompositeOperation = 'source-over';
+
+    fill(COLORS.INK);
+    noStroke();
+    textFont('STIX Two Text');
+    textSize(25);
+    textAlign(CENTER, CENTER);
+    textStyle(NORMAL);
+
+    text(`${affluence.toFixed(2)}%`, centerX, barTopY - 30);
+    pop();
+}
+  
 function mouseMoved() {
         redraw();
 }

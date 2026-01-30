@@ -212,7 +212,7 @@ html, body {
   .legend-icon{
     position: absolute;   /* permette di posizionarla sopra il canvas */
     top: 130px;            /* distanza dal bordo superiore della finestra */
-    right: 330px;            /* centrata orizzontalmente *//* centratura perfetta */
+    right: 60%;            /* centrata orizzontalmente *//* centratura perfetta */
     z-index: 10;        /* deve essere più alto del canvas */
     pointer-events: none; /* opzionale, per evitare che blocchi il mouse sul canvas */
   }
@@ -233,6 +233,18 @@ html, body {
     pointer-events: none; /* opzionale, per evitare che blocchi il mouse sul canvas */
   }
 
+  .txt-overview{
+    position: absolute;  /* permette di posizionarla sopra il canvas */
+    top: 110px;            /* distanza dal bordo superiore della finestra */
+    left: 50%;            /* centrata orizzontalmente *//* centratura perfetta */
+    transform: translateX(-50%);
+    z-index: 100;        /* deve essere più alto del canvas */
+    pointer-events: none; /* opzionale, per evitare che blocchi il mouse sul canvas */
+    color: var(--blue-color);
+    font-size: 28px;
+    font-weight: normal;
+    text-transform: uppercase;
+  }
   /* --- AGGIUNTA FIX CURSORE --- */
 
 /* 1. Rendi il body e i wrapper trasparenti ai click */

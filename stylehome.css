@@ -90,8 +90,7 @@ body {
 
 /* Data (sinistra) */
 .navbar-date {
-  font-size: 32pt;
-  /* Aumentato da 18px a 32pt */
+  /* font-size ereditato da navbar.css (16px) */
   margin: 0;
   color: var(--blue-color);
   font-weight: bold;

@@ -76,7 +76,7 @@
 
 /* Data (sinistra) */
 .navbar-date {
-  font-size: 18px;
+  font-size: 16px;
   margin: 0;
   color: var(--blue-color);
   font-family: 'STIX Two Text', serif;
@@ -127,7 +127,7 @@
 
 .navbar-title {
   color: var(--blue-color);
-  font-size: 40px;
+  font-size: 12px;
   font-weight: bold;
   letter-spacing: 1px;
   font-style: italic;

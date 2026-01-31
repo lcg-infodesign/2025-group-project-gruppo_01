@@ -1,49 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Home - Sketch</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" type="text/css" href="navbar.css">
-    <link rel="stylesheet" type="text/css" href="styleoverview.css">
-    <script src="libraries/p5.min.js"></script>
-    <script src="libraries/p5.sound.min.js"></script>
-  </head>
+  <title>Home - Sketch</title>
 
-  <body>
+  <link rel="stylesheet" type="text/css" href="navbar.css">
+  <link rel="stylesheet" type="text/css" href="styleoverview.css">
+  <script src="libraries/p5.min.js"></script>
+  <script src="libraries/p5.sound.min.js"></script>
+</head>
 
-    <div id="navbar">
-      <div class="navbar-wrapper">
-        <!-- RIGA ALTA -->
-        <div class="navbar-top">
-          <div id="current-date" class="navbar-date"></div>
-    
-          <div class="navbar-right">
-            <a href="home.html" class="nav-link">Home</a>
-            <a href="overview.html" class="nav-link active">Overview</a>
-            <a href="dettaglio.html" class="nav-link">Dettaglio</a>
-            <a href="informazioni.html" class="nav-link">Info</a>
-          </div>
+<body>
+
+  <div id="navbar">
+    <div class="navbar-wrapper">
+      <!-- RIGA ALTA -->
+      <div class="navbar-top">
+        <div id="current-date" class="navbar-date"></div>
+
+        <div class="navbar-right">
+          <a href="home.html" class="nav-link">Home</a>
+          <a href="overview.html" class="nav-link active">Overview</a>
+          <a href="dettaglio.html" class="nav-link">Dettaglio</a>
+          <a href="informazioni.html" class="nav-link">Info</a>
         </div>
-    
-        <!-- LINEA BLU -->
-        <div class="linea-parallela-top"></div>
-    
-        <!-- TITOLO CENTRALE -->
-        <div class="navbar-bottom">
-          <div class="navbar-title">AFFLUENZA dei REFERENDUM</div>
-        </div>
-    
-        <!-- SECONDA LINEA BLU -->
-        <div class="linea-parallela-bottom"></div>
-    
       </div>
-    </div>
-    
 
-      <button id="help-toggle" title="Aiuto" style="
+      <!-- LINEA BLU -->
+      <div class="linea-parallela-top"></div>
+
+      <!-- TITOLO CENTRALE -->
+      <div class="navbar-bottom">
+        <div class="navbar-title">AFFLUENZA dei REFERENDUM</div>
+      </div>
+
+      <!-- SECONDA LINEA BLU -->
+      <div class="linea-parallela-bottom"></div>
+
+    </div>
+  </div>
+
+
+  <button id="help-toggle" title="Aiuto" style="
           width: 30px;
           height: 30px;
           border-radius: 50%;
@@ -61,120 +62,120 @@
           transition: all 0.3s ease;
           box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         ">?</button>
-        
-        <div id="help-status" style="display:none;">OFF</div>
-    </div>
-    
+
+  <div id="help-status" style="display:none;">OFF</div>
+  </div>
+
   </div>
   <div class="legend-icon">
     <img src="img/SVG/omino.svg" alt="Icona referendum">
 
   </div>
-   <div class="txt-overview">
+  <div class="txt-overview">
     <p>
       Seleziona un'anno
     </p>
   </div>
- 
+
   </div>
 
 
-  
+
 
   <script>
     // Dati di affluenza per i 25 referendum
     let affluenceData = [];
     let years = [];
-    let quorumStatus = {}; 
+    let quorumStatus = {};
     let numReferendums = 25;
     let hoveredIndex = -1;  // Indice della colonna su cui si passa il mouse
-    
+
     // --- Colori Basati sull'Immagine ---
-    
-    
-const COLORS = {
-  INK: '#1E52A6', 
-  RAGGIUNTO: '#1E52A6', 
-  // 🎯 MODIFICA QUI per le barre del grafico
-  NON_RAGGIUNTO: '#ADBAD2', 
-  NON_RICHIESTO: '#F6ECE1', 
-  BACKGROUND_PAPER: '#F6F0E0', 
-  LINE_RULE: '#D9D9D9',       
-  QUORUM_LINE: '#FFB905',
-  HOVER_HIGHLIGHT: '#FFB905' // Oro brillante per l'
-};
-// ...
-    
+
+
+    const COLORS = {
+      INK: '#1E52A6',
+      RAGGIUNTO: '#1E52A6',
+      // 🎯 MODIFICA QUI per le barre del grafico
+      NON_RAGGIUNTO: '#ADBAD2',
+      NON_RICHIESTO: '#F6ECE1',
+      BACKGROUND_PAPER: '#F6F0E0',
+      LINE_RULE: '#D9D9D9',
+      QUORUM_LINE: '#FFB905',
+      HOVER_HIGHLIGHT: '#FFB905' // Oro brillante per l'
+    };
+    // ...
+
     // Raggio di curvatura per le barre (Top & Bottom)
-    const BAR_RADIUS = 10; 
+    const BAR_RADIUS = 10;
     // Offset e Margini
     const CHART_PADDING = 100; // Increased for more side margins
-    const TOP_MARGIN = 180; 
+    const TOP_MARGIN = 180;
     const BOTTOM_MARGIN = 120; // Increased to accommodate timeline higher position 
-    
+
     // Costante per la dimensione del marker quadrato sulla timeline
-    const TIMELINE_SQUARE_SIZE = 20; 
+    const TIMELINE_SQUARE_SIZE = 20;
 
     // Variabile per l'omino SVG come testo
     let ominoSvgText;
     let ominoImage;
-    
-    function preload(){
+
+    function preload() {
       bg = loadImage("img/background.png");
       // Carica l'SVG come testo per poterlo modificare
       ominoSvgText = loadStrings("omino1.svg");
     }
-    
+
     // Cache per le immagini colorate già create
     let ominoImageCache = {};
-    
+
     // Funzione per creare un'immagine SVG colorata
     function createColoredOmino(fillColor, strokeColor = null, strokeWidth = 0) {
       if (!ominoSvgText) return null;
-      
+
       // Crea una chiave per la cache basata sui colori
       let cacheKey = hex(red(fillColor), 2) + hex(green(fillColor), 2) + hex(blue(fillColor), 2);
       if (strokeColor) {
         cacheKey += '_' + hex(red(strokeColor), 2) + hex(green(strokeColor), 2) + hex(blue(strokeColor), 2) + '_' + strokeWidth;
       }
-      
+
       // Se l'immagine è già in cache, restituiscila
       if (ominoImageCache[cacheKey]) {
         return ominoImageCache[cacheKey];
       }
-      
+
       // Converte l'array di stringhe in un'unica stringa
       let svgText = ominoSvgText.join('\n');
-      
+
       // Converte il colore p5.js in formato hex
       let hexColor = '#' + hex(red(fillColor), 2) + hex(green(fillColor), 2) + hex(blue(fillColor), 2);
-      
+
       // Sostituisce il colore fill nel path principale (il corpo dell'omino)
       // Il primo path contiene il corpo dell'omino, sostituiamo solo quello
       svgText = svgText.replace(/<path d="M31.6699[^>]*fill="#[^"]*"/, (match) => {
         return match.replace(/fill="#[^"]*"/, `fill="${hexColor}"`);
       });
-      
+
       // Se l'omino è bianco, cambia occhi e bocca in blu
       if (red(fillColor) === 255 && green(fillColor) === 255 && blue(fillColor) === 255) {
         let blueColor = COLORS.INK; // #1E52A6
         let blueHex = '#1E52A6';
-        
+
         // Cambia gli occhi (i due rect con fill="white") in blu
         svgText = svgText.replace(/<rect[^>]*fill="white"/g, (match) => {
           return match.replace(/fill="white"/, `fill="${blueHex}"`);
         });
-        
+
         // Cambia la bocca (il path con stroke="white") in blu
         svgText = svgText.replace(/<path d="M16.5889[^>]*stroke="white"/g, (match) => {
           return match.replace(/stroke="white"/, `stroke="${blueHex}"`);
         });
       }
-      
+
       // Se c'è un bordo, aggiungi stroke al path principale
       if (strokeColor && strokeWidth > 0) {
         let strokeHex = '#' + hex(red(strokeColor), 2) + hex(green(strokeColor), 2) + hex(blue(strokeColor), 2);
-        
+
         // Aggiungi padding al viewBox per evitare che lo stroke venga tagliato
         // Il padding deve essere almeno la metà dello stroke-width
         let padding = Math.ceil(strokeWidth / 2) + 1; // Aggiungi 1px extra per sicurezza
@@ -189,7 +190,7 @@ const COLORS = {
           }
           return match;
         });
-        
+
         // Trova il path principale e aggiungi/modifica stroke con linejoin e linecap per evitare tagli
         svgText = svgText.replace(/<path d="M31.6699([^>]*)>/, (match, attrs) => {
           if (!attrs.includes('stroke=')) {
@@ -201,11 +202,11 @@ const COLORS = {
           }
         });
       }
-      
+
       // Crea un data URL dall'SVG modificato
-      let svgBlob = new Blob([svgText], {type: 'image/svg+xml;charset=utf-8'});
+      let svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
       let url = URL.createObjectURL(svgBlob);
-      
+
       // Carica l'immagine dal blob URL
       let img = loadImage(url, (loadedImg) => {
         // Immagine caricata con successo
@@ -213,24 +214,24 @@ const COLORS = {
         // Errore nel caricamento
         console.error('Errore nel caricamento dell\'omino colorato');
       });
-      
+
       // Salva nella cache
       ominoImageCache[cacheKey] = img;
-      
+
       return img;
     }
-    
+
     // Funzione helper per convertire numero in hex a 2 cifre
     function hex(num, len) {
       let str = Math.round(num).toString(16);
       while (str.length < len) str = '0' + str;
       return str;
     }
-    
+
     function setup() {
       createCanvas(windowWidth, windowHeight);
       textFont('sans-serif');
-      
+
       // Pre-crea le immagini colorate degli omini dopo che l'SVG è stato caricato
       if (ominoSvgText) {
         // Crea le tre versioni colorate
@@ -238,78 +239,78 @@ const COLORS = {
         ominoImageCache['non_raggiunto'] = createColoredOmino(COLORS.NON_RAGGIUNTO, null, 0);
         ominoImageCache['non_richiesto'] = createColoredOmino(color(255, 255, 255), COLORS.INK, 2);
       }
-      
+
       years = [
         '1946', '1974', '1978', '1981', '1985', '1987', '1989', '1990', '1991', '1993',
         '1995', '1997', '1999', '2000', '2001', '2003', '2005', '2006', '2009', '2011',
         '2016(1)', '2016(2)', '2020', '2022', '2025'
       ];
-      
+
       affluenceData = [
         88.82, 87.7, 81.2, 79.4, 77.96, 65.11, 80.31, 43.13, 62.50, 76.81,
         57.49, 30.16, 49.58, 32.17, 34.05, 25.87, 25.98, 53.84, 23.70, 57.03,
         32.16, 68.49, 53.84, 20.93, 30.59
       ];
-      
+
       const quorumStatesList = [
-        'NON_RICHIESTO', 'RAGGIUNTO', 'RAGGIUNTO', 'RAGGIUNTO', 'RAGGIUNTO', 
-        'RAGGIUNTO', 'NON_RICHIESTO', 'NON_RAGGIUNTO', 'RAGGIUNTO', 'RAGGIUNTO', 
-        'RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RICHIESTO', 
-        'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RICHIESTO', 'NON_RAGGIUNTO', 'RAGGIUNTO', 
+        'NON_RICHIESTO', 'RAGGIUNTO', 'RAGGIUNTO', 'RAGGIUNTO', 'RAGGIUNTO',
+        'RAGGIUNTO', 'NON_RICHIESTO', 'NON_RAGGIUNTO', 'RAGGIUNTO', 'RAGGIUNTO',
+        'RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RICHIESTO',
+        'NON_RAGGIUNTO', 'NON_RAGGIUNTO', 'NON_RICHIESTO', 'NON_RAGGIUNTO', 'RAGGIUNTO',
         'NON_RAGGIUNTO', 'NON_RICHIESTO', 'NON_RICHIESTO', 'NON_RAGGIUNTO', 'NON_RAGGIUNTO'
       ];
-    
+
       for (let i = 0; i < years.length; i++) {
-        quorumStatus[years[i]] = quorumStatesList[i].trim().replace(/\s/g, '_'); 
+        quorumStatus[years[i]] = quorumStatesList[i].trim().replace(/\s/g, '_');
       }
     }
-    
+
     function draw() {
       // 1. Logica Hover
       background(245, 240, 220);
-      updateHoverState(); 
-    
+      updateHoverState();
 
 
 
-  const canvasElement = document.querySelector('canvas');
-  if (canvasElement) {
-    if (hoveredIndex !== -1) {
-      canvasElement.style.cursor = 'pointer';
-    } else {
-      canvasElement.style.cursor = 'default';
-    }
-  }
-  // --------------------------------
 
-      
-      
+      const canvasElement = document.querySelector('canvas');
+      if (canvasElement) {
+        if (hoveredIndex !== -1) {
+          canvasElement.style.cursor = 'pointer';
+        } else {
+          canvasElement.style.cursor = 'default';
+        }
+      }
+      // --------------------------------
+
+
+
       // 2. Disegno;
-      drawLegend(); 
+      drawLegend();
       drawHistogram();
       // drawTimeline(); // Removed - using HTML timeline instead (same as dettaglio)
       drawHoverInfo();
     }
-    
+
     /**
      * Aggiorna l'indice della colonna su cui si sta passando il mouse,
      * includendo l'area della linea del tempo.
      */
-        /**
-     * Aggiorna l'indice della colonna su cui si sta passando il mouse,
-     * includendo l'area della linea del tempo.
-     */
-         /**
-     * Aggiorna l'indice della colonna su cui si sta passando il mouse,
-     * usando la logica del "Vicino più Prossimo" per la massima precisione.
-     */
-     function updateHoverState() {
+    /**
+ * Aggiorna l'indice della colonna su cui si sta passando il mouse,
+ * includendo l'area della linea del tempo.
+ */
+    /**
+* Aggiorna l'indice della colonna su cui si sta passando il mouse,
+* usando la logica del "Vicino più Prossimo" per la massima precisione.
+*/
+    function updateHoverState() {
       // 1. DEFINIZIONE AREA VERTICALE ATTIVA
       // Attiviamo l'hover solo se il mouse è verticalmente dentro l'area del grafico o della timeline
       // Parte alta del grafico
-      let topLimit = TOP_MARGIN - 20; 
+      let topLimit = TOP_MARGIN - 20;
       // Parte bassa (inclusa la timeline e i pallini sotto)
-      let bottomLimit = height - BOTTOM_MARGIN + 80; 
+      let bottomLimit = height - BOTTOM_MARGIN + 80;
 
       if (mouseY < topLimit || mouseY > bottomLimit) {
         hoveredIndex = -1;
@@ -320,7 +321,7 @@ const COLORS = {
       // Questi numeri DEVONO essere identici a quelli usati in drawHistogram
       let chartX = CHART_PADDING - 65;
       let chartWidth = width - 2 * CHART_PADDING + 130;
-      
+
       // Calcoliamo la distanza media tra una barra e l'altra
       let stepWidth = chartWidth / (numReferendums - 1);
 
@@ -331,7 +332,7 @@ const COLORS = {
       for (let i = 0; i < numReferendums; i++) {
         // Calcolo della posizione percentuale esatta (0.0 a 1.0)
         let t = i / (numReferendums - 1);
-        
+
         // Calcolo coordinata X centrale della barra corrente
         let centerX = chartX + t * chartWidth;
 
@@ -358,119 +359,119 @@ const COLORS = {
 
 
 
-    
+
     function drawPaperBackground() {
-  noStroke();                          // niente bordo
-  fill(245, 240, 220, 90);             // colore con alpha (trasparenza)
-  rect(0, 0, width, height);  
-  background(bg)         // rettangolo che copre tutto il canvas
-}
-    
-function drawLegend() {
-  const legendX = width - CHART_PADDING-220; // posizione X della legenda
-  let legendY = TOP_MARGIN - 35;               // posizione Y iniziale
-  const spacing = 30;                          // spazio tra le voci
-  const markerX = legendX + 10;  
-                // posizione X dei marker
+      noStroke();                          // niente bordo
+      fill(245, 240, 220, 90);             // colore con alpha (trasparenza)
+      rect(0, 0, width, height);
+      background(bg)         // rettangolo che copre tutto il canvas
+    }
 
-  // Oggetti della legenda
-  const legendItems = [
-    { text: 'Quorum non richiesto', color: COLORS.NON_RICHIESTO },
-    { text: 'Quorum non raggiunto', color: COLORS.NON_RAGGIUNTO },
-    { text: 'Quorum raggiunto', color: COLORS.RAGGIUNTO }
-  ];
-  
-  textSize(19);
-  textFont('STIX Two Text', 'serif');
-  textAlign(LEFT, LEFT);
+    function drawLegend() {
+      const legendX = width - CHART_PADDING - 220; // posizione X della legenda
+      let legendY = TOP_MARGIN - 35;               // posizione Y iniziale
+      const spacing = 30;                          // spazio tra le voci
+      const markerX = legendX + 10;
+      // posizione X dei marker
 
-  for (let i = 0; i < legendItems.length; i++) {
-    let item = legendItems[i];
-    let y = legendY + i * spacing;
+      // Oggetti della legenda
+      const legendItems = [
+        { text: 'Quorum non richiesto', color: COLORS.NON_RICHIESTO },
+        { text: 'Quorum non raggiunto', color: COLORS.NON_RAGGIUNTO },
+        { text: 'Quorum raggiunto', color: COLORS.RAGGIUNTO }
+      ];
 
-    // Disegna testo
-    fill(COLORS.INK);
-    noStroke();
-    text(item.text, markerX + 20, y+7);
+      textSize(19);
+      textFont('STIX Two Text', 'serif');
+      textAlign(LEFT, LEFT);
 
-   fill(item.color);
-    stroke(COLORS.INK);
-    strokeWeight(1);
-    rectMode(CENTER);
-    rect(markerX, y+8, 12, 12, 3);
-    rectMode(CORNER);
-  }
-}
+      for (let i = 0; i < legendItems.length; i++) {
+        let item = legendItems[i];
+        let y = legendY + i * spacing;
 
-function getBarColor(year) {
+        // Disegna testo
+        fill(COLORS.INK);
+        noStroke();
+        text(item.text, markerX + 20, y + 7);
+
+        fill(item.color);
+        stroke(COLORS.INK);
+        strokeWeight(1);
+        rectMode(CENTER);
+        rect(markerX, y + 8, 12, 12, 3);
+        rectMode(CORNER);
+      }
+    }
+
+    function getBarColor(year) {
       const status = quorumStatus[year];
       if (status === 'RAGGIUNTO') return COLORS.RAGGIUNTO;
       else if (status === 'NON_RAGGIUNTO') return COLORS.NON_RAGGIUNTO;
       else return COLORS.NON_RICHIESTO;
-}
-    
+    }
 
 
 
-function drawHistogram() {
-      let chartX = CHART_PADDING-65;
+
+    function drawHistogram() {
+      let chartX = CHART_PADDING - 65;
       let chartY = TOP_MARGIN - 10;
       let chartWidth = width - 2 * CHART_PADDING + 130;
       let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
       let baselineY = chartY + chartHeight;
-      
-      
+
+
       // Calculate positions aligned with timeline dots (uniform distribution)
       const yearToPosition = {};
       years.forEach((year, index) => {
-        const position = (years.length > 1) 
-          ? (index / (years.length - 1)) * 100 
+        const position = (years.length > 1)
+          ? (index / (years.length - 1)) * 100
           : 0;
         yearToPosition[year] = position;
       });
-      
+
       const quorumY = baselineY - (50 / 100) * chartHeight;
       stroke(COLORS.QUORUM_LINE);
       strokeWeight(3);
       line(chartX, quorumY, chartX + chartWidth, quorumY);
-      
+
       textSize(24);
       textAlign(RIGHT, CENTER);
-      
+
       // Draw 50+1 with subtle outline for better readability
       push();
       // Draw outline (white/light background) first
       noStroke();
       fill(COLORS.QUORUM_LINE);
-      text('50+1', chartX +1400, quorumY-15);
+      text('50+1', chartX + 1400, quorumY - 15);
       pop();
-      
+
       textSize(14);
-      
+
       // Draw QUORUM with subtle outline for better readability
       push();
       // Draw outline (white/light background) first
       // Draw main text on top
       noStroke();
       fill(COLORS.QUORUM_LINE);
-      text('QUORUM', chartX +1400, quorumY + 15);
+      text('QUORUM', chartX + 1400, quorumY + 15);
       pop();
-      
-      
+
+
       // Bar width as percentage of chart width
       const barWidthPercent = 2; // Width of each bar as % of total chart width
       const barWidth = (chartWidth * barWidthPercent) / 100;
-      
+
       for (let i = 0; i < numReferendums; i++) {
         // Calculate x position aligned with timeline dots
         const percentage = yearToPosition[years[i]];
         const x = chartX + (percentage / 100) * chartWidth - barWidth / 2;
-        
+
         let affluence = affluenceData[i];
         let barHeight = (affluence / 100) * chartHeight;
         let barTopY = baselineY - barHeight;
         let barColor = getBarColor(years[i]);
-        
+
         if (barColor === COLORS.NON_RICHIESTO || barColor === COLORS.NON_RAGGIUNTO) {
           fill(barColor);
           stroke(COLORS.INK);
@@ -479,561 +480,566 @@ function drawHistogram() {
           fill(barColor);
           noStroke();
         }
-        
+
         rect(x, barTopY, barWidth, barHeight, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS, BAR_RADIUS);
-    
-      if (hoveredIndex === i) {
-    push();
-    noFill();
-    stroke(COLORS.HOVER_HIGHLIGHT);
-    strokeWeight(4);
-    rect(
-        x - 2,
-        barTopY - 2,
-        barWidth + 4,
-        barHeight + 4,
-        BAR_RADIUS
-    );
-    pop();
-}
-      }
 
-}
-
-
-    
-function drawTimeline() {
-        let chartX = CHART_PADDING;
-        let chartWidth = width - 2 * CHART_PADDING;
-        let totalBarWidth = chartWidth / numReferendums;
-        let baselineY = TOP_MARGIN + (height - TOP_MARGIN - BOTTOM_MARGIN);
-        let timelineY = baselineY + 0; 
-        
-        stroke(COLORS.INK);
-        strokeWeight(2);
-        line(chartX, timelineY, chartX + chartWidth, timelineY); 
-        
-        for (let i = 0; i < numReferendums; i++) {
-            let x = chartX + i * totalBarWidth + totalBarWidth / 2;
-            let barColor = getBarColor(years[i]);
-            
-            let markerSize = 20;
-            let squareSize = TIMELINE_SQUARE_SIZE; 
-            
-            fill(barColor);
-            stroke(COLORS.INK);
-            strokeWeight(1);
-            rectMode(CENTER);
-            rect(x, timelineY + 20, squareSize, squareSize, 5, 5, 5, 5); 
-            rectMode(CORNER);
-            
-            if (hoveredIndex === i) markerSize = 12;
-    
-            if (quorumStatus[years[i]] === 'RAGGIUNTO') {
-                fill(COLORS.INK);
-                noStroke();
-                circle(x, timelineY, markerSize);
-            } else {
-                noFill(COLORS.BACKGROUND_PAPER);
-                stroke(COLORS.INK);
-                strokeWeight(2);
-                circle(x, timelineY, markerSize);
-            }
+        if (hoveredIndex === i) {
+          push();
+          noFill();
+          stroke(COLORS.HOVER_HIGHLIGHT);
+          strokeWeight(4);
+          rect(
+            x - 2,
+            barTopY - 2,
+            barWidth + 4,
+            barHeight + 4,
+            BAR_RADIUS
+          );
+          pop();
         }
-}
-    
-function drawHoverInfo() {
-    if (hoveredIndex === -1) return;
-
-    let chartX = CHART_PADDING - 65;
-    let chartY = TOP_MARGIN - 10;
-    let chartWidth = width - 2 * CHART_PADDING + 130;
-    let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
-    let baselineY = chartY + chartHeight;
-
-    // Calcolo posizioni identico a drawHistogram()
-    const yearToPosition = {};
-    years.forEach((year, index) => {
-        const position = (years.length > 1)
-            ? (index / (years.length - 1)) * 100
-            : 0;
-        yearToPosition[year] = position;
-    });
-
-    let i = hoveredIndex;
-    let affluence = affluenceData[i];
-
-    // === STESSA LARGHEZZA BARRA DELL'ISTOGRAMMA ===
-    const barWidthPercent = 2;
-    const barWidth = (chartWidth * barWidthPercent) / 100;
-
-    // === STESSO CALCOLO X DELL'ISTOGRAMMA ===
-    const percentage = yearToPosition[years[i]];
-    const x = chartX + (percentage / 100) * chartWidth - barWidth / 2;
-    const centerX = x + barWidth / 2;
-
-    // Altezza barra
-    let barHeight = (affluence / 100) * chartHeight;
-    let barTopY = baselineY - barHeight;
-
-    // Linea tratteggiata
-    stroke(COLORS.INK);
-    strokeWeight(1.5);
-    drawingContext.setLineDash([6, 6]);
-    line(centerX, barTopY, centerX, barTopY - 20);
-    drawingContext.setLineDash([]);
-
-    // Percentuale (senza ombre o effetti)
-    push();
-    drawingContext.shadowBlur = 0;
-    drawingContext.shadowColor = 'rgba(0,0,0,0)';
-    drawingContext.shadowOffsetX = 0;
-    drawingContext.shadowOffsetY = 0;
-    drawingContext.filter = 'none';
-    drawingContext.globalCompositeOperation = 'source-over';
-
-    fill(COLORS.INK);
-    noStroke();
-    textFont('STIX Two Text');
-    textSize(25);
-    textAlign(CENTER, CENTER);
-    textStyle(NORMAL);
-
-    text(`${affluence.toFixed(2)}%`, centerX, barTopY - 30);
-    pop();
-}
-  
-function mouseMoved() {
-        redraw();
-}
-
-function mousePressed() {
-  // Verifica se il click è su una barra dell'istogramma (hoveredIndex calcolato da updateHoverState)
-  
-  if (hoveredIndex !== -1) {
-    const year = years[hoveredIndex];
-    
-    // Converti il formato anno da overview a dettaglio (stesso formato della timeline)
-    let yearParam = year;
-    // Gestione specifica per i casi 2016
-    if (year === "2016(1)") {
-      yearParam = "2016-1";
-    } else if (year === "2016(2)") {
-      yearParam = "2016-2";
-    } else {
-      // Per gli altri anni, usa il valore direttamente
-      yearParam = year;
-    }
-    
-    console.log('✅ Click su barra istogramma per anno:', year, '- vado al dettaglio');
-    
-    // Reindirizza alla pagina dettaglio
-    window.location.href = 'dettaglio.html?year=' + encodeURIComponent(yearParam);
-  }
-  function mousePressed() {
-  if (mouseButton !== LEFT) return; // <--- AGGIUNGI QUESTO!
-  
-  // ... resto del codice ...
-}
-
-}
-
-    
-function windowResized() {
-      resizeCanvas(windowWidth, windowHeight);
-}
-
-
-</script>
-
-
-<script>
-  function updateCurrentDate() {
-    const dateElement = document.getElementById('current-date');
-    if (dateElement) {
-      const now = new Date();
-      const daysOfWeek = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-      const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 
-                     'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-      const dayOfWeek = daysOfWeek[now.getDay()];
-      const day = now.getDate();
-      const month = months[now.getMonth()];
-      const year = now.getFullYear();
-      dateElement.textContent = `${dayOfWeek} ${day} ${month} ${year}`;
-    }
-  }
-  updateCurrentDate();
-
-  // Intersection Observer per animazioni
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
       }
+
+    }
+
+
+
+    function drawTimeline() {
+      let chartX = CHART_PADDING;
+      let chartWidth = width - 2 * CHART_PADDING;
+      let totalBarWidth = chartWidth / numReferendums;
+      let baselineY = TOP_MARGIN + (height - TOP_MARGIN - BOTTOM_MARGIN);
+      let timelineY = baselineY + 0;
+
+      stroke(COLORS.INK);
+      strokeWeight(2);
+      line(chartX, timelineY, chartX + chartWidth, timelineY);
+
+      for (let i = 0; i < numReferendums; i++) {
+        let x = chartX + i * totalBarWidth + totalBarWidth / 2;
+        let barColor = getBarColor(years[i]);
+
+        let markerSize = 20;
+        let squareSize = TIMELINE_SQUARE_SIZE;
+
+        fill(barColor);
+        stroke(COLORS.INK);
+        strokeWeight(1);
+        rectMode(CENTER);
+        rect(x, timelineY + 20, squareSize, squareSize, 5, 5, 5, 5);
+        rectMode(CORNER);
+
+        if (hoveredIndex === i) markerSize = 12;
+
+        if (quorumStatus[years[i]] === 'RAGGIUNTO') {
+          fill(COLORS.INK);
+          noStroke();
+          circle(x, timelineY, markerSize);
+        } else {
+          noFill(COLORS.BACKGROUND_PAPER);
+          stroke(COLORS.INK);
+          strokeWeight(2);
+          circle(x, timelineY, markerSize);
+        }
+      }
+    }
+
+    function drawHoverInfo() {
+      if (hoveredIndex === -1) return;
+
+      let chartX = CHART_PADDING - 65;
+      let chartY = TOP_MARGIN - 10;
+      let chartWidth = width - 2 * CHART_PADDING + 130;
+      let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
+      let baselineY = chartY + chartHeight;
+
+      // Calcolo posizioni identico a drawHistogram()
+      const yearToPosition = {};
+      years.forEach((year, index) => {
+        const position = (years.length > 1)
+          ? (index / (years.length - 1)) * 100
+          : 0;
+        yearToPosition[year] = position;
+      });
+
+      let i = hoveredIndex;
+      let affluence = affluenceData[i];
+
+      // === STESSA LARGHEZZA BARRA DELL'ISTOGRAMMA ===
+      const barWidthPercent = 2;
+      const barWidth = (chartWidth * barWidthPercent) / 100;
+
+      // === STESSO CALCOLO X DELL'ISTOGRAMMA ===
+      const percentage = yearToPosition[years[i]];
+      const x = chartX + (percentage / 100) * chartWidth - barWidth / 2;
+      const centerX = x + barWidth / 2;
+
+      // Altezza barra
+      let barHeight = (affluence / 100) * chartHeight;
+      let barTopY = baselineY - barHeight;
+
+      // Linea tratteggiata
+      stroke(COLORS.INK);
+      strokeWeight(1.5);
+      drawingContext.setLineDash([6, 6]);
+      line(centerX, barTopY, centerX, barTopY - 20);
+      drawingContext.setLineDash([]);
+
+      // Percentuale (senza ombre o effetti)
+      push();
+      drawingContext.shadowBlur = 0;
+      drawingContext.shadowColor = 'rgba(0,0,0,0)';
+      drawingContext.shadowOffsetX = 0;
+      drawingContext.shadowOffsetY = 0;
+      drawingContext.filter = 'none';
+      drawingContext.globalCompositeOperation = 'source-over';
+
+      fill(COLORS.INK);
+      noStroke();
+      textFont('STIX Two Text');
+      textSize(25);
+      textAlign(CENTER, CENTER);
+      textStyle(NORMAL);
+
+      text(`${affluence.toFixed(2)}%`, centerX, barTopY - 30);
+      pop();
+    }
+
+    function mouseMoved() {
+      redraw();
+    }
+
+    function mousePressed() {
+      // Verifica se il click è su una barra dell'istogramma (hoveredIndex calcolato da updateHoverState)
+
+      if (hoveredIndex !== -1) {
+        const year = years[hoveredIndex];
+
+        // Converti il formato anno da overview a dettaglio (stesso formato della timeline)
+        let yearParam = year;
+        // Gestione specifica per i casi 2016
+        if (year === "2016(1)") {
+          yearParam = "2016-1";
+        } else if (year === "2016(2)") {
+          yearParam = "2016-2";
+        } else {
+          // Per gli altri anni, usa il valore direttamente
+          yearParam = year;
+        }
+
+        console.log('✅ Click su barra istogramma per anno:', year, '- vado al dettaglio');
+
+        // Reindirizza alla pagina dettaglio
+        window.location.href = 'dettaglio.html?year=' + encodeURIComponent(yearParam);
+      }
+      function mousePressed() {
+        if (mouseButton !== LEFT) return; // <--- AGGIUNGI QUESTO!
+
+        // ... resto del codice ...
+      }
+
+    }
+
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+
+
+  </script>
+
+
+  <script>
+    function updateCurrentDate() {
+      const dateElement = document.getElementById('current-date');
+      if (dateElement) {
+        const now = new Date();
+        const daysOfWeek = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+        const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+          'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+        const dayOfWeek = daysOfWeek[now.getDay()];
+        const day = now.getDate();
+        const month = months[now.getMonth()];
+        const year = now.getFullYear();
+        dateElement.textContent = `${dayOfWeek} ${day} ${month} ${year}`;
+      }
+    }
+    updateCurrentDate();
+
+    // Intersection Observer per animazioni
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.3
     });
-  }, {
-    threshold: 0.3
-  });
 
-  document.querySelectorAll('.section-row').forEach(section => {
-    observer.observe(section);
-  });
+    document.querySelectorAll('.section-row').forEach(section => {
+      observer.observe(section);
+    });
 
-  const navLinks = document.querySelectorAll('.nav-link');
+    const navLinks = document.querySelectorAll('.nav-link');
 
-navLinks.forEach(link => {
-  link.addEventListener('click', function(event) {
-    // Evita che la pagina si ricarichi se vuoi restare sulla stessa pagina
-    // event.preventDefault(); 
+    navLinks.forEach(link => {
+      link.addEventListener('click', function (event) {
+        // Evita che la pagina si ricarichi se vuoi restare sulla stessa pagina
+        // event.preventDefault(); 
 
-    // Rimuovi la classe 'active' da tutti i link
-    navLinks.forEach(l => l.classList.remove('active'));
+        // Rimuovi la classe 'active' da tutti i link
+        navLinks.forEach(l => l.classList.remove('active'));
 
-    // Aggiungi la classe 'active' al link cliccato
-    this.classList.add('active');
-  });
-});
+        // Aggiungi la classe 'active' al link cliccato
+        this.classList.add('active');
+      });
+    });
 
 
 
-</script>
+  </script>
 
-    <!-- Timeline footer (same as dettaglio.html) -->
-    <div id="footer" style="position:fixed; bottom:40px; left:0; right:0; height:80px; background-color:#f5f0dc; z-index:10000; display:flex; align-items:center; padding:0px;">
-      <div id="year-slider-container" style="position:relative; width:100%; max-width:1400px; margin:0 auto;">
-        <div style="position:relative; height:40px; display:flex; align-items:center;">
-          <div id="timeline-line" style="position:absolute; left:0; right:0; height:4px; background-color:#0F3D88 !important; top:50%; transform:translateY(-50%); z-index:10; pointer-events:none; opacity:1 !important; display:block !important; visibility:visible !important;"></div>
-          <div id="year-dots" style="position:relative; width:100%; height:100%; z-index:15; min-height:40px;"></div>
-          <input type="range" id="year-slider" min="0" max="100" value="100" step="0.01" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:5;">
+  <!-- Timeline footer (same as dettaglio.html) -->
+  <div id="footer"
+    style="position:fixed; bottom:40px; left:0; right:0; height:80px; background-color:#f5f0dc; z-index:10000; display:flex; align-items:center; padding:0px;">
+    <div id="year-slider-container" style="position:relative; width:100%; max-width:1400px; margin:0 auto;">
+      <div style="position:relative; height:40px; display:flex; align-items:center;">
+        <div id="timeline-line"
+          style="position:absolute; left:0; right:0; height:4px; background-color:#0F3D88 !important; top:50%; transform:translateY(-50%); z-index:10; pointer-events:none; opacity:1 !important; display:block !important; visibility:visible !important;">
         </div>
+        <div id="year-dots" style="position:relative; width:100%; height:100%; z-index:15; min-height:40px;"></div>
+        <input type="range" id="year-slider" min="0" max="100" value="100" step="0.01"
+          style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:5;">
       </div>
     </div>
+  </div>
 
-    <script>
-      // Timeline setup for overview - adapted from sketch_dettaglio.js
-      let selectedYearOverview = null; // No default selected year
-      
-      // Convert overview year format to internal format for quorum lookup
-      function getYearKeyForQuorum(displayYear) {
-        if (displayYear === '2016(1)') return '2016-1';
-        if (displayYear === '2016(2)') return '2016-2';
-        return displayYear;
-      }
-      
-      // Quorum status mapping (same as dettaglio)
-      const quorumStatusByYear = {
-        '1946': 'NON_RICHIESTO',
-        '1974': 'RAGGIUNTO',
-        '1978': 'RAGGIUNTO',
-        '1981': 'RAGGIUNTO',
-        '1985': 'RAGGIUNTO',
-        '1987': 'RAGGIUNTO',
-        '1989': 'NON_RICHIESTO',
-        '1990': 'NON_RAGGIUNTO',
-        '1991': 'RAGGIUNTO',
-        '1993': 'RAGGIUNTO',
-        '1995': 'RAGGIUNTO',
-        '1997': 'NON_RAGGIUNTO',
-        '1999': 'NON_RAGGIUNTO',
-        '2000': 'NON_RAGGIUNTO',
-        '2001': 'NON_RICHIESTO',
-        '2003': 'NON_RAGGIUNTO',
-        '2005': 'NON_RAGGIUNTO',
-        '2006': 'NON_RICHIESTO',
-        '2009': 'NON_RAGGIUNTO',
-        '2011': 'RAGGIUNTO',
-        '2016-1': 'NON_RAGGIUNTO',
-        '2016-2': 'NON_RICHIESTO',
-        '2020': 'NON_RICHIESTO',
-        '2022': 'NON_RAGGIUNTO',
-        '2025': 'NON_RAGGIUNTO'
-      };
-      
-      function setupYearSliderOverview() {
-        const slider = document.getElementById('year-slider');
-        const yearDots = document.getElementById('year-dots');
-        
-        if (!slider || !yearDots) return;
-        
-        // Use years array from overview
-        const overviewYears = years; // ['1946', '1974', ..., '2016(1)', '2016(2)', ...]
-        
-        // Calculate uniform positions
-        const yearToPosition = {};
-        overviewYears.forEach((year, index) => {
-          const position = (overviewYears.length > 1) 
-            ? (index / (overviewYears.length - 1)) * 100 
-            : 0;
-          yearToPosition[year] = position;
+  <script>
+    // Timeline setup for overview - adapted from sketch_dettaglio.js
+    let selectedYearOverview = null; // No default selected year
+
+    // Convert overview year format to internal format for quorum lookup
+    function getYearKeyForQuorum(displayYear) {
+      if (displayYear === '2016(1)') return '2016-1';
+      if (displayYear === '2016(2)') return '2016-2';
+      return displayYear;
+    }
+
+    // Quorum status mapping (same as dettaglio)
+    const quorumStatusByYear = {
+      '1946': 'NON_RICHIESTO',
+      '1974': 'RAGGIUNTO',
+      '1978': 'RAGGIUNTO',
+      '1981': 'RAGGIUNTO',
+      '1985': 'RAGGIUNTO',
+      '1987': 'RAGGIUNTO',
+      '1989': 'NON_RICHIESTO',
+      '1990': 'NON_RAGGIUNTO',
+      '1991': 'RAGGIUNTO',
+      '1993': 'RAGGIUNTO',
+      '1995': 'RAGGIUNTO',
+      '1997': 'NON_RAGGIUNTO',
+      '1999': 'NON_RAGGIUNTO',
+      '2000': 'NON_RAGGIUNTO',
+      '2001': 'NON_RICHIESTO',
+      '2003': 'NON_RAGGIUNTO',
+      '2005': 'NON_RAGGIUNTO',
+      '2006': 'NON_RICHIESTO',
+      '2009': 'NON_RAGGIUNTO',
+      '2011': 'RAGGIUNTO',
+      '2016-1': 'NON_RAGGIUNTO',
+      '2016-2': 'NON_RICHIESTO',
+      '2020': 'NON_RICHIESTO',
+      '2022': 'NON_RAGGIUNTO',
+      '2025': 'NON_RAGGIUNTO'
+    };
+
+    function setupYearSliderOverview() {
+      const slider = document.getElementById('year-slider');
+      const yearDots = document.getElementById('year-dots');
+
+      if (!slider || !yearDots) return;
+
+      // Use years array from overview
+      const overviewYears = years; // ['1946', '1974', ..., '2016(1)', '2016(2)', ...]
+
+      // Calculate uniform positions
+      const yearToPosition = {};
+      overviewYears.forEach((year, index) => {
+        const position = (overviewYears.length > 1)
+          ? (index / (overviewYears.length - 1)) * 100
+          : 0;
+        yearToPosition[year] = position;
+      });
+
+      // Set slider
+      slider.min = 0;
+      slider.max = 100;
+      slider.step = 0.01;
+
+      // Find current year position - start at 0 if no year selected (instead of 100 to avoid auto-selecting 2025)
+      const currentPosition = selectedYearOverview ? yearToPosition[selectedYearOverview] : 0;
+      slider.value = currentPosition;
+
+      // Don't trigger selection on initial load - only on user interaction
+
+      // Function to find closest year
+      const findClosestYear = (position) => {
+        let closestYear = overviewYears[0];
+        let minDistance = Infinity;
+
+        overviewYears.forEach((year) => {
+          const yearPos = yearToPosition[year];
+          const distance = Math.abs(position - yearPos);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestYear = year;
+          }
         });
-        
-        // Set slider
-        slider.min = 0;
-        slider.max = 100;
-        slider.step = 0.01;
-        
-        // Find current year position - start at 0 if no year selected (instead of 100 to avoid auto-selecting 2025)
-        const currentPosition = selectedYearOverview ? yearToPosition[selectedYearOverview] : 0;
-        slider.value = currentPosition;
-        
-        // Don't trigger selection on initial load - only on user interaction
-        
-        // Function to find closest year
-        const findClosestYear = (position) => {
-          let closestYear = overviewYears[0];
-          let minDistance = Infinity;
-          
-          overviewYears.forEach((year) => {
-            const yearPos = yearToPosition[year];
-            const distance = Math.abs(position - yearPos);
-            if (distance < minDistance) {
-              minDistance = distance;
-              closestYear = year;
-            }
-          });
-          
-          return closestYear;
-        };
-        
-        
-        // Create dots
-        const createDots = () => {
-          yearDots.innerHTML = '';
-          
-          // Create timeline line directly in year-dots container
-          const line = document.createElement('div');
-          line.style.cssText = 'position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 3px; width: 100%; background-color: #0F3D88; z-index: 1; pointer-events: none; opacity: 1; display: block; visibility: visible;';
-          yearDots.appendChild(line);
-          
-          console.log('Timeline line created, yearDots:', yearDots);
-          
-          overviewYears.forEach((year, index) => {
-            const dotContainer = document.createElement('div');
-            dotContainer.setAttribute('data-year-key', year);
-            dotContainer.style.position = 'absolute';
-            const percentage = yearToPosition[year];
-            dotContainer.style.left = `${percentage}%`;
-            dotContainer.style.top = '50%';
-            dotContainer.style.transform = 'translate(-50%, -50%)';
-            dotContainer.style.cursor = 'pointer';
-            dotContainer.style.zIndex = '20';
-            dotContainer.style.pointerEvents = 'auto';
-            // Ensure container doesn't affect label positioning
-            dotContainer.style.display = 'flex';
-            dotContainer.style.flexDirection = 'column';
-            dotContainer.style.alignItems = 'center';
-            
-            // Create square marker
-            const dot = document.createElement('div');
-            const baseSize = 18;
-            dot.style.width = baseSize + 'px';
-            dot.style.height = baseSize + 'px';
-            dot.style.transition = 'all 0.18s ease';
-            dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
-            dot.style.borderRadius = '6px';
-            dot.style.display = 'block';
-            dot.style.visibility = 'visible';
-            dot.style.opacity = '1';
-            dot.style.position = 'relative';
-            dot.style.zIndex = '21'; // Above the line
-            
-            // Colors
-            const FILLED_BLUE = '#1E52A6';
-            const BORDER_BLUE = '#1E52A6';
-            const LIGHT_BLUE = '#a4afc1ff';
-            const NON_RICHIESTO_COLOR = '#F6ECE1'; // Color for NON_RICHIESTO
-            
-            // Get quorum status (convert year format)
-            const yearKey = getYearKeyForQuorum(year);
-            const quorumStatus = quorumStatusByYear[yearKey];
-            
-            // Apply color based on quorum status
-            if (quorumStatus === 'RAGGIUNTO') {
-              dot.style.backgroundColor = FILLED_BLUE;
-              dot.style.border = `2px solid ${BORDER_BLUE}`;
-              dot.style.border = 'none';
-            } else if (quorumStatus === 'NON_RICHIESTO') {
-              dot.style.backgroundColor = NON_RICHIESTO_COLOR;
-              dot.style.border = `2px solid ${BORDER_BLUE}`;
-            } else if (quorumStatus === 'NON_RAGGIUNTO') {
-              dot.style.backgroundColor = LIGHT_BLUE;
-              dot.style.border = 'none';
-            } else {
-              dot.style.backgroundColor = '#E1E1E1';
-              dot.style.border = `2px solid ${BORDER_BLUE}`;
-            }
-            
-            // Create year label - positioned BELOW the timeline
-            // Position label absolutely relative to year-dots container for consistent alignment
-            const label = document.createElement('div');
-            label.textContent = year;
-            label.setAttribute('data-label-year', year);
-            label.style.position = 'absolute';
-            // Reuse percentage variable already declared above
-            label.style.left = `${percentage}%`;
-            label.style.transform = 'translateX(-50%)';
-            label.style.top = 'calc(50% + 30px)'; // Position relative to timeline center, always same distance
-            label.style.fontFamily = "'STIX Two Text', serif";
-            label.style.fontSize = '16px';
-            label.style.fontWeight = 'bold';
-            label.style.whiteSpace = 'nowrap';
-            label.style.pointerEvents = 'none'; // Il click viene gestito dal container
+
+        return closestYear;
+      };
+
+
+      // Create dots
+      const createDots = () => {
+        yearDots.innerHTML = '';
+
+        // Create timeline line directly in year-dots container
+        const line = document.createElement('div');
+        line.style.cssText = 'position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 3px; width: 100%; background-color: #0F3D88; z-index: 1; pointer-events: none; opacity: 1; display: block; visibility: visible;';
+        yearDots.appendChild(line);
+
+        console.log('Timeline line created, yearDots:', yearDots);
+
+        overviewYears.forEach((year, index) => {
+          const dotContainer = document.createElement('div');
+          dotContainer.setAttribute('data-year-key', year);
+          dotContainer.style.position = 'absolute';
+          const percentage = yearToPosition[year];
+          dotContainer.style.left = `${percentage}%`;
+          dotContainer.style.top = '50%';
+          dotContainer.style.transform = 'translate(-50%, -50%)';
+          dotContainer.style.cursor = 'pointer';
+          dotContainer.style.zIndex = '20';
+          dotContainer.style.pointerEvents = 'auto';
+          // Ensure container doesn't affect label positioning
+          dotContainer.style.display = 'flex';
+          dotContainer.style.flexDirection = 'column';
+          dotContainer.style.alignItems = 'center';
+
+          // Create square marker
+          const dot = document.createElement('div');
+          const baseSize = 18;
+          dot.style.width = baseSize + 'px';
+          dot.style.height = baseSize + 'px';
+          dot.style.transition = 'all 0.18s ease';
+          dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+          dot.style.borderRadius = '6px';
+          dot.style.display = 'block';
+          dot.style.visibility = 'visible';
+          dot.style.opacity = '1';
+          dot.style.position = 'relative';
+          dot.style.zIndex = '21'; // Above the line
+
+          // Colors
+          const FILLED_BLUE = '#1E52A6';
+          const BORDER_BLUE = '#1E52A6';
+          const LIGHT_BLUE = '#a4afc1ff';
+          const NON_RICHIESTO_COLOR = '#F6ECE1'; // Color for NON_RICHIESTO
+
+          // Get quorum status (convert year format)
+          const yearKey = getYearKeyForQuorum(year);
+          const quorumStatus = quorumStatusByYear[yearKey];
+
+          // Apply color based on quorum status
+          if (quorumStatus === 'RAGGIUNTO') {
+            dot.style.backgroundColor = FILLED_BLUE;
+            dot.style.border = `2px solid ${BORDER_BLUE}`;
+            dot.style.border = 'none';
+          } else if (quorumStatus === 'NON_RICHIESTO') {
+            dot.style.backgroundColor = NON_RICHIESTO_COLOR;
+            dot.style.border = `2px solid ${BORDER_BLUE}`;
+          } else if (quorumStatus === 'NON_RAGGIUNTO') {
+            dot.style.backgroundColor = LIGHT_BLUE;
+            dot.style.border = 'none';
+          } else {
+            dot.style.backgroundColor = '#E1E1E1';
+            dot.style.border = `2px solid ${BORDER_BLUE}`;
+          }
+
+          // Create year label - positioned BELOW the timeline
+          // Position label absolutely relative to year-dots container for consistent alignment
+          const label = document.createElement('div');
+          label.textContent = year;
+          label.setAttribute('data-label-year', year);
+          label.style.position = 'absolute';
+          // Reuse percentage variable already declared above
+          label.style.left = `${percentage}%`;
+          label.style.transform = 'translateX(-50%)';
+          label.style.top = 'calc(50% + 30px)'; // Position relative to timeline center, always same distance
+          label.style.fontFamily = "'STIX Two Text', serif";
+          label.style.fontSize = '16px';
+          label.style.fontWeight = 'bold';
+          label.style.whiteSpace = 'nowrap';
+          label.style.pointerEvents = 'none'; // Il click viene gestito dal container
+          label.style.opacity = '1';
+          label.style.lineHeight = '16px'; // Fixed line height
+          label.style.height = '16px'; // Fixed height for consistent alignment
+          label.style.marginTop = '0';
+          label.style.paddingTop = '0';
+          label.style.marginBottom = '0';
+          label.style.paddingBottom = '0';
+          label.style.zIndex = '1'; // Below the line (line has z-index 5)
+
+          // Highlight selected year (only if one is selected)
+          if (selectedYearOverview && year === selectedYearOverview) {
+            const selectedSize = 22;
+            dot.style.width = `${selectedSize}px`;
+            dot.style.height = `${selectedSize}px`;
+            dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
             label.style.opacity = '1';
-            label.style.lineHeight = '16px'; // Fixed line height
-            label.style.height = '16px'; // Fixed height for consistent alignment
-            label.style.marginTop = '0';
-            label.style.paddingTop = '0';
-            label.style.marginBottom = '0';
-            label.style.paddingBottom = '0';
-            label.style.zIndex = '1'; // Below the line (line has z-index 5)
-            
-            // Highlight selected year (only if one is selected)
-            if (selectedYearOverview && year === selectedYearOverview) {
-              const selectedSize = 22;
-              dot.style.width = `${selectedSize}px`;
-              dot.style.height = `${selectedSize}px`;
-              dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
-              label.style.opacity = '1';
-              label.style.color = '#255077';
-            } else {
-              label.style.color = '#255096';
-            }
-            
-            // Hover effects
-            dotContainer.addEventListener('mouseenter', () => {
-              const hoverSize = 24;
-              dot.style.width = `${hoverSize}px`;
-              dot.style.height = `${hoverSize}px`;
-              dot.style.boxShadow = '0 6px 12px rgba(0,0,0,0.25)';
-              dot.style.borderRadius = '6px';
-              // Aggiungi tooltip per indicare il click
-              dotContainer.title = 'Click per vedere il dettaglio';
-            });
-            
-            dotContainer.addEventListener('mouseleave', () => {
-              if (year !== selectedYearOverview) {
-                dot.style.width = '18px';
-                dot.style.height = '18px';
-                dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
-              } else {
-                dot.style.width = '22px';
-                dot.style.height = '22px';
-                dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
-              }
-            });
-            
-            // Click handler - singolo click per andare al dettaglio
-            dotContainer.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              
-              // Converti il formato anno da overview a dettaglio
-              let yearParam = year;
-              if (year === '2016(1)') {
-                yearParam = '2016-1';
-              } else if (year === '2016(2)') {
-                yearParam = '2016-2';
-              } else {
-                // Per gli altri anni, usa il numero direttamente
-                yearParam = year;
-              }
-              
-              console.log('Click su anno:', year, '-> reindirizzamento a dettaglio.html?year=' + yearParam);
-              
-              // Reindirizza alla pagina dettaglio con l'anno come parametro
-              window.location.href = `dettaglio.html?year=${encodeURIComponent(yearParam)}`;
-            });
-            
-            dotContainer.appendChild(dot);
-            // Append dotContainer first, then label to maintain proper z-index layering
-            yearDots.appendChild(dotContainer);
-            // Append label directly to yearDots container for consistent positioning (after dotContainer so it's on top)
-            yearDots.appendChild(label);
-            
-            // Debug: verify dot is visible
-            console.log(`Dot created for ${year}:`, dot, 'Container:', dotContainer);
+            label.style.color = '#255077';
+          } else {
+            label.style.color = '#255096';
+          }
+
+          // Hover effects
+          dotContainer.addEventListener('mouseenter', () => {
+            const hoverSize = 24;
+            dot.style.width = `${hoverSize}px`;
+            dot.style.height = `${hoverSize}px`;
+            dot.style.boxShadow = '0 6px 12px rgba(0,0,0,0.25)';
+            dot.style.borderRadius = '6px';
+            // Aggiungi tooltip per indicare il click
+            dotContainer.title = 'Click per vedere il dettaglio';
           });
-        };
-        
-        // Update dot styles
-        const updateDotStyles = () => {
-          const dotContainers = yearDots.querySelectorAll('[data-year-key]');
-          dotContainers.forEach((container) => {
-            const year = container.getAttribute('data-year-key');
-            const dot = container.querySelector('div');
-            // Find label by data-label-year attribute since it's now in yearDots container
-            const label = yearDots.querySelector(`[data-label-year="${year}"]`);
-            
-            if (selectedYearOverview && year === selectedYearOverview) {
-              dot.style.width = '22px';
-              dot.style.height = '22px';
-              dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
-              if (label) {
-                label.style.color = '#255077';
-                label.style.opacity = '1';
-                // Keep label aligned at same position
-                label.style.top = 'calc(50% + 30px)';
-              }
-            } else {
+
+          dotContainer.addEventListener('mouseleave', () => {
+            if (year !== selectedYearOverview) {
               dot.style.width = '18px';
               dot.style.height = '18px';
               dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
-              if (label) {
-                label.style.color = '#255096';
-                label.style.opacity = '1';
-                // Keep label aligned at same position
-                label.style.top = 'calc(50% + 30px)';
-              }
+            } else {
+              dot.style.width = '22px';
+              dot.style.height = '22px';
+              dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
             }
           });
-        };
-        
-        // Create dots
-        createDots();
-        
-        // Handle slider change
-        let isInitialLoad = true;
-        slider.addEventListener('input', (e) => {
-          // Skip first load to avoid auto-selecting 2025
-          if (isInitialLoad) {
-            isInitialLoad = false;
-            return;
-          }
-          
-          const position = parseFloat(e.target.value);
-          const year = findClosestYear(position);
-          
-          if (year && year !== selectedYearOverview) {
-            selectedYearOverview = year;
-            updateDotStyles();
-            
-            // Snap slider to exact position
-            const exactPosition = yearToPosition[selectedYearOverview];
-            if (exactPosition !== undefined) {
-              slider.value = exactPosition;
+
+          // Click handler - singolo click per andare al dettaglio
+          dotContainer.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Converti il formato anno da overview a dettaglio
+            let yearParam = year;
+            if (year === '2016(1)') {
+              yearParam = '2016-1';
+            } else if (year === '2016(2)') {
+              yearParam = '2016-2';
+            } else {
+              // Per gli altri anni, usa il numero direttamente
+              yearParam = year;
             }
-            
-            // Don't automatically show percentage when year is selected
-            // Percentage will only show on hover
-            hoveredIndex = -1;
-            redraw();
+
+            console.log('Click su anno:', year, '-> reindirizzamento a dettaglio.html?year=' + yearParam);
+
+            // Reindirizza alla pagina dettaglio con l'anno come parametro
+            window.location.href = `dettaglio.html?year=${encodeURIComponent(yearParam)}`;
+          });
+
+          dotContainer.appendChild(dot);
+          // Append dotContainer first, then label to maintain proper z-index layering
+          yearDots.appendChild(dotContainer);
+          // Append label directly to yearDots container for consistent positioning (after dotContainer so it's on top)
+          yearDots.appendChild(label);
+
+          // Debug: verify dot is visible
+          console.log(`Dot created for ${year}:`, dot, 'Container:', dotContainer);
+        });
+      };
+
+      // Update dot styles
+      const updateDotStyles = () => {
+        const dotContainers = yearDots.querySelectorAll('[data-year-key]');
+        dotContainers.forEach((container) => {
+          const year = container.getAttribute('data-year-key');
+          const dot = container.querySelector('div');
+          // Find label by data-label-year attribute since it's now in yearDots container
+          const label = yearDots.querySelector(`[data-label-year="${year}"]`);
+
+          if (selectedYearOverview && year === selectedYearOverview) {
+            dot.style.width = '22px';
+            dot.style.height = '22px';
+            dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+            if (label) {
+              label.style.color = '#255077';
+              label.style.opacity = '1';
+              // Keep label aligned at same position
+              label.style.top = 'calc(50% + 30px)';
+            }
+          } else {
+            dot.style.width = '18px';
+            dot.style.height = '18px';
+            dot.style.boxShadow = '0 1px 2px rgba(0,0,0,0.12)';
+            if (label) {
+              label.style.color = '#255096';
+              label.style.opacity = '1';
+              // Keep label aligned at same position
+              label.style.top = 'calc(50% + 30px)';
+            }
           }
         });
-        
-        // Reset flag after a short delay to allow user interaction
-        setTimeout(() => {
-          isInitialLoad = false;
-        }, 500);
-      }
-      
-      // Initialize timeline when page loads
-      window.addEventListener('load', () => {
-        // Wait a bit for p5.js setup to complete
-        setTimeout(() => {
-          setupYearSliderOverview();
-        }, 100);
-      });
-    </script>
+      };
 
-  </body>
+      // Create dots
+      createDots();
+
+      // Handle slider change
+      let isInitialLoad = true;
+      slider.addEventListener('input', (e) => {
+        // Skip first load to avoid auto-selecting 2025
+        if (isInitialLoad) {
+          isInitialLoad = false;
+          return;
+        }
+
+        const position = parseFloat(e.target.value);
+        const year = findClosestYear(position);
+
+        if (year && year !== selectedYearOverview) {
+          selectedYearOverview = year;
+          updateDotStyles();
+
+          // Snap slider to exact position
+          const exactPosition = yearToPosition[selectedYearOverview];
+          if (exactPosition !== undefined) {
+            slider.value = exactPosition;
+          }
+
+          // Don't automatically show percentage when year is selected
+          // Percentage will only show on hover
+          hoveredIndex = -1;
+          redraw();
+        }
+      });
+
+      // Reset flag after a short delay to allow user interaction
+      setTimeout(() => {
+        isInitialLoad = false;
+      }, 500);
+    }
+
+    // Initialize timeline when page loads
+    window.addEventListener('load', () => {
+      // Wait a bit for p5.js setup to complete
+      setTimeout(() => {
+        setupYearSliderOverview();
+      }, 100);
+    });
+  </script>
+
+</body>
+
 </html>

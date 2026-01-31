@@ -5,6 +5,7 @@
         font-weight: normal;
         font-style: normal;
       }
+
       @font-face {
         font-family: 'STIX Two Text';
         src: url('font/STIX_Two_Text/static/STIXTwoText-Bold.ttf') format('truetype');
@@ -20,246 +21,285 @@
       }
 
 
-html, body {
-    font-family: 'STIX Two Text' ;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    
-  }
-  :root {
-    --bg-color: #f5f0dc;
-    --blue-color: #073789;
-    --yellow-color: #FFB700;
-    --gray-color: #aaaaaa;
-  } 
+      html,
+      body {
+        font-family: 'STIX Two Text';
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
 
-  /* canvas p5 sotto tutto */
-  canvas {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 0;
-  }
-  
-  /*-----------------*/
-  /*    YEAR SLIDER  */
-  /*-----------------*/
-  #year-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
-    cursor: pointer;
-  }
+      }
 
-  
-  #year-slider::-webkit-slider-track,
-  #year-slider::-moz-range-track {
-    background: #0a1e50;
-    height: 3px;
-    border-radius: 0;
-  }
-  #year-slider::-webkit-slider-thumb,
-  #year-slider::-moz-range-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    background: #0a1e50;
-    height: 14px;
-    width: 14px;
-    border-radius: 0;
-    border: 2px solid #0a1e50;
-    box-shadow: none;
-    cursor: pointer;
-    margin-top: -5.5px;
-  }
-  
-  /* timeline */
-  #year-dots {
-    transition: opacity 0.1s ease;
-    position: relative;
-  }
-  #year-dots.blurred,
-  #year-dots.visible {
-    opacity: 1;
-    background: transparent;
-    pointer-events: auto;
-  }
-  
-  /*-----------------*/
-  /* HELP TOGGLE (dentro navbar) */
-  /*-----------------*/
-  .help-controls {
-    height: 10px;
-    width: auto;
-    gap: 8px;
-    margin-left: 40px; /* distacco dal menu */
-  }
-  
-  .help-toggle-btn {
-    display: flex;             /* permette all'icona di essere centrata */
-    justify-content: center;   /* centro orizzontale */
-    align-items: center;    
-    background: var(--color-primary, #1E52A6);
-    color: white;
-    border: none;
-    height: 20px;
-    width: auto;
-    padding: 8px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 10px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  
-  }
+      :root {
+        --bg-color: #f5f0dc;
+        --blue-color: #073789;
+        --yellow-color: #FFB700;
+        --gray-color: #aaaaaa;
+      }
+
+      /* canvas p5 sotto tutto */
+      canvas {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 0;
+      }
+
+      /*-----------------*/
+      /*    YEAR SLIDER  */
+      /*-----------------*/
+      #year-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+        cursor: pointer;
+      }
 
 
+      #year-slider::-webkit-slider-track,
+      #year-slider::-moz-range-track {
+        background: #0a1e50;
+        height: 3px;
+        border-radius: 0;
+      }
 
-  
-  .help-toggle-btn:hover {
-    background: var(--color-primary-hover, #1E52A6);
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(30, 82, 166, 0.3);
-  }
-  
-  .help-toggle-btn.active {
-    background: var(--color-yellow, #FFB700);
-    color: #1C2836;
-  }
-  
-  .help-icon {
-    font-size: 16px;
-    font-weight: bold;
-    align-self: center;
-  }
-  
-  .help-status {
-    font-size: 12px;
-    font-weight: 600;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    min-width: 40px;
-    text-align: center;
-  }
-  
-  .help-status.active {
-    color: var(--color-yellow, #FFB700);
-  }
-  #help-toggle.active {
-    background-color: #FFB700 !important; /* Giallo del tema */
-    color: #163264 !important;
-    border: 2px solid #163264 !important;
-  }
-  
-  /* Hover effect */
-  #help-toggle:hover {
-    transform: scale(1.1);
-  }
+      #year-slider::-webkit-slider-thumb,
+      #year-slider::-moz-range-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        background: #0a1e50;
+        height: 14px;
+        width: 14px;
+        border-radius: 0;
+        border: 2px solid #0a1e50;
+        box-shadow: none;
+        cursor: pointer;
+        margin-top: -5.5px;
+      }
 
-  canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-  
-  #slider-container {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    max-width: 600px;
-    z-index: 100;
-  }
-  
-  #tile-slider {
-    width: 100%;
-    height: 8px;
-    border-radius: 5px;
-    background: rgba(101, 67, 33, 0.3);
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  
-  #tile-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: rgb(101, 67, 33);
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-  
-  #tile-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: rgb(101, 67, 33);
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-  
+      /* timeline */
+      #year-dots {
+        transition: opacity 0.1s ease;
+        position: relative;
+      }
 
-  .legend-icon{
-    position: absolute;   /* permette di posizionarla sopra il canvas */
-    top: 130px;            /* distanza dal bordo superiore della finestra */
-    right: 60%;            /* centrata orizzontalmente *//* centratura perfetta */
-    z-index: 10;        /* deve essere più alto del canvas */
-    pointer-events: none; /* opzionale, per evitare che blocchi il mouse sul canvas */
-  }
-  .legend-icon img {
-    width: 80px;         /* regola dimensioni */
-    height: auto;
-  }
+      #year-dots.blurred,
+      #year-dots.visible {
+        opacity: 1;
+        background: transparent;
+        pointer-events: auto;
+      }
 
-  .legend-text{
-    color: var(--blue-color);
-    font-size: 20px;
-    font-weight: normal;
-    letter-spacing: 1px;
-    position: absolute;  /* permette di posizionarla sopra il canvas */
-    top:90px;            /* distanza dal bordo superiore della finestra */
-    left: 650px;            /* centrata orizzontalmente *//* centratura perfetta */
-    z-index: 100;        /* deve essere più alto del canvas */
-    pointer-events: none; /* opzionale, per evitare che blocchi il mouse sul canvas */
-  }
+      /*-----------------*/
+      /* HELP TOGGLE (dentro navbar) */
+      /*-----------------*/
+      .help-controls {
+        height: 10px;
+        width: auto;
+        gap: 8px;
+        margin-left: 40px;
+        /* distacco dal menu */
+      }
 
-  .txt-overview{
-    position: absolute;  /* permette di posizionarla sopra il canvas */
-    top: 110px;            /* distanza dal bordo superiore della finestra */
-    left: 50%;            /* centrata orizzontalmente *//* centratura perfetta */
-    transform: translateX(-50%);
-    z-index: 100;        /* deve essere più alto del canvas */
-    pointer-events: none; /* opzionale, per evitare che blocchi il mouse sul canvas */
-    color: var(--blue-color);
-    font-size: 28px;
-    font-weight: normal;
-    text-transform: uppercase;
-  }
-  /* --- AGGIUNTA FIX CURSORE --- */
+      .help-toggle-btn {
+        display: flex;
+        /* permette all'icona di essere centrata */
+        justify-content: center;
+        /* centro orizzontale */
+        align-items: center;
+        background: var(--color-primary, #1E52A6);
+        color: white;
+        border: none;
+        height: 20px;
+        width: auto;
+        padding: 8px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
 
-/* 1. Rendi il body e i wrapper trasparenti ai click */
-body, html {
-  pointer-events: none;
-}
+      }
 
-/* 2. Riabilita i click solo sugli elementi interattivi */
-#navbar, .navbar-wrapper, #footer, #help-toggle, input, button, a {
-  pointer-events: auto;
-}
 
-/* 3. Il canvas deve essere cliccabile e SOPRA il resto */
-canvas {
-  pointer-events: auto !important;
-  z-index: 1 !important; /* Alziamo lo z-index per sicurezza */
-}
-/* ---------------------------- */
+
+
+      .help-toggle-btn:hover {
+        background: var(--color-primary-hover, #1E52A6);
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(30, 82, 166, 0.3);
+      }
+
+      .help-toggle-btn.active {
+        background: var(--color-yellow, #FFB700);
+        color: #1C2836;
+      }
+
+      .help-icon {
+        font-size: 16px;
+        font-weight: bold;
+        align-self: center;
+      }
+
+      .help-status {
+        font-size: 12px;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        min-width: 40px;
+        text-align: center;
+      }
+
+      .help-status.active {
+        color: var(--color-yellow, #FFB700);
+      }
+
+      #help-toggle.active {
+        background-color: #FFB700 !important;
+        /* Giallo del tema */
+        color: #163264 !important;
+        border: 2px solid #163264 !important;
+      }
+
+      /* Hover effect */
+      #help-toggle:hover {
+        transform: scale(1.1);
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      #slider-container {
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60%;
+        max-width: 600px;
+        z-index: 100;
+      }
+
+      #tile-slider {
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: rgba(101, 67, 33, 0.3);
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      #tile-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgb(101, 67, 33);
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      #tile-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgb(101, 67, 33);
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+
+      .legend-icon {
+        position: absolute;
+        /* permette di posizionarla sopra il canvas */
+        top: 130px;
+        /* distanza dal bordo superiore della finestra */
+        right: 60%;
+        /* centrata orizzontalmente */
+        /* centratura perfetta */
+        z-index: 10;
+        /* deve essere più alto del canvas */
+        pointer-events: none;
+        /* opzionale, per evitare che blocchi il mouse sul canvas */
+      }
+
+      .legend-icon img {
+        width: 80px;
+        /* regola dimensioni */
+        height: auto;
+      }
+
+      .legend-text {
+        color: var(--blue-color);
+        font-size: 20px;
+        font-weight: normal;
+        letter-spacing: 1px;
+        position: absolute;
+        /* permette di posizionarla sopra il canvas */
+        top: 90px;
+        /* distanza dal bordo superiore della finestra */
+        left: 650px;
+        /* centrata orizzontalmente */
+        /* centratura perfetta */
+        z-index: 100;
+        /* deve essere più alto del canvas */
+        pointer-events: none;
+        /* opzionale, per evitare che blocchi il mouse sul canvas */
+      }
+
+      .txt-overview {
+        position: absolute;
+        /* permette di posizionarla sopra il canvas */
+        top: 110px;
+        /* distanza dal bordo superiore della finestra */
+        left: 50%;
+        /* centrata orizzontalmente */
+        /* centratura perfetta */
+        transform: translateX(-50%);
+        z-index: 100;
+        /* deve essere più alto del canvas */
+        pointer-events: none;
+        /* opzionale, per evitare che blocchi il mouse sul canvas */
+        color: var(--blue-color);
+        font-size: 28px;
+        font-weight: normal;
+        text-transform: uppercase;
+      }
+
+      /* --- AGGIUNTA FIX CURSORE --- */
+
+      /* 1. Rendi il body e i wrapper trasparenti ai click */
+      body,
+      html {
+        pointer-events: none;
+      }
+
+      /* 2. Riabilita i click solo sugli elementi interattivi */
+      #navbar,
+      .navbar-wrapper,
+      #footer,
+      #help-toggle,
+      input,
+      button,
+      a {
+        pointer-events: auto;
+      }
+
+      /* 3. Il canvas deve essere cliccabile e SOPRA il resto */
+      canvas {
+        pointer-events: auto !important;
+        z-index: 1 !important;
+        /* Alziamo lo z-index per sicurezza */
+      }
+
+      /* ---------------------------- */

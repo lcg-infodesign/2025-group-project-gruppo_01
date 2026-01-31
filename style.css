@@ -400,3 +400,23 @@ canvas {
   position: relative; /* Serve per far funzionare top/z-index se necessario */
   top: -8px;          /* Alternativa al margin-top se quello non va */
 }
+
+
+
+/* --- BOTTONE TORNA A OVERVIEW (A SINISTRA) --- */
+#back-to-overview-btn, .back-btn { /* Usa il selettore corretto del tuo bottone */
+  position: absolute !important;
+  bottom: 10px !important;    /* Stessa altezza della legenda */
+  left: 50px !important;      /* Allineato a SINISTRA */
+  right: auto !important;     /* Annulla eventuali allineamenti a destra */
+  transform: none !important; /* Rimuove la centratura translateX(-50%) */
+  z-index: 2500 !important;   /* Sopra a tutto */
+}
+
+
+/* --- LEGENDA QUORUM (A DESTRA) --- */
+#html-legend {
+  left: auto !important;      /* Annulla l'allineamento a sinistra del JS */
+  right: 43px !important;     /* Allinea a DESTRA (a filo coi grafici) */
+  /* bottom: 38px è già settato dal JS, va bene così */
+}

@@ -1,4 +1,5 @@
-/* --- FONT --- */
+
+      /* --- FONT --- */
       @font-face {
         font-family: 'STIX Two Text';
         src: url('font/STIX_Two_Text/static/STIXTwoText-Regular.ttf') format('truetype');
@@ -218,112 +219,94 @@
 
  /* --- LAYOUT SEZIONI --- */
  main {
-        width: 100%;
-        max-width: 1400px; /* Aumentato per ospitare elementi più grandi */
-        margin: 0 auto;
-        padding: 0 20px;
-      }
+  width: 100%;
+  max-width: 100%; /* Usa tutta la larghezza */
+  margin: 0;
+  padding: 0; /* Rimuovi il padding di 200px */
+}
+.section-row {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  
+  /* Allineamento dall'alto */
+  justify-content: flex-start; 
+  
+  /* AUMENTATO DA 160px A 220px per sicurezza */
+  padding-top: 220px;          
+  
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
 
-      .section-row {
-        min-height: 90vh; 
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0px; /* Ridotto leggermente il gap per dare spazio agli omini */
-        padding-bottom: 50px;
-        
-        /* Stato INIZIALE */
-        opacity: 0;
-        transform: translateY(50px);
-        transition: opacity 1s ease-out, transform 1s ease-out;
-      }
+  /* Le tue animazioni */
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+/* IMPORTANTE: Assicura che la prima sezione non finisca sotto la navbar */
 
+.section-row:nth-child(2) {
+  margin-top: 0 !important;
+  padding-top: 220px !important; /* Forza lo stesso padding della prima */
+}
       .section-row.visible {
         opacity: 1;
         transform: translateY(0);
       }
 
-      /* Zig-Zag layout */
-      .section-row:nth-child(even) { flex-direction: row-reverse; }
-
+  
       /* Colonne */
       .text-col {
-        padding-right: 20px;
-        flex: 0.98; /* Il testo occupa un po' meno spazio rispetto agli omini ora */
         display: flex;
         flex-direction: column;
         justify-content: center;
-      }
-      
-      .section-row:nth-child(odd) .text-col { align-items: flex-end; text-align: right; }
-      .section-row:nth-child(even) .text-col { align-items: flex-start; text-align: left; }
-      
-      /* Centra il testo nell'ultima sezione */
-      .section-row:last-child {
-        justify-content: center;
-      }
-      
-      .section-row:last-child .text-col { 
-        align-items: center; 
-        text-align: center; 
+        align-items: center;
+        text-align: center;
         width: 100%;
         max-width: 1000px;
       }
 
-      .visual-col {
-        flex: 1.5; /* Più spazio per gli omini grandi */
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px; /* Spazio tra gli omini */
-        max-width: 1300px; /* Impedisce che si disperdano troppo */
-      }
-      
-      /* Prima visual: mantieni gli omini su una sola riga e abilita lo scroll orizzontale se necessario */
-      .section-row:first-of-type .visual-col {
-        flex-wrap: nowrap;
-        overflow: hidden;
-        -webkit-overflow-scrolling: touch;
-        justify-content: flex-start; /* Allinea a sinistra nella prima visual */
-      }
-
-      .section-row:nth-child(odd) .visual-col { justify-content: flex-start; }
-      .section-row:nth-child(even) .visual-col { justify-content: flex-end; }
-
+     .visual-col {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 15px;
+  height: auto;
+  margin-top: 0;       
+  margin-bottom: 80px; /* Distanza fissa tra omini e testo */
+  justify-content: center;
+  align-items: flex-end; 
+}
 
       /* --- TIPOGRAFIA INGRANDITA --- */
       h1, h2, p { margin: 0; }
       
       /* 1. Intro */
       .txt-intro {
-        font-size: 30px; /* Ingrandito */
-        font-weight: normal;
-        margin-bottom: -15px;
-        opacity: 0.9;
+        font-size: 40px;
+        font-weight: bold;
+        text-align: center;
       }
 
-      /* 2. ANNO GIGANTE */
-      .txt-year {
-        font-size: 130px; /* Molto più grande */
-        font-weight: bold;
-        line-height: 1;
-        color: var(--blue-color);
-        letter-spacing: -4px;
-        margin: 10px 0 0px 0;
-      }
 
       /* 3. Statistica */
       .txt-stat {
-        font-size: 42px; /* Ingrandito */
-        line-height: 1;
+        font-size: 65px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 0.8;
+        color: var(--yellow-color);
       }
 
       /* 4. Hero finale */
       .txt-hero {
         font-size: 60px; /* Titolo finale più impattante */
-        line-height: 1.1;
+        line-height: 0.83;
         font-weight: bold;
-        margin-bottom: 40px;
-        margin-right: 0;
+        margin-top: 90px;
+        margin-bottom: 50px;
         text-align: center;
       }
 
@@ -334,7 +317,7 @@
       
 
       .omino {
-        width: 70px; /* INGRANDITO: da 45px a 70px */
+        width: 90px; /* INGRANDITO: da 45px a 70px */
         height: auto;
         opacity: 0;
         transform: scale(0);
@@ -377,19 +360,6 @@
         position: relative;
       }
 
-      /* Scroll indicator arrow */
-      .scroll-indicator {
-        position: absolute;
-        bottom: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 999;
-        animation: fadeInScroll 1s ease-in-out;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-      }
-
       .scroll-arrow {
         display: flex;
         justify-content: center;
@@ -399,16 +369,17 @@
         cursor: pointer;
         opacity: 0.8;
         transition: opacity 0.3s ease, transform 0.3s ease;
+        padding: 15px;
+        border-radius: 50%;
       }
-
-      .scroll-arrow:hover {
-        opacity: 1;
-        transform: scale(1.1);
+      
+      .scroll-arrow:active {
+        transform: scale(0.95);
       }
 
       .scroll-arrow svg {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
       }
 
@@ -449,11 +420,18 @@
       }
 
       /* Nascondi la freccia quando l'utente scrolla */
-      .scroll-indicator.hidden {
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.5s ease;
-      }
+     .scroll-indicator {
+  position: absolute;
+  bottom: 10px;            /* Molto vicino al bordo inferiore */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 1;
+}
 
       @keyframes popIn {
         to { opacity: 1; transform: scale(1); }
@@ -493,9 +471,10 @@
       }
 
       .action-btn:hover {
-        background-color: #0a4ab5;
+        background-color:  #FFB700;;
         transform: translateY(-4px) !important;
-        box-shadow: 0 8px 25px rgba(7, 55, 137, 0.4);
+        box-shadow: 0 8px 25px rgba(202, 148, 31, 0.4);
+
       }
 
       #help-toggle {
@@ -529,461 +508,436 @@
         .omino { width: 50px; } 
         .omino-big { width: 250px; }
       }
-/* =========================
-   STRUTTURA BASE
-========================= */
+/*-----------------------*/
+/*--    INFORMAZIONI   --*/
+/*-----------------------*/
 
 .page {
-  width: 100vw;
-  min-height: 100vh;
-  margin: 0;
-  box-sizing: border-box;
+    position: relative;
+    width: 100vw;         
+    min-height: 100vh;    
+    margin: 0;            
+    padding: 0;   
+    box-sizing: border-box;
 }
 
-
-/* =========================
-   HERO
-========================= */
+/* Centra il contenitore del bottone nella sezione finale */
+.btn-container {
+    text-align: center;
+    width: 100%; 
+    margin-top: 20px; 
+    display: flex;
+    justify-content: center;
+}
 
 .hero {
     display: flex;
-    margin-top: 130px;
-  flex-wrap: wrap; /* così si adatta su mobile */
-  justify-content: center;
-  text-align: center;
+    justify-content: space-between; 
+    align-items: flex-start;     
+    gap: 100px;                  
+    margin-top: 140px;           
+    margin-bottom: 50px;
 }
 
+.hero .referendum-icon{
+    position: absolute;
+    left: 40px;
+    top: 250px;
+    z-index: 1;
+}
+
+.hero .referendum-icon img{
+    width: 130px;
+    height: auto;
+}
+
+.hero h3{
+    font-size: 25px;
+    color: var(--blue-color);
+    justify-content: flex-start;
+    margin-top: 80px;
+    margin-bottom: 10px;
+}
+
+.hero p{
+  font-size: 18px;
+    margin-top: 30px;
+    line-height: 1.5;
+}
 .text-block {
-    flex: 1;
-    align-content: center;
+    width: 40%;
+    justify-content: flex-start;
+    margin-left: 180px;
 }
 
-.text-block h2 {
-  font-size: 48px;
-  color: var(--blue-color);
-  text-align: center;
-
+.text-block h2{
+    font-size: 36px;
+    color: var(--blue-color);
+    justify-content: flex-start;
+    margin-left: 20px;
+    margin-top: 30px;
+    margin-bottom: 10px;
 }
+
+
 
 .text-block h3 {
- text-align: center;
+    font-size: 28px;
+    color: var(--blue-color);
+}
+
+
+.highlight {
+    font-size: 28px;
+    color: var(--blue-color);
+    font-weight: bold;
+    position: relative;        
+    z-index: 2;    
+}
+
+.info h3 {
+    font-size: 28px;
+    color: var(--blue-color);
+    font-family: 'STIX Two Text', serif;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+    text-align: right;  
+    justify-self: flex-end; 
+    margin-right: 70px;
+}
+ .referendum h3 {
+    font-size: 28px;
+    color: var(--blue-color);
+    font-family: 'STIX Two Text', serif;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+    text-align: left;  
+    justify-self: flex-start; 
+    margin-left: 10%;
+} 
+
+
+/* Immagine */
+.image-block {
+    position: absolute;
+    width: 30%;
+    right: 60px;
+    margin-top: -27%;
+}
+
+.image-block img {
+    width: 100%;
+    border-radius: 4px;
+}
+
+.referendum-image{
+    position: absolute;
+    margin-left: 55%;
+    margin-top: 15%;
+    width: 30%;
+    height: auto;
+}
+
+.referendum-image img{
+    border-radius: 4px;
+}
+
+/*----------------------*/
+/* SEZIONE DATI E REFERENDUM */
+/*----------------------*/
+
+/* Contenitore dati + immagine */
+.info {
+ padding-top: 20px;
+    width: 100%;
+    position: relative;
+}
+
+/* SEZIONE DATI: immagine a sinistra, testo a destra */
+/* Contenitore dati + immagine a sinistra, testo a destra */
+.dati {
+  display: flex;                 
+  justify-content: space-between;
+  align-items: flex-start; /* ⬅️ allineamento in alto */
+  padding-top: 0  ;
+}
+
+.info .dati h2 {
+      font-size: 36px;
+    color: var(--blue-color);
+    justify-content: flex-start;
+    margin-left: 20px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+
+/* Immagine dati */
+.image-block-dati {
+  width: 40%;
+  border-radius: 5px;
+  margin-left: 10%;
+  position: absolute; /* ⬅️ NON absolute */
+
+}
+
+.image-block-dati img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+/* Testo dati */
+.dati-content {
+  text-align: right;
+  flex-direction: column;
+}
+
+.dati-h2,
+.info .dati h2 {
+  font-weight: 700;              /* SOLO il titolo */
   font-size: 36px;
   color: var(--blue-color);
+  margin-bottom: 10px;
+  margin-top: 90px;
+}
+
+/* Testo normale */
+.info .dati p {
+  margin-left: 60%;
+  font-weight: 400; 
+  font-size: 18px;  
+  line-height: 1.5; 
+  text-align: right;   
+  width: 40%;          /* ⬅️ restringe l’area testo */
+  max-width: 520px;    /* ⬅️ linee più corte e leggibili */
+}
+/* SEZIONE REFERENDUM: testo a sinistra, immagine a destra */
+.info .referendum {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-top: 120px;
+
+ 
+}
+.info .referendum-icon {
+  position: absolute;
+  left: 20px;
+  top: 520px;
+  z-index: 1;
+}
+.info .referendum-icon img {
+  width: 100px;
+  height: auto;
+}
+
+.info .referendum .highlight {
   margin-bottom: 20px;
 }
 
-.hero p {
-text-align: center;
+.referendum p {
+  margin-left: 10%;
   font-size: 18px;
-  margin-top: 10px;
   line-height: 1.5;
-  max-width: 570px;
-  margin-left: 30%;
-}
-.affluenza-container {
-  display: flex;
-  gap: 60px;
-  justify-content: center;
-  flex-wrap: wrap;
-  text-align: center;
-  margin-top: 50px;
-  margin-left: 7%;
+  width: 50%;
+   max-width: 520px;
 }
 
-/* Wrapper tipo dati-type */
-.affluenza-type {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
- cursor: pointer;
-  position: relative;
-    gap: 10px;
-
-}
-
-/* Cerchio giallo */
-.affluenza-type .yellow-circle.small {
-    position: absolute;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background-color: var(--yellow-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s;
-  z-index: -1;
-
-}
-
-.affluenza-type:hover .yellow-circle.small {
-  transform: scale(1.8);
-}
-
-/* Titolo sopra il cerchio */
-.circle-title {
-position: relative;
-  font-size: 28px;
-  color: var(--blue-color);
-  line-height: 1.2;
-  right: 45px;
-  bottom: 15px;
-  z-index: 2;
-  pointer-events: none; /* non interferisce con hover */
-}
-
-/* Percentuale */
-.circle-description {
+.info .referendum-image {
   position: absolute;
-  font-size: 48px;
-right: 40px;
-bottom: 60px;
-  font-weight: bold;
-  color: var(--blue-color);
-  opacity: 0; /* invisibile finché non si fa hover */
-  transition: opacity 0.3s, transform 0.3s;
-  z-index: 3;
+  right: 60px;
+  top: 330px;
+  width: 35%;
 }
 
-/* Hover: scritta scompare, percentuale appare grande */
-.affluenza-type:hover .circle-title {
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.affluenza-type:hover .circle-description {
-  opacity: 1;
-  font-size: 48px;
-}
-
-
-
-
-/* =========================
-   INFO – STRUTTURA
-========================= */
-
-.info {
+.info .referendum-image img {
   width: 100%;
-  padding-top: 20px;
+  height: auto;
+  display: block;
+  border-radius: 5px;
 }
 
-/* =========================
-   SEZIONE DATI
-========================= */
-
-.dati {
-  margin-top: 140px;
-}
-
-.dati-intro {
-  max-width: 520px;
-  margin: 0 auto 50px auto; /* centro orizzontale */
-  text-align: center;
-}
-
-.dati-intro h3 {
-  font-size: 36px;
-  color: var(--blue-color);
-  margin-bottom: 10px;
-}
-
-.dati-intro p {
-  font-size: 18px;
-  line-height: 1.5;
-}
-
-/* CONTENITORE TIPI */
-.dati-types {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin-left: 32%;
-  margin-right: 20%;
-  flex-wrap: wrap; /* permette l’adattamento su mobile */
-}
-
-/* SINGOLO TIPO */
-.dati-type {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  cursor: pointer;
-  max-width: 450px;
-}
-
-/* TITOLO */
-.dati-type h4 {
-  position: relative;
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--blue-color);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  z-index: 2;
-  line-height: 1.1;
-  margin-bottom: 5px;
-}
-
-/* CERCHIO GIALLO (versione piccola) */
-.dati-type .yellow-circle.small {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  background-color: var(--yellow-color);
-  border-radius: 50%;
-  top: -10px;
-  left: -22px;
-  z-index: 1;
-  transition: transform 0.3s ease;
-}
-
-/* DESCRIZIONE */
-.dati-type .description {
-  margin-top: 3px;
-  max-width: 330px;
-  font-size: 18px;
-  line-height: 1.4;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-/* HOVER */
-.dati-type:hover .yellow-circle.small {
-  transform: scale(1.4);
-}
-
-.dati-type:hover .description {
-  opacity: 1;
-}
-
-/* =========================
-   MOBILE
-========================= */
-@media (max-width: 900px) {
-  .dati-types {
-    flex-direction: column;
-    gap: 40px;
-    margin: 0 auto;
-  }
-
-  .dati-type {
-    max-width: 90%;
-    align-items: center;
-  }
-}
-
-
-
-/* =========================
-   REFERENDUM – NUOVA SEZIONE
-========================= */
-
-.referendum {
-  margin-top: 40px;
-}
-
-.referendum-intro {
-  max-width: 520px;
-  margin: 0 auto 80px auto; /* centro orizzontale */
-  text-align: center;
-}
-
-.referendum-intro h3 {
-  font-size: 36px;
-  color: var(--blue-color);
-  margin-bottom: 10px;
-}
-
-.referendum-intro p {
-  font-size: 18px;
-  line-height: 1.5;
-}
-
-/* CONTENITORE TIPI */
-.referendum-types {
-  display: flex;
-  justify-content: space-between;
-  gap: 40px;
-  margin: 0 10%;
-}
-
-/* SINGOLO TIPO */
-.referendum-type {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  cursor: pointer;
-}
-
-
-
-
-
-/* =========================
-   TIPI DI REFERENDUM
-========================= */
-
-.referendum-types {
-  display: flex;
-  justify-content: space-between;
-  gap: 60px;
-  margin: 0 10%;
-}
-
-.referendum-type {
-  position: relative;
-  cursor: pointer;
-}
-
-/* TITOLO */
-.referendum-type h4 {
-  position: relative;
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--blue-color);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  z-index: 2;
-  line-height: 1.1;
-  margin-bottom: 5px;
-}
-
-/* CERCHIO GIALLO (versione piccola) */
-.yellow-circle.small {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  background-color: var(--yellow-color);
-  border-radius: 50%;
-  top: -10px;
-  left: -22px;
-  z-index: 1;
-  transition: transform 0.3s ease;
-}
-
-/* DESCRIZIONE */
-.referendum-type .description {
-  margin-top: 3px;
-  margin-bottom: 100px;
-  max-width: 220px;
-  font-size: 18px;
-  line-height: 1.4;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-/* HOVER */
-.referendum-type:hover .yellow-circle.small {
-  transform: scale(1.4);
-}
-
-.referendum-type:hover .description {
-  opacity: 1;
-}
-
-
-/* =========================
-   ELEMENTI GRAFICI
-========================= */
-
-.highlight {
-  font-size: 28px;
-  font-weight: bold;
-  color: var(--blue-color);
-}
-
+/* Titolo "I DATI" in grassetto */
+/* Link sottolineato ma dello stesso colore del testo */
 .external-link {
-  color: inherit;
+  color: inherit;               /* prende il colore del testo */
   text-decoration: underline;
+  text-underline-offset: 3px;   /* estetica */
+}
+
+/* Opzionale: hover pulito */
+.external-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* MEDIA QUERY: layout responsive per schermi piccoli */
+@media (max-width: 900px) {
+  .info .dati, .info .referendum {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .image-block-dati, .dati-content,
+  .info .referendum p, .info .referendum-image {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 20px;
+    margin-top: 18px;
+    line-height: 1.5;
+  }
+}
+
+/* Titoli e paragrafi */
+.info h4 {
+    color: var(--blue-color);
+    font-size: 20px;
+}
+
+.dati p {
+    margin: 0;
+    margin-top: 18px;
+    line-height: 1.5;
+    width: 100%;
 }
 
 
-/* =========================
-   ALBUM
-========================= */
-
-.album {
-  padding: 50px 20px;
-  text-align: center;
+/*----------------------*/
+/* MEDIA QUERY */
+@media (max-width: 1200px) {
+    .info {
+        margin: 60px 40px;
+        gap: 60px;
+    }
+    
+    .info .dati-content {
+        width: 50%;
+        text-align: right;
+    }
+    
+    .image-block-dati {
+        width: 45%;
+    }
+    
+    .info .referendum p {
+        width: 50%;
+    }
+    
+    .referendum-image {
+        width: 45%;
+    }
 }
 
-.album h1 {
-  font-size: 40px;
-  color: var(--blue-color);
-  margin: 15px 0 20px;
+@media (max-width: 900px) {
+    .info {
+        margin: 40px 20px;
+        gap: 40px;
+        flex-direction: column;
+    }
+    
+    .info .dati {
+        flex-direction: column;
+        min-height: auto;
+    }
+    
+    .image-block-dati {
+        position: relative;
+        width: 100%;
+        margin-bottom: 30px;
+    }
+    
+    .info .dati-content {
+        width: 100%;
+        text-align: left;
+    }
+    
+    .info .referendum {
+        min-height: auto;
+    }
+    
+    .info .referendum p {
+        width: 100%;
+    }
+    
+    .info .referendum-image {
+        position: relative;
+        width: 100%;
+        margin-top: 30px;
+        top: auto;
+    }
 }
 
-.album-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 300px);
-  gap: 30px;
-  max-width: 1000px;
-  margin: 80px auto 0;
-}
-
-.album-item img {
-  width: 100%;
-  height: 200px;
-  border-radius: 10px;
-}
-
-
-/* =========================
-   LINEE E CORNICI
-========================= */
-
-.linea-parallela {
-  height: 4px;
-  background: var(--blue-color);
-  margin-bottom: 10px;
-}
-
+/*----------------------*/
+/* CORNICI E ALTRO */
 .frame-top,
-.frame-bottom {
-  position: fixed;
-  left: 20px;
-  right: 20px;
-  height: 4px;
-  background: var(--blue-color);
-  z-index: 900;
+.frame-bottom,
+.frame-left,
+.frame-right {
+    position: fixed;
+    background-color: var(--blue-color);
+    z-index: 900;
 }
 
 .frame-top {
-  top: 0;
+    top: 0;
+    left: 30px;
+    right: 30px;
+    height: 4px;
 }
 
 .frame-bottom {
-  bottom: 0;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    height: 4px;
 }
 
 
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 900px) {
-  .hero,
-  .info .dati,
-  .info .referendum {
-    flex-direction: column;
-  }
-
-  .text-block,
-  .info .dati p,
-  .info .referendum p {
+.linea-parallela {
+    height: 4px;
+    background: var(--blue-color);
+    margin: 0px auto 10px;
     width: 100%;
-    margin-left: 0;
-    text-align: left;
-  }
+}
 
-  .album-grid {
-    grid-template-columns: 1fr;
-  }
+/*----------------------*/
+/* ALBUM E FOOTER */
+.album {
+    padding: 50px 20px;
+    text-align: center;
+}
+   
+.album h1 {
+    font-size:40px;
+    letter-spacing: 1px;
+    color: var(--blue-color);
+    display: inline-block;
+    margin-bottom: 20px;
+    margin-top: 15px;
+}
+
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 300px);
+    gap: 30px;
+    max-width: 1000px;
+    margin: 80px auto 0 auto;
+}
+
+.album-item img {
+    width: 100%;
+    height: 200px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.album-item p {
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--blue-color);   
 }
 
 .site-footer {

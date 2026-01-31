@@ -3585,6 +3585,9 @@ function setupYearSlider() {
         dot.style.width = selectedSize + 'px';
         dot.style.height = selectedSize + 'px';
         dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+        
+
+        
       }
       
       // Label Data - positioned BELOW slider (same as overview timeline)
@@ -3662,7 +3665,8 @@ function setupYearSlider() {
         if (yearKey === String(selectedYear)) {
           dot.style.width = '22px';
           dot.style.height = '22px';
-          dot.style.boxShadow = '0 3px 6px rgba(0,0,0,0.25)';
+          dot.style.boxShadow = '0 3px 6px rgba(0, 0, 0, 0.25)';
+          
         } else {
           dot.style.width = '18px';
           dot.style.height = '18px';
@@ -3874,23 +3878,23 @@ function setupYearSlider() {
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background: #0F3D88;
+        background: #FFB700;
         cursor: pointer;
-        box-shadow: 0 3px 6px rgba(15, 61, 136, 0.4), 0 0 0 3px rgba(255, 255, 255, 0.9);
+        box-shadow: 0 3px 6px rgba(136, 118, 15, 0.4), 0 0 0 3px rgba(255, 255, 255, 0.9);
         transition: all 0.2s ease;
         border: 2px solid #ffffff;
         margin-top: -8px;
       }
       
       #year-slider-visible::-webkit-slider-thumb:hover {
-        background: #1E52A6;
+        background:rgb(236, 169, 0);
         transform: scale(1.1);
         box-shadow: 0 4px 8px rgba(15, 61, 136, 0.5), 0 0 0 3px rgba(255, 255, 255, 1);
       }
       
       #year-slider-visible::-webkit-slider-thumb:active {
         transform: scale(1.15);
-        box-shadow: 0 6px 12px rgba(15, 61, 136, 0.6), 0 0 0 4px rgba(255, 255, 255, 1);
+        box-shadow: 0 6px 12px rgba(136, 118, 15, 0.6), 0 0 0 4px rgba(255, 255, 255, 1);
       }
       
       #year-slider-visible::-webkit-slider-runnable-track {
@@ -4610,6 +4614,52 @@ function drawAffluenzaChart() {
   );
   pop();
 
+  // --- NUOVO: Tacca fissa "Affluenza massima" (88.8%) ---
+  push();
+  // Colore blu del sito (usiamo cBlue definito sopra o #1E52A6)
+  stroke('#1E52A6'); 
+  strokeWeight(4); // Stesso spessore della tacca gialla
+  strokeCap(ROUND);
+  
+  // Impostiamo il tratteggio: 4px linea, 4px spazio
+  drawingContext.setLineDash([3, 6]);
+
+  const maxAffluenzaVal = 88.8;
+  const maxAngle = startAngle + (maxAffluenzaVal / 100) * totalAngle;
+  
+  const rOuterMax = radius + 18;
+  const rInnerMax = radius - 18;
+
+  line(
+    centerX + rInnerMax * cos(maxAngle), centerY + rInnerMax * sin(maxAngle),
+    centerX + rOuterMax * cos(maxAngle), centerY + rOuterMax * sin(maxAngle)
+  );
+  
+  // Ripristiniamo la linea continua per il resto dei disegni
+  drawingContext.setLineDash([]);
+  pop();
+
+  // --- Testo "Affluenza massima: 88.8% – 1946" ---
+  push();
+  textSize(14); // Stesso corpo di 0% e 100% (o leggermente più piccolo se serve spazio)
+  textStyle(BOLD); // O NORMAL, a seconda di come vuoi che appaia rispetto a 0%/100%
+  fill('#1E52A6'); // Blu
+  textAlign(LEFT, CENTER); // Allineato a sinistra rispetto al punto
+  
+  // Calcolo posizione testo: un po' a destra e sopra la tacca
+  // Aggiungiamo un raggio extra per allontanarlo
+  const textRadius = rOuterMax + 15; 
+  const textX = centerX + textRadius * cos(maxAngle) - 20; // +5 per staccare un po'
+  const textY = centerY + textRadius * sin(maxAngle) - 10; // -10 per alzarlo leggermente
+
+  if (typeof stixFont !== 'undefined') textFont(stixFont);
+  text("Massima: 88.8%", textX, textY);
+  pop();
+  // -----------------------------------------------------
+
+
+
+
   // 6. Testi e Etichette
   
   // Percentuale Grande al centro (anch'essa animata!)
@@ -4928,7 +4978,7 @@ function drawGenderChart() {
   const windowHeight    = window.sezione3WindowHeight;
   const chartX          = chartAreaLeft + chartAreaWidth / 2;
   const titleHeight     = 20;
-  const centerY         = windowTop + windowHeight * 0.65; 
+  const centerY         = windowTop + windowHeight * 0.67; 
   const radius          = getCommonSemicircleRadius(); 
 
   // 2. Recupero Dati (Logica generica adattata)
@@ -5070,18 +5120,18 @@ function drawGenderChart() {
   
   // Maschi (Sinistra)
   fill(cMale);
-  text(`${pctM.toFixed(1)}%`, chartX - radius/1.5, centerY + 25);
+  text(`${pctM.toFixed(1)}%`, chartX - radius/1.5, centerY + 27);
   
   // Femmine (Destra)
   fill(cFemale);
-  text(`${pctF.toFixed(1)}%`, chartX + radius/1.5, centerY + 25);
+  text(`${pctF.toFixed(1)}%`, chartX + radius/1.5, centerY + 27);
   
   // Etichette UOMINI / DONNE (Opzionale, come da tuo screenshot)
   textSize(16);
   fill(cMale);
-  text("UOMINI", chartX - radius/1.5, centerY + 5);
+  text("UOMINI", chartX - radius/1.5, centerY + 12);
   fill(cFemale);
-  text("DONNE", chartX + radius/1.5, centerY + 5);
+  text("DONNE", chartX + radius/1.5, centerY + 12);
   pop();
 }
 

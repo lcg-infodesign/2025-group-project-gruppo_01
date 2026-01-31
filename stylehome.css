@@ -560,6 +560,7 @@ p {
   }
 }
 
+
 /* Aggiungi questa nuova regola CSS */
 .btn-container {
   text-align: center;
@@ -590,6 +591,12 @@ p {
 
 .section-row.visible .action-btn {
   animation: fadeInUpBtn 0.8s ease forwards 1.0s;
+}
+
+.action-btn:hover {
+  background-color: #FFB700;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 25px rgba(202, 148, 31, 0.4);
 }
 
 @keyframes fadeInUpBtn {

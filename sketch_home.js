@@ -103,7 +103,7 @@ function drawWrappedCentered(str, centerX, bottomY, maxWidth, lineHeight) {
   let lines = [];
   let current = "";
 
-  for (let i = 0; i < words.length; i++) {
+  for (let i = 0; i < words.length; i++) { 
     const test = current.length ? current + " " + words[i] : words[i];
     if (textWidth(test) <= maxWidth) {
       current = test;

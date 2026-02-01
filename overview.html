@@ -35,29 +35,6 @@
       <!-- TITOLO CENTRALE -->
       <div class="navbar-bottom">
         <div class="navbar-title">AFFLUENZA dei REFERENDUM</div>
-        <!-- HELP BUTTON -->
-        <button id="help-toggle" title="Aiuto" style="
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          background-color: #163264;
-          color: #f5f0dc;
-          border: none;
-          cursor: pointer;
-          font-family: 'STIX Two Text', serif;
-          font-weight: bold;
-          font-size: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-left: 10px;
-          transition: all 0.3s ease;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-          position: fixed;
-          top: 60px;
-          right: 20px;
-          z-index: 2000;
-        ">?</button>
       </div>
 
       <!-- SECONDA LINEA BLU -->
@@ -65,8 +42,6 @@
 
     </div>
   </div>
-
-  <div id="help-status" style="display:none;">OFF</div>
 
   <!-- Omino in alto a destra: al click si sposta a sinistra e a destra compare "seleziona un anno" -->
   <div class="intro-top-right" id="intro-top-right">
@@ -417,7 +392,8 @@
       strokeWeight(3);
       line(chartX, quorumY, chartX + chartWidth, quorumY);
 
-      textSize(24);
+      textFont('STIX Two Text', 'serif');
+      textSize(34);
       textAlign(RIGHT, CENTER);
 
       // Draw 50+1 with subtle outline for better readability
@@ -425,10 +401,10 @@
       // Draw outline (white/light background) first
       noStroke();
       fill(COLORS.QUORUM_LINE);
-      text('50+1', chartX + chartWidth - 20, quorumY - 15);
+      text('50+1', chartX + chartWidth + 10, quorumY - 22);
       pop();
 
-      textSize(14);
+      textSize(22);
 
       // Draw QUORUM with subtle outline for better readability
       push();
@@ -436,7 +412,7 @@
       // Draw main text on top
       noStroke();
       fill(COLORS.QUORUM_LINE);
-      text('QUORUM', chartX + chartWidth - 20, quorumY + 15);
+      text('QUORUM', chartX + chartWidth + 10, quorumY + 22);
       pop();
 
 

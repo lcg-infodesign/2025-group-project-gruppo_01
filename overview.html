@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Home - Sketch</title>
+  <title>Overview - Affluenza Referendum</title>
 
   <link rel="stylesheet" type="text/css" href="navbar.css">
   <link rel="stylesheet" type="text/css" href="styleoverview.css">
@@ -35,16 +35,8 @@
       <!-- TITOLO CENTRALE -->
       <div class="navbar-bottom">
         <div class="navbar-title">AFFLUENZA dei REFERENDUM</div>
-      </div>
-
-      <!-- SECONDA LINEA BLU -->
-      <div class="linea-parallela-bottom"></div>
-
-    </div>
-  </div>
-
-
-  <button id="help-toggle" title="Aiuto" style="
+        <!-- HELP BUTTON -->
+        <button id="help-toggle" title="Aiuto" style="
           width: 30px;
           height: 30px;
           border-radius: 50%;
@@ -61,12 +53,21 @@
           margin-left: 10px;
           transition: all 0.3s ease;
           box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          position: fixed;
+          top: 60px;
+          right: 20px;
+          z-index: 2000;
         ">?</button>
+      </div>
+
+      <!-- SECONDA LINEA BLU -->
+      <div class="linea-parallela-bottom"></div>
+
+    </div>
+  </div>
 
   <div id="help-status" style="display:none;">OFF</div>
-  </div>
 
-  </div>
   <div class="legend-icon">
     <img src="img/SVG/omino.svg" alt="Icona referendum">
 
@@ -108,10 +109,11 @@
 
     // Raggio di curvatura per le barre (Top & Bottom)
     const BAR_RADIUS = 10;
-    // Offset e Margini
-    const CHART_PADDING = 100; // Increased for more side margins
+    // Offset e Margini (stessa larghezza della timeline footer per allineamento colonne-quadratini)
+    const CHART_PADDING = 100;
     const TOP_MARGIN = 180;
-    const BOTTOM_MARGIN = 120; // Increased to accommodate timeline higher position 
+    const BOTTOM_MARGIN = 120;
+    const TIMELINE_MAX_WIDTH = 1400; // deve coincidere con #year-slider-container max-width 
 
     // Costante per la dimensione del marker quadrato sulla timeline
     const TIMELINE_SQUARE_SIZE = 20;
@@ -317,10 +319,9 @@
         return;
       }
 
-      // 2. DEFINIZIONE GEOMETRIA ORIZZONTALE
-      // Questi numeri DEVONO essere identici a quelli usati in drawHistogram
-      let chartX = CHART_PADDING - 65;
-      let chartWidth = width - 2 * CHART_PADDING + 130;
+      // 2. DEFINIZIONE GEOMETRIA ORIZZONTALE (allineata alla timeline footer)
+      let chartWidth = Math.min(width, TIMELINE_MAX_WIDTH);
+      let chartX = (width - chartWidth) / 2;
 
       // Calcoliamo la distanza media tra una barra e l'altra
       let stepWidth = chartWidth / (numReferendums - 1);
@@ -414,9 +415,9 @@
 
 
     function drawHistogram() {
-      let chartX = CHART_PADDING - 65;
+      let chartWidth = Math.min(width, TIMELINE_MAX_WIDTH);
+      let chartX = (width - chartWidth) / 2;
       let chartY = TOP_MARGIN - 10;
-      let chartWidth = width - 2 * CHART_PADDING + 130;
       let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
       let baselineY = chartY + chartHeight;
 
@@ -443,7 +444,7 @@
       // Draw outline (white/light background) first
       noStroke();
       fill(COLORS.QUORUM_LINE);
-      text('50+1', chartX + 1400, quorumY - 15);
+      text('50+1', chartX + chartWidth - 20, quorumY - 15);
       pop();
 
       textSize(14);
@@ -454,12 +455,12 @@
       // Draw main text on top
       noStroke();
       fill(COLORS.QUORUM_LINE);
-      text('QUORUM', chartX + 1400, quorumY + 15);
+      text('QUORUM', chartX + chartWidth - 20, quorumY + 15);
       pop();
 
 
       // Bar width as percentage of chart width
-      const barWidthPercent = 2; // Width of each bar as % of total chart width
+      const barWidthPercent = 1.5;
       const barWidth = (chartWidth * barWidthPercent) / 100;
 
       for (let i = 0; i < numReferendums; i++) {
@@ -546,9 +547,9 @@
     function drawHoverInfo() {
       if (hoveredIndex === -1) return;
 
-      let chartX = CHART_PADDING - 65;
+      let chartWidth = Math.min(width, TIMELINE_MAX_WIDTH);
+      let chartX = (width - chartWidth) / 2;
       let chartY = TOP_MARGIN - 10;
-      let chartWidth = width - 2 * CHART_PADDING + 130;
       let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
       let baselineY = chartY + chartHeight;
 
@@ -565,7 +566,7 @@
       let affluence = affluenceData[i];
 
       // === STESSA LARGHEZZA BARRA DELL'ISTOGRAMMA ===
-      const barWidthPercent = 2;
+      const barWidthPercent = 1.5;
       const barWidth = (chartWidth * barWidthPercent) / 100;
 
       // === STESSO CALCOLO X DELL'ISTOGRAMMA ===

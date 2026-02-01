@@ -385,6 +385,10 @@ let omino3Img = null; // omino3.svg (omino grigio per "dato assente")
 let helpModeActive = false;
 let currentHoveredSection = null;
 
+// ==================== ENTRANCE (mappa + finestre insieme) ====================
+let entranceStartTime = null;
+const ENTRANCE_DURATION_MS = 320;
+
 // Helper function to calculate quesiti and presidenti window bounds (same as drawQuesitiWindow)
 function calculateQuesitiPresidentiBounds() {
   const navbarHeight = 100;
@@ -989,6 +993,20 @@ function setup() {
     selectedYear = yearFromUrl;
     dataFile = REFERENDUM_YEARS[yearFromUrl]; // Imposta il percorso del CSV corrispondente
     console.log("Anno caricato dall'URL:", selectedYear);
+    // Entrata: mappa + finestre si caricano insieme (animazione coordinata)
+    entranceStartTime = Date.now();
+    const mappaContainer = document.getElementById('mappa-container');
+    const footerEl = document.getElementById('footer');
+    if (mappaContainer) {
+      mappaContainer.style.opacity = '0';
+      mappaContainer.style.transition = 'opacity ' + (ENTRANCE_DURATION_MS / 1000) + 's ease-out';
+      setTimeout(function () { mappaContainer.style.opacity = '1'; }, 20);
+    }
+    if (footerEl) {
+      footerEl.style.opacity = '0';
+      footerEl.style.transition = 'opacity ' + (ENTRANCE_DURATION_MS / 1000) + 's ease-out';
+      setTimeout(function () { footerEl.style.opacity = '1'; }, 20);
+    }
   }
   // -----------------------------------------
 
@@ -2718,8 +2736,14 @@ function draw() {
   rect(0, 90, width * 0.33, colH);            // Colonna sinistra allungata
   rect(width * 0.67, 90, width * 0.33, colH); // Colonna destra allungata
 
-
-
+  // Entrata: mappa + finestre (quesiti, grafici) appaiono insieme con la mappa
+  push();
+  if (entranceStartTime !== null) {
+    const elapsed = Date.now() - entranceStartTime;
+    const t = Math.min(1, elapsed / ENTRANCE_DURATION_MS);
+    const easeOut = 1 - Math.pow(1 - t, 1.2);
+    drawingContext.globalAlpha = easeOut;
+  }
 
 
 
@@ -2888,6 +2912,9 @@ function draw() {
   drawHelpModeOverlay();
 
   drawHelpHintBubble();
+
+  if (entranceStartTime !== null) drawingContext.globalAlpha = 1;
+  pop();
 }
 
 

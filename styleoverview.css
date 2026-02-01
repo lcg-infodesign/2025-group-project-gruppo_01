@@ -248,61 +248,122 @@
       }
 
 
-      .legend-icon {
-        position: absolute;
-        /* permette di posizionarla sopra il canvas */
+      /* ---------- INTRO OVERVIEW: omino in alto a destra, al click si sposta a sinistra e la scritta compare a destra dell'omino ---------- */
+      .intro-top-right {
+        position: fixed;
+        right: 24px;
         top: 130px;
-        /* distanza dal bordo superiore della finestra */
-        right: 60%;
-        /* centrata orizzontalmente */
-        /* centratura perfetta */
-        z-index: 10;
-        /* deve essere più alto del canvas */
-        pointer-events: none;
-        /* opzionale, per evitare che blocchi il mouse sul canvas */
+        z-index: 500;
+        pointer-events: auto;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: flex-end;
+        gap: 0.4rem;
       }
-
-      .legend-icon img {
-        width: 80px;
-        /* regola dimensioni */
+      .intro-top-right .intro-omino-wrap {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .intro-top-right .intro-omino {
+        width: 100px;
         height: auto;
+        display: block;
       }
-
-      .legend-text {
+      /* Bottone "Clicca qui" in alto a destra, omino alla sua sinistra (come se lo indicasse) */
+      .intro-top-right .intro-click-hint {
+        flex-shrink: 0;
+        font-family: 'STIX Two Text', serif;
+        font-size: 17px;
+        font-weight: bold;
         color: var(--blue-color);
-        font-size: 20px;
-        font-weight: normal;
-        letter-spacing: 1px;
-        position: absolute;
-        /* permette di posizionarla sopra il canvas */
-        top: 90px;
-        /* distanza dal bordo superiore della finestra */
-        left: 650px;
-        /* centrata orizzontalmente */
-        /* centratura perfetta */
-        z-index: 100;
-        /* deve essere più alto del canvas */
-        pointer-events: none;
-        /* opzionale, per evitare che blocchi il mouse sul canvas */
+        background-color: var(--bg-color);
+        border: 2px solid var(--blue-color);
+        border-radius: 8px;
+        padding: 8px 14px;
+        white-space: nowrap;
+        box-shadow: 0 2px 6px rgba(30, 82, 166, 0.2);
+        animation: intro-hint-pulse 2s ease-in-out infinite;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
       }
-
-      .txt-overview {
-        position: absolute;
-        /* permette di posizionarla sopra il canvas */
-        top: 110px;
-        /* distanza dal bordo superiore della finestra */
-        left: 50%;
-        /* centrata orizzontalmente */
-        /* centratura perfetta */
-        transform: translateX(-50%);
-        z-index: 100;
-        /* deve essere più alto del canvas */
+      .intro-top-right.expanded .intro-click-hint {
+        opacity: 0;
+        visibility: hidden;
         pointer-events: none;
-        /* opzionale, per evitare che blocchi il mouse sul canvas */
+        width: 0;
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+      @keyframes intro-hint-pulse {
+        0%, 100% { box-shadow: 0 2px 6px rgba(30, 82, 166, 0.2); border-color: var(--blue-color); }
+        50% { box-shadow: 0 2px 12px rgba(30, 82, 166, 0.4); border-color: var(--yellow-color); }
+      }
+      /* Scritta "seleziona un anno" + legenda sotto: nascosti inizialmente, compaiono al click */
+      .intro-top-right .intro-text-wrap {
+        max-width: 0;
+        overflow: hidden;
+        opacity: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease 0.2s;
+      }
+      .intro-top-right.expanded .intro-text-wrap {
+        max-width: 420px;
+        opacity: 1;
+      }
+      .intro-top-right .intro-text {
+        margin: 0;
+        white-space: nowrap;
         color: var(--blue-color);
         font-size: 28px;
         font-weight: normal;
         text-transform: uppercase;
+        font-family: 'STIX Two Text', serif;
+        letter-spacing: 0.02em;
+      }
+      .intro-top-right .intro-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: 20px;
+        color: var(--blue-color);
+        font-family: 'STIX Two Text', serif;
+      }
+      .intro-top-right .intro-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .intro-top-right .intro-legend-marker {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+      .intro-top-right .intro-text .letter {
+        display: inline-block;
+        opacity: 0;
+        animation: intro-letter-in 0.25s ease forwards;
+      }
+      .intro-top-right .intro-text .letter.space {
+        min-width: 0.25em;
+      }
+      @keyframes intro-letter-in {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       /* --- AGGIUNTA FIX CURSORE --- */
@@ -318,6 +379,8 @@
       .navbar-wrapper,
       #footer,
       #help-toggle,
+      .intro-top-right,
+      .intro-top-right .intro-omino-wrap,
       input,
       button,
       a {

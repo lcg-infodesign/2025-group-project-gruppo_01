@@ -68,14 +68,20 @@
 
   <div id="help-status" style="display:none;">OFF</div>
 
-  <div class="legend-icon">
-    <img src="img/SVG/omino.svg" alt="Icona referendum">
-
-  </div>
-  <div class="txt-overview">
-    <p>
-      Seleziona un'anno
-    </p>
+  <!-- Omino in alto a destra: al click si sposta a sinistra e a destra compare "seleziona un anno" -->
+  <div class="intro-top-right" id="intro-top-right">
+    <div class="intro-omino-wrap" id="intro-omino-wrap">
+      <img src="img/SVG/omino.svg" class="intro-omino" id="intro-omino" alt="Seleziona un anno" />
+    </div>
+    <span class="intro-click-hint" id="intro-click-hint">Clicca qui</span>
+    <div class="intro-text-wrap" id="intro-right">
+      <p class="intro-text" id="intro-text" aria-hidden="true"></p>
+      <div class="intro-legend" id="intro-legend">
+        <div class="intro-legend-item"><span class="intro-legend-marker" style="background:#F6ECE1; border:1px solid #1E52A6;"></span> Quorum non richiesto</div>
+        <div class="intro-legend-item"><span class="intro-legend-marker" style="background:#ADBAD2;"></span> Quorum non raggiunto</div>
+        <div class="intro-legend-item"><span class="intro-legend-marker" style="background:#1E52A6;"></span> Quorum raggiunto</div>
+      </div>
+    </div>
   </div>
 
   </div>
@@ -108,7 +114,7 @@
     // ...
 
     // Raggio di curvatura per le barre (Top & Bottom)
-    const BAR_RADIUS = 10;
+    const BAR_RADIUS = 12;
     // Offset e Margini (stessa larghezza della timeline footer per allineamento colonne-quadratini)
     const CHART_PADDING = 100;
     const TOP_MARGIN = 180;
@@ -287,73 +293,48 @@
 
 
 
-      // 2. Disegno;
-      drawLegend();
+      // 2. Disegno (legenda solo nell'intro con l'omino, non sul canvas)
       drawHistogram();
       // drawTimeline(); // Removed - using HTML timeline instead (same as dettaglio)
       drawHoverInfo();
     }
 
     /**
-     * Aggiorna l'indice della colonna su cui si sta passando il mouse,
-     * includendo l'area della linea del tempo.
+     * Aggiorna l'indice della colonna su cui si sta passando il mouse.
+     * L'hover è attivo solo quando il mouse è sopra il rettangolo effettivo della barra.
      */
-    /**
- * Aggiorna l'indice della colonna su cui si sta passando il mouse,
- * includendo l'area della linea del tempo.
- */
-    /**
-* Aggiorna l'indice della colonna su cui si sta passando il mouse,
-* usando la logica del "Vicino più Prossimo" per la massima precisione.
-*/
     function updateHoverState() {
-      // 1. DEFINIZIONE AREA VERTICALE ATTIVA
-      // Attiviamo l'hover solo se il mouse è verticalmente dentro l'area del grafico o della timeline
-      // Parte alta del grafico
-      let topLimit = TOP_MARGIN - 20;
-      // Parte bassa (inclusa la timeline e i pallini sotto)
-      let bottomLimit = height - BOTTOM_MARGIN + 80;
-
-      if (mouseY < topLimit || mouseY > bottomLimit) {
-        hoveredIndex = -1;
-        return;
-      }
-
-      // 2. DEFINIZIONE GEOMETRIA ORIZZONTALE (allineata alla timeline footer)
       let chartWidth = Math.min(width, TIMELINE_MAX_WIDTH);
       let chartX = (width - chartWidth) / 2;
+      let chartY = TOP_MARGIN - 10;
+      let chartHeight = height - TOP_MARGIN - BOTTOM_MARGIN;
+      let baselineY = chartY + chartHeight;
 
-      // Calcoliamo la distanza media tra una barra e l'altra
-      let stepWidth = chartWidth / (numReferendums - 1);
+      // Stesse posizioni usate in drawHistogram()
+      const yearToPosition = {};
+      years.forEach((year, index) => {
+        const position = (years.length > 1)
+          ? (index / (years.length - 1)) * 100
+          : 0;
+        yearToPosition[year] = position;
+      });
 
-      // 3. TROVA IL PIÙ VICINO
-      let closestDist = Infinity;
-      let bestIndex = -1;
+      const barWidthPercent = 2.4;
+      const barWidth = (chartWidth * barWidthPercent) / 100;
 
+      hoveredIndex = -1;
       for (let i = 0; i < numReferendums; i++) {
-        // Calcolo della posizione percentuale esatta (0.0 a 1.0)
-        let t = i / (numReferendums - 1);
+        const percentage = yearToPosition[years[i]];
+        const x = chartX + (percentage / 100) * chartWidth - barWidth / 2;
+        const affluence = affluenceData[i];
+        const barHeight = (affluence / 100) * chartHeight;
+        const barTopY = baselineY - barHeight;
 
-        // Calcolo coordinata X centrale della barra corrente
-        let centerX = chartX + t * chartWidth;
-
-        // Calcolo distanza tra mouse e centro barra
-        let dist = Math.abs(mouseX - centerX);
-
-        // Se questa barra è più vicina delle altre, salviamola
-        if (dist < closestDist) {
-          closestDist = dist;
-          bestIndex = i;
+        // Hover solo se il mouse è dentro il rettangolo della barra
+        if (mouseX >= x && mouseX <= x + barWidth && mouseY >= barTopY && mouseY <= baselineY) {
+          hoveredIndex = i;
+          break;
         }
-      }
-
-      // 4. APPLICAZIONE
-      // Se la distanza è minore della metà dello spazio tra due barre,
-      // significa che siamo nello "spazio di competenza" di quell'anno.
-      if (bestIndex !== -1 && closestDist < (stepWidth / 2)) {
-        hoveredIndex = bestIndex;
-      } else {
-        hoveredIndex = -1;
       }
     }
 
@@ -460,7 +441,7 @@
 
 
       // Bar width as percentage of chart width
-      const barWidthPercent = 1.5;
+      const barWidthPercent = 2.4;
       const barWidth = (chartWidth * barWidthPercent) / 100;
 
       for (let i = 0; i < numReferendums; i++) {
@@ -566,7 +547,7 @@
       let affluence = affluenceData[i];
 
       // === STESSA LARGHEZZA BARRA DELL'ISTOGRAMMA ===
-      const barWidthPercent = 1.5;
+      const barWidthPercent = 2.4;
       const barWidth = (chartWidth * barWidthPercent) / 100;
 
       // === STESSO CALCOLO X DELL'ISTOGRAMMA ===
@@ -610,8 +591,9 @@
     }
 
     function mousePressed() {
-      // Verifica se il click è su una barra dell'istogramma (hoveredIndex calcolato da updateHoverState)
+      if (mouseButton !== LEFT) return;
 
+      // Verifica se il click è su una barra dell'istogramma (hoveredIndex calcolato da updateHoverState)
       if (hoveredIndex !== -1) {
         const year = years[hoveredIndex];
 
@@ -632,12 +614,6 @@
         // Reindirizza alla pagina dettaglio
         window.location.href = 'dettaglio.html?year=' + encodeURIComponent(yearParam);
       }
-      function mousePressed() {
-        if (mouseButton !== LEFT) return; // <--- AGGIUNGI QUESTO!
-
-        // ... resto del codice ...
-      }
-
     }
 
 
@@ -696,7 +672,50 @@
       });
     });
 
+    // ---------- Intro overview: al click sull'omino si sposta a sinistra e "seleziona un anno" compare a destra lettera per lettera ----------
+    (function () {
+      const INTRO_PHRASE = "seleziona un anno";
+      const introBlock = document.getElementById('intro-top-right');
+      const introOminoWrap = document.getElementById('intro-omino-wrap');
+      const introClickHint = document.getElementById('intro-click-hint');
+      const introTextEl = document.getElementById('intro-text');
+      const letterDelayMs = 80;
 
+      if (!introBlock || !introOminoWrap || !introTextEl) return;
+
+      function toggleIntro() {
+        if (introBlock.classList.contains('expanded')) {
+          introBlock.classList.remove('expanded');
+          return;
+        }
+        introBlock.classList.add('expanded');
+
+        // Costruisci il testo lettera per lettera solo al primo click (spazi con classe .space per separare le parole)
+        if (introTextEl.children.length === 0) {
+          INTRO_PHRASE.split('').forEach(function (char, i) {
+            const span = document.createElement('span');
+            span.className = char === ' ' ? 'letter space' : 'letter';
+            span.textContent = char;
+            span.style.animationDelay = (i * letterDelayMs) + 'ms';
+            introTextEl.appendChild(span);
+          });
+        }
+      }
+
+      function attachTrigger(el) {
+        if (!el) return;
+        el.addEventListener('click', function (e) {
+          e.stopPropagation();
+          toggleIntro();
+        });
+        el.addEventListener('touchend', function (e) {
+          e.preventDefault();
+          toggleIntro();
+        }, { passive: false });
+      }
+      attachTrigger(introOminoWrap);
+      attachTrigger(introClickHint);
+    })();
 
   </script>
 

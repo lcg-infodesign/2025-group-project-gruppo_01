@@ -123,6 +123,10 @@
         margin: 0;
       }
 
+      .navbar-date {
+        font-size: 18px;
+      }
+
       /*-----------------*/
       /* HELP TOGGLE (dentro navbar) */
       /*-----------------*/

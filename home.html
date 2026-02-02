@@ -215,6 +215,32 @@
         });
       });
 
+      // Funzione per gestire la tastiera
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          spostaGiu();
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          spostaSu();
+        }
+      });
+
+      // Funzione unica che gestisce il movimento
+      function spostaGiu() {
+        window.scrollBy({
+          top: 830,         // Pixel di spostamento verso il basso
+          behavior: 'smooth' // Rende lo scorrimento fluido
+        });
+      }
+
+      function spostaSu() {
+        window.scrollBy({
+          top: -830,         // Pixel di spostamento verso l'alto
+          behavior: 'smooth' // Rende lo scorrimento fluido
+        });
+      }
+
       const navLinks = document.querySelectorAll('.nav-link');
 
 navLinks.forEach(link => {

@@ -4542,7 +4542,7 @@ function drawAffluenzaChart() {
   const windowWidth = chartAreaWidth - bgPadding * 2;
   const affluenzaChartX = windowLeft + windowWidth / 2;
   const radius = getAffluenzaSemicircleRadius();
-  const affluenzaChartY = windowTop + windowHeight * 0.65;
+  const affluenzaChartY = windowTop + windowHeight * 0.80;
 
   // --- INIZIO LOGICA ANIMAZIONE ---
   let targetAffluenza = calculateAffluenzaForChart();
@@ -4998,7 +4998,7 @@ function drawGenderChart() {
   const windowHeight = window.sezione3WindowHeight;
   const chartX = chartAreaLeft + chartAreaWidth / 2;
   const titleHeight = 20;
-  const centerY = windowTop + windowHeight * 0.65;
+  const centerY = windowTop + windowHeight * 0.75;
   const radius = getCommonSemicircleRadius();
 
   // 2. Recupero Dati (Logica generica adattata)
@@ -5057,7 +5057,7 @@ function drawGenderChart() {
     const titleY = windowTop + 8;
     push();
     textAlign(RIGHT, TOP);
-    textSize(16);
+    textSize(20);
     fill("#1B4A95");
     textFont('STIX Two Text');
     text("VOTANTI PER GENERE", titleX, titleY); // o DISTRIBUZIONE GENERE

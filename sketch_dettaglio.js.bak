@@ -746,7 +746,7 @@ function updateQuesitiHover() {
     const textEndX = windowLeft + windowWidth - bgPadding * 2 - rightPaddingExtra;
     const maxTextWidth = textEndX - textStartX;
 
-    textSize(18);
+    textSize(16);
     quesiti2025.forEach((quesito) => {
       const words = quesito.testo.split(' ');
       let line = '';
@@ -1759,9 +1759,9 @@ function parseTableTotals() {
         }
       }
 
-      // Parse national totals for SI/NO votes (accept multiple possible column names)
-      const votiSi = (row['VOTI_SI'] || row['SUM of VOTI_SI'] || row['VOTI SI'] || row['NUMVOTISI'] || row['SUM of NUMVOTISI'] || '').trim();
-      const votiNo = (row['VOTI_NO'] || row['SUM of VOTI_NO'] || row['VOTI NO'] || row['NUMVOTINO'] || row['SUM of NUMVOTINO'] || '').trim();
+      // Parse national totals for SI/NO votes
+      const votiSi = (row['VOTI_SI'] || row['SUM of VOTI_SI'] || row['VOTI SI'] || '').trim();
+      const votiNo = (row['VOTI_NO'] || row['SUM of VOTI_NO'] || row['VOTI NO'] || '').trim();
 
       let siNum = 0, noNum = 0;
       if (votiSi) {
@@ -1833,9 +1833,9 @@ function parseTableTotals() {
       }
 
 
-      // Try different possible column names for regional totals
-      const votiSi = (row['VOTI_SI'] || row['SUM of VOTI_SI'] || row['VOTI SI'] || row['NUMVOTISI'] || row['SUM of NUMVOTISI'] || '').trim();
-      const votiNo = (row['VOTI_NO'] || row['SUM of VOTI_NO'] || row['VOTI NO'] || row['NUMVOTINO'] || row['SUM of NUMVOTINO'] || '').trim();
+      // Try different possible column names
+      const votiSi = (row['VOTI_SI'] || row['SUM of VOTI_SI'] || row['VOTI SI'] || '').trim();
+      const votiNo = (row['VOTI_NO'] || row['SUM of VOTI_NO'] || row['VOTI NO'] || '').trim();
 
       let siNum = 0;
       let noNum = 0;
@@ -1930,9 +1930,9 @@ function parseTableTotals() {
           }
         }
 
-        // Aggregate votes (accept various column name variants)
-        const votiSi = (row['VOTI_SI'] || row['SUM of VOTI_SI'] || row['VOTI SI'] || row['NUMVOTISI'] || row['SUM of NUMVOTISI'] || '').trim();
-        const votiNo = (row['VOTI_NO'] || row['SUM of VOTI_NO'] || row['VOTI NO'] || row['NUMVOTINO'] || row['SUM of NUMVOTINO'] || '').trim();
+        // Aggregate votes
+        const votiSi = (row['VOTI_SI'] || row['SUM of VOTI_SI'] || row['VOTI SI'] || '').trim();
+        const votiNo = (row['VOTI_NO'] || row['SUM of VOTI_NO'] || row['VOTI NO'] || '').trim();
         if (votiSi) {
           const siNum = parseFloat(votiSi.replace(/,/g, '').trim());
           if (isFinite(siNum) && siNum > 0) {
@@ -2018,8 +2018,8 @@ function parseTableTotals() {
     if (regione.includes('TOTAL') || regione.includes('ITALIA') || provincia.includes('TOTAL')) continue;
 
     // Prendi i voti cercando tutte le varianti di colonna
-    const votiSiStr = (row['VOTI_SI'] || row['SUM of VOTI_SI'] || row['VOTI SI'] || row['NUMVOTISI'] || row['SUM of NUMVOTISI'] || '').trim();
-    const votiNoStr = (row['VOTI_NO'] || row['SUM of VOTI_NO'] || row['VOTI NO'] || row['NUMVOTINO'] || row['SUM of NUMVOTINO'] || '').trim();
+    const votiSiStr = (row['VOTI_SI'] || row['SUM of VOTI_SI'] || row['VOTI SI'] || '').trim();
+    const votiNoStr = (row['VOTI_NO'] || row['SUM of VOTI_NO'] || row['VOTI NO'] || '').trim();
 
     let siVal = 0, noVal = 0;
     if (votiSiStr) {
@@ -4777,7 +4777,7 @@ function getAffluenzaSemicircleRadius() {
 function drawPieChart() {
   // 1. Definizioni base e controlli
   let votiSi = 0, votiNo = 0;
-  const chartTitle = 'ESITO';
+  const chartTitle = 'VOTI REFERENDUM';
   let regionName = null;
   let displayRegionName = null;
 
@@ -5423,7 +5423,7 @@ function drawQuesitiWindow() {
   let totalQuesitiHeight = 0;
 
   // Calculate height per quesito
-  textSize(18);
+  textSize(16);
   quesiti2025.forEach((quesito) => {
     const words = quesito.testo.split(' ');
     let line = '';
@@ -5531,7 +5531,7 @@ function drawQuesitiWindow() {
     noStroke();
     fill(titleColor);
     textStyle(NORMAL);
-    textSize(18);
+    textSize(16);
     textAlign(LEFT, TOP);
     let textY = contentY;
     const words = quesito.testo.split(' ');
@@ -6266,16 +6266,15 @@ function mousePressed() {
   }
 
   // Then check if click is on a quesito - use same dimensions as above
-  // Expand vertical bounds slightly to improve clickability for single-line quesiti
   if (mouseX >= windowLeft + bgPadding && mouseX < windowLeft + windowWidth - bgPadding &&
-    mouseY >= (quesitiAreaTop - 12) && mouseY < (quesitiAreaBottom + 12)) {
+    mouseY >= quesitiAreaTop && mouseY < quesitiAreaBottom) {
     // Check which quesito was clicked (account for scroll offset)
     const quesiti2025 = quesitiList.length > 0 ? quesitiList : [];
 
     // Calculate heights for quesiti (same logic as drawQuesitiWindow)
     const minQuesitoHeight = 40;
     const quesitiHeights = [];
-    textSize(18); // Allineato con drawQuesitiWindow
+    textSize(16); // Allineato con drawQuesitiWindow
     textStyle(NORMAL);
     const textStartX2 = windowLeft + bgPadding * 2 + 30;
     const rightPaddingExtra2 = 30;
@@ -6309,10 +6308,8 @@ function mousePressed() {
     for (let i = 0; i < quesiti2025.length; i++) {
       const quesitoHeight = quesitiHeights[i];
       const y = currentY;
-      // Increase click area for better clickability (especially for single-line quesiti)
-      const clickPadding = 8;
-      const quesitoClickTop = y - clickPadding;
-      const quesitoClickBottom = y + quesitoHeight + clickPadding;
+      const quesitoClickTop = y;
+      const quesitoClickBottom = y + quesitoHeight;
 
       if (mouseY >= quesitoClickTop && mouseY < quesitoClickBottom) {
         // Toggle selection: if same quesito clicked again, deselect

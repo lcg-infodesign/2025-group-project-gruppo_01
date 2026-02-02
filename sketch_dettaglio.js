@@ -545,7 +545,7 @@ const HELP_SECTIONS = {
   },
   'presidenti': {
     label: 'PRESIDENTI',
-    description: 'Visualizza i Presidenti della Repubblica e del Consiglio durante il referendum selezionato. Usa le frecce per navigare.',
+    description: 'Visualizza i Presidenti della Repubblica e del Consiglio durante il referendum selezionato.',
     bounds: () => {
       const bounds = calculateQuesitiPresidentiBounds();
       return bounds.presidenti;
@@ -611,36 +611,32 @@ function setupHelpMode() {
   const helpToggle = document.getElementById('help-toggle');
   const helpStatus = document.getElementById('help-status');
 
-  if (!helpToggle) {
-    console.warn('Help toggle button not found');
-    return;
-  }
+  if (!helpToggle) return;
 
   helpToggle.addEventListener('click', () => {
     helpModeActive = !helpModeActive;
-
     helpToggle.classList.toggle('active', helpModeActive);
 
-    // Aggiorna help-status solo se esiste
     if (helpStatus) {
       helpStatus.classList.toggle('active', helpModeActive);
       helpStatus.textContent = helpModeActive ? 'ON' : 'OFF';
     }
 
-    console.log('Help Mode:', helpModeActive ? 'ENABLED' : 'DISABLED');
-
-    if (!helpModeActive) {
+    if (helpModeActive) {
+      // --- NUOVA LOGICA: Forza l'evidenziazione delle statistiche all'avvio ---
+      currentHoveredSection = 'grafici';
+      const statsSection = HELP_SECTIONS['grafici'];
+      showHelpOverlay(statsSection, 'grafici');
+      // -----------------------------------------------------------------
+    } else {
       removeHelpOverlay();
       currentHoveredSection = null;
-
-      // Timeline rimossa - non serve più resettare
-
-      // RESET: Rimuovi blur da canvas
       const canvas = document.querySelector('canvas');
       if (canvas) {
         canvas.classList.remove('help-mode-blur', 'help-mode-clear');
       }
     }
+    redraw(); // Forza il p5.js a ridisegnare con il nuovo stato
   });
 }
 

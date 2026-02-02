@@ -474,7 +474,3 @@
   cursor: pointer; /* Cambia il cursore in manina */
 }
 
-/* Effetto Hover: Ingrandisce l'immagine */
-.album-item .album-link:hover img {
-  transform: scale(1.2); /* Ingrandisce del 20% */
-}

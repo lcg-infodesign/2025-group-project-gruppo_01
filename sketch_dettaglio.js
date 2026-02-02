@@ -4543,10 +4543,10 @@ function drawAffluenzaChart() {
   const affluenzaChartX = windowLeft + windowWidth / 2;
   const radius = getAffluenzaSemicircleRadius();
   
-  // Centro del grafico - Tirato su di 10px come richiesto
+  // Centro del grafico - Tirato su di 10px
   const affluenzaChartY = (windowTop + windowHeight * 0.72) - 10;
 
-  // --- LOGICA RECUPERO NOME REGIONE (IDENTICA A DRAWPIECHART) ---
+  // --- LOGICA RECUPERO NOME REGIONE (Standardizzata) ---
   let displayRegionName = null;
   if (selectedRegion) {
     let rawName = null;
@@ -4650,7 +4650,7 @@ function drawAffluenzaChart() {
   text(displayAffluenza.toFixed(1) + "%", centerX, centerY - 10);
   pop();
 
-  // --- 7. BARRA GRADIENTE COSTANTE E TESTI ---
+  // 7. BARRA GRADIENTE COSTANTE E TESTI
   const barWidth = radius * 2.2; 
   const barHeight = 15; 
   const barX = centerX - barWidth / 2;
@@ -4687,28 +4687,40 @@ function drawAffluenzaChart() {
   drawingContext.restore();
   pop();
 
-  // 8. Titolo e Sottotitolo (AGGIORNATO)
+  // 8. Titolo e Sottotitolo (AGGIORNATO CON LOGICA QUESITO)
   const titleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
   const titleY = windowTop + 8;
   push();
   
-  // Titolo "AFFLUENZA"
+  // Titolo Principale
   textAlign(RIGHT, TOP);
   textSize(20);
   fill("#1B4A95");
   textFont('STIX Two Text');
   text("AFFLUENZA", titleX, titleY);
 
-  // Sottotitolo (Nome Regione o Italia)
-  const subtitle = displayRegionName ? displayRegionName : "Italia";
-  textAlign(RIGHT, TOP);
-  textSize(16);
-  fill("#1B4A95"); // Stesso blu del titolo
-  // Posizionato subito sotto il titolo principale (offset +22 come nel pie chart)
-  text(subtitle, titleX, titleY + 22);
+  // Sottotitolo Dinamico (Copiato da PieChart)
+  let subtitle = null;
+  if (selectedQuesito !== null) {
+    // Se c'è un quesito selezionato: "Quesito X - NomeRegione"
+    const regionSuffix = displayRegionName ? displayRegionName : "Italia";
+    subtitle = `Quesito ${selectedQuesito} - ${regionSuffix}`;
+  } else {
+    // Se NON c'è quesito selezionato: "NomeRegione" o "Italia"
+    subtitle = displayRegionName ? displayRegionName : "Italia";
+  }
+
+  // Disegna Sottotitolo
+  if (subtitle) {
+    textAlign(RIGHT, TOP);
+    textSize(16);
+    fill("#1B4A95"); 
+    text(subtitle, titleX, titleY + 22);
+  }
 
   pop();
 }
+
 
 
 
@@ -4996,41 +5008,62 @@ function drawGenderChart() {
   const windowTop = window.sezione3Window3Top;
   const windowHeight = window.sezione3WindowHeight;
   const chartX = chartAreaLeft + chartAreaWidth / 2;
-  const titleHeight = 20;
   const centerY = windowTop + windowHeight * 0.75;
   const radius = getCommonSemicircleRadius();
 
-  // 2. Recupero Dati (Logica generica adattata)
+  // --- LOGICA RECUPERO NOME REGIONE (Standardizzata) ---
+  let displayRegionName = null;
+  let regionKeyForData = null; // Chiave pulita per cercare i dati
+
+  if (selectedRegion) {
+    let rawName = null;
+    if (typeof selectedRegion === 'object' && selectedRegion.properties) {
+      rawName = selectedRegion.properties.reg_name || 
+                selectedRegion.properties.denominazione_reg || 
+                selectedRegion.properties.denominazione || 
+                selectedRegion.properties.nome;
+    } else if (typeof selectedRegion === 'string') {
+      rawName = selectedRegion;
+    }
+    
+    if (rawName) {
+      // 1. Definisci il nome da VISUALIZZARE
+      if (rawName.toUpperCase().includes("VALLE") || rawName.toUpperCase().includes("AOSTA")) displayRegionName = "Valle d'Aosta";
+      else if (rawName.toUpperCase().includes("TRENTINO") || rawName.toUpperCase().includes("TIROL")) displayRegionName = "Trentino-Alto Adige";
+      else displayRegionName = rawName;
+
+      // 2. Definisci la chiave per CERCARE I DATI (può coincidere o essere rawName)
+      regionKeyForData = displayRegionName; 
+    }
+  }
+  // ---------------------------------------------------------------
+
+  // 2. Recupero Dati
   let m = 0, f = 0;
 
-  // --- INSERISCI QUI LA TUA LOGICA DI RECUPERO DATI ESATTA ---
-  // (Copia quella che avevi funzionante prima, qui metto un esempio standard)
-  if (selectedQuesito !== null && quesitiVotes[selectedQuesito]) {
-    // Se hai i dati per quesito
-    if (typeof quesitoGender !== 'undefined' && quesitoGender[selectedQuesito]) {
-      m = quesitoGender[selectedQuesito].maschi || 0;
-      f = quesitoGender[selectedQuesito].femmine || 0;
-    }
-  } else if (selectedRegion) {
-    // Logica per regione
-    let displayRegionName = null;
-    if (typeof selectedRegion === 'object' && selectedRegion.properties) {
-      displayRegionName = selectedRegion.properties.reg_name || selectedRegion.properties.nome;
-    } else {
-      displayRegionName = selectedRegion;
-    }
-
-    // Normalizzazione rapida per trovare la chiave giusta in regionGender
-    if (displayRegionName) {
-      // Cerca match esatto o normalizzato
-      if (regionGender[displayRegionName]) {
-        m = regionGender[displayRegionName].maschi || 0;
-        f = regionGender[displayRegionName].femmine || 0;
+  if (selectedQuesito !== null) {
+      // Caso A: Quesito selezionato
+      // Idealmente qui dovresti avere una struttura quesitoGender filtrata per regione se necessario.
+      // Se non hai i dati dettagliati regione+quesito per il genere, e usi quelli nazionali del quesito:
+      if (typeof quesitoGender !== 'undefined' && quesitoGender[selectedQuesito]) {
+        m = quesitoGender[selectedQuesito].maschi || 0;
+        f = quesitoGender[selectedQuesito].femmine || 0;
+      }
+      // Se invece hai una struttura complessa tipo regionQuesitoGender[regione][quesito], usala qui.
+  } 
+  else if (selectedRegion) {
+    // Caso B: Solo Regione (totali regione, senza quesito specifico)
+    if (regionKeyForData && typeof regionGender !== 'undefined') {
+      // Cerca match esatto
+      if (regionGender[regionKeyForData]) {
+        m = regionGender[regionKeyForData].maschi || 0;
+        f = regionGender[regionKeyForData].femmine || 0;
       } else {
         // Fallback: cerca normalizzando
-        const normTarget = normalizeName(displayRegionName);
+        const normalize = (str) => str ? str.toUpperCase().replace(/[^A-Z]/g, '') : '';
+        const normTarget = normalize(regionKeyForData);
         for (const key of Object.keys(regionGender)) {
-          if (normalizeName(key) === normTarget) {
+          if (normalize(key) === normTarget) {
             m = regionGender[key].maschi || 0;
             f = regionGender[key].femmine || 0;
             break;
@@ -5038,20 +5071,19 @@ function drawGenderChart() {
         }
       }
     }
-  } else {
+  } 
+  else {
+    // Caso C: Italia Totale (default)
     m = totalMaschi || 0;
     f = totalFemmine || 0;
   }
-  // -----------------------------------------------------------
 
   const total = m + f;
 
-  // --- FIX 1: GESTIONE DATI NON DISPONIBILI ---
+  // --- GESTIONE DATI NON DISPONIBILI ---
   if (total === 0) {
-    // Disegna il placeholder "Dati non disponibili" (omino grigio)
     drawNoDataPlaceholder(windowTop, windowHeight, 'Dati genere non disponibili');
-
-    // Disegna comunque il titolo per coerenza
+    // Disegna comunque titoli
     const titleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
     const titleY = windowTop + 8;
     push();
@@ -5059,7 +5091,14 @@ function drawGenderChart() {
     textSize(20);
     fill("#1B4A95");
     textFont('STIX Two Text');
-    text("VOTANTI PER GENERE", titleX, titleY); // o DISTRIBUZIONE GENERE
+    text("VOTANTI PER GENERE", titleX, titleY);
+    
+    // Sottotitolo anche nel caso "No Data" per coerenza
+    let subtitle = displayRegionName ? displayRegionName : "Italia";
+    if (selectedQuesito !== null) subtitle = `Quesito ${selectedQuesito} - ${subtitle}`;
+    
+    textSize(16);
+    text(subtitle, titleX, titleY + 22);
     pop();
     return;
   }
@@ -5068,7 +5107,7 @@ function drawGenderChart() {
   let targetM = (m / total) * 100;
   let targetF = (f / total) * 100;
 
-  let currentContextKey = String(selectedYear) + "-" + String(selectedRegion) + "-" + String(selectedQuesito);
+  let currentContextKey = String(selectedYear) + "-" + String(displayRegionName || "ITA") + "-" + String(selectedQuesito);
   if (lastGenderYear !== currentContextKey) {
     currentMaschiAnim = 0;
     currentFemmineAnim = 0;
@@ -5088,38 +5127,28 @@ function drawGenderChart() {
   // 3. Disegno Archi
   const startAngle = PI;
   const totalArchAngle = PI;
-
   const angleM = (pctM / 100) * totalArchAngle;
   const angleF = (pctF / 100) * totalArchAngle;
 
   push();
   noFill();
   strokeWeight(18);
-
-  // --- FIX 2: PUNTE STONDATE (ROUND) ---
   strokeCap(ROUND);
 
   // Arco Maschi (Giallo)
   stroke(cMale);
   if (pctM > 0.5) {
-    // Disegna arco normale
     arc(chartX, centerY, radius * 2, radius * 2, startAngle, startAngle + angleM);
   }
 
   // Arco Femmine (Blu)
   stroke(cFemale);
   if (pctF > 0.5) {
-    // Calcola punto di inizio preciso
-    // Se usiamo ROUND, le punte si estendono oltre l'angolo. 
-    // Per farli toccare bene senza sovrapporsi troppo "stranamente", li facciamo partire dallo stesso punto.
-    // L'ordine di disegno (prima Giallo, poi Blu sopra) gestisce la sovrapposizione centrale.
-
-    // Disegna arco femmine
     arc(chartX, centerY, radius * 2, radius * 2, startAngle + angleM, startAngle + angleM + angleF);
   }
   pop();
 
-  // 4. Testi e Titoli
+  // 4. Testi e Titoli (AGGIORNATO CON SOTTOTITOLO)
   const titleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
   const titleY = windowTop + 8;
 
@@ -5129,38 +5158,44 @@ function drawGenderChart() {
   fill("#1B4A95");
   textFont('STIX Two Text');
   text("VOTANTI PER GENERE", titleX, titleY);
+
+  // Sottotitolo Dinamico
+  let subtitle = null;
+  if (selectedQuesito !== null) {
+    const regionSuffix = displayRegionName ? displayRegionName : "Italia";
+    subtitle = `Quesito ${selectedQuesito} - ${regionSuffix}`;
+  } else {
+    subtitle = displayRegionName ? displayRegionName : "Italia";
+  }
+
+  if (subtitle) {
+    textSize(16);
+    text(subtitle, titleX, titleY + 22);
+  }
   pop();
 
-  // Etichette e Percentuali (posizionate agli estremi del div come SI/NO)
+  // 5. Etichette e Percentuali
   push();
   textFont('STIX Two Text');
   textStyle(BOLD);
 
-  // Gruppo UOMINI (Estremo Sinistro del div)
+  // Gruppo UOMINI (Sinistra)
   const uominiX = chartAreaLeft + bgPadding + 25;
-
-  // Etichetta "UOMINI" sopra (allineata a sinistra)
   textAlign(LEFT, BOTTOM);
   textSize(24);
   fill(cMale);
   text("UOMINI", uominiX, centerY + 2);
-
-  // Percentuale sotto (allineata a sinistra)
   textAlign(LEFT, TOP);
   textSize(32);
   fill(cMale);
   text(`${pctM.toFixed(1)}%`, uominiX, centerY + 2);
 
-  // Gruppo DONNE (Estremo Destro del div)
+  // Gruppo DONNE (Destra)
   const donneX = chartAreaLeft + chartAreaWidth - bgPadding - 25;
-
-  // Etichetta "DONNE" sopra (allineata a destra)
   textAlign(RIGHT, BOTTOM);
   textSize(24);
   fill(cFemale);
   text("DONNE", donneX, centerY + 2);
-
-  // Percentuale sotto (allineata a destra)
   textAlign(RIGHT, TOP);
   textSize(32);
   fill(cFemale);
@@ -5168,6 +5203,7 @@ function drawGenderChart() {
 
   pop();
 }
+
 
 
 

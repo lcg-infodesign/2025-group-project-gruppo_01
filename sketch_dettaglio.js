@@ -4542,35 +4542,41 @@ function drawAffluenzaChart() {
   const windowWidth = chartAreaWidth - bgPadding * 2;
   const affluenzaChartX = windowLeft + windowWidth / 2;
   const radius = getAffluenzaSemicircleRadius();
-  const affluenzaChartY = windowTop + windowHeight * 0.80;
+  
+  // Centro del grafico - Tirato su di 10px come richiesto
+  const affluenzaChartY = (windowTop + windowHeight * 0.72) - 10;
+
+  // --- LOGICA RECUPERO NOME REGIONE (IDENTICA A DRAWPIECHART) ---
+  let displayRegionName = null;
+  if (selectedRegion) {
+    let rawName = null;
+    if (typeof selectedRegion === 'object' && selectedRegion.properties) {
+      rawName = selectedRegion.properties.reg_name || 
+                selectedRegion.properties.denominazione_reg || 
+                selectedRegion.properties.denominazione || 
+                selectedRegion.properties.nome;
+    } else if (typeof selectedRegion === 'string') {
+      rawName = selectedRegion;
+    }
+    if (rawName) {
+      if (rawName.toUpperCase().includes("VALLE") || rawName.toUpperCase().includes("AOSTA")) displayRegionName = "Valle d'Aosta";
+      else if (rawName.toUpperCase().includes("TRENTINO") || rawName.toUpperCase().includes("TIROL")) displayRegionName = "Trentino-Alto Adige";
+      else displayRegionName = rawName;
+    }
+  }
+  // ---------------------------------------------------------------
 
   // --- INIZIO LOGICA ANIMAZIONE ---
   let targetAffluenza = calculateAffluenzaForChart();
-
-  // Pulizia del dato target
   if (typeof targetAffluenza === 'string') targetAffluenza = parseFloat(targetAffluenza);
+  if (targetAffluenza === null || targetAffluenza === undefined || !isFinite(targetAffluenza)) return;
 
-  // Se il dato non è valido, non disegniamo nulla (o reset a 0)
-  if (targetAffluenza === null || targetAffluenza === undefined || !isFinite(targetAffluenza)) {
-    return;
-  }
-
-  // Se l'anno è cambiato rispetto all'ultimo frame disegnato, resetta l'animazione a 0
   if (lastAffluenzaYear !== selectedYear) {
     currentAffluenzaAnim = 0;
     lastAffluenzaYear = selectedYear;
   }
-
-  // Calcola il passo dell'animazione (Lerp)
-  // 0.05 è la velocità: più basso (es. 0.02) è più lento, più alto (es. 0.1) è più veloce
   currentAffluenzaAnim = lerp(currentAffluenzaAnim, targetAffluenza, 0.05);
-
-  // Se siamo molto vicini al target (es. 99.9% vs 100%), scatta al valore finale per evitare micro-decimali
-  if (Math.abs(currentAffluenzaAnim - targetAffluenza) < 0.1) {
-    currentAffluenzaAnim = targetAffluenza;
-  }
-
-  // Usiamo il valore ANIMATO per tutto il disegno
+  if (Math.abs(currentAffluenzaAnim - targetAffluenza) < 0.1) currentAffluenzaAnim = targetAffluenza;
   const displayAffluenza = currentAffluenzaAnim;
   // --- FINE LOGICA ANIMAZIONE ---
 
@@ -4580,11 +4586,12 @@ function drawAffluenzaChart() {
   const progressAngle = Math.min(startAngle + (displayAffluenza / 100) * totalAngle, endAngle);
   const centerX = affluenzaChartX;
   const centerY = affluenzaChartY;
+  const chartStrokeWeight = 15;
 
   // 3. Disegna SFONDO (Arco Grigio)
   push();
   stroke(0, 0, 0, 20);
-  strokeWeight(18);
+  strokeWeight(chartStrokeWeight);
   strokeCap(ROUND);
   noFill();
   arc(centerX, centerY, radius * 2, radius * 2, startAngle, endAngle);
@@ -4592,34 +4599,25 @@ function drawAffluenzaChart() {
 
   // 4. Disegna ARCO CON GRADIENTE
   push();
-  strokeWeight(18);
+  strokeWeight(chartStrokeWeight);
   strokeCap(SQUARE);
   noFill();
-
   if (progressAngle > startAngle) {
     const steps = 80;
     const angleSpan = progressAngle - startAngle;
     const fullSpan = endAngle - startAngle;
-
-    // A. Disegna il gradiente a segmenti
     for (let i = 0; i < steps; i++) {
       const t1 = i / steps;
       const t2 = (i + 1) / steps;
-
       const a1 = startAngle + t1 * angleSpan;
       const a2 = startAngle + t2 * angleSpan;
-
       const globalT = (a1 - startAngle) / fullSpan;
       const col = lerpColor(cLightBlue, cBlue, globalT);
-
       stroke(col);
-      // Piccola sovrapposizione (+0.015) per evitare linee bianche tra i segmenti
       arc(centerX, centerY, radius * 2, radius * 2, a1, a2 + 0.015);
     }
-
-    // B. Aggiungi il "tappo" rotondo all'inizio (0%)
     stroke(cLightBlue);
-    strokeWeight(18);
+    strokeWeight(chartStrokeWeight);
     strokeCap(ROUND);
     const startX = centerX + radius * cos(startAngle);
     const startY = centerY + radius * sin(startAngle);
@@ -4627,7 +4625,7 @@ function drawAffluenzaChart() {
   }
   pop();
 
-  // 5. Asticella (Needle) che segue l'animazione
+  // 5. Asticella (Needle)
   push();
   stroke(cYellow);
   strokeWeight(4);
@@ -4640,56 +4638,8 @@ function drawAffluenzaChart() {
     centerX + rOuter * cos(indicatorAngle), centerY + rOuter * sin(indicatorAngle)
   );
   pop();
-
-  // --- NUOVO: Tacca fissa "Affluenza massima" (88.8%) ---
-  push();
-  // Colore blu del sito (usiamo cBlue definito sopra o #1E52A6)
-  stroke('#1E52A6');
-  strokeWeight(4); // Stesso spessore della tacca gialla
-  strokeCap(ROUND);
-
-  // Impostiamo il tratteggio: 4px linea, 4px spazio
-  drawingContext.setLineDash([3, 6]);
-
-  const maxAffluenzaVal = 88.8;
-  const maxAngle = startAngle + (maxAffluenzaVal / 100) * totalAngle;
-
-  const rOuterMax = radius + 18;
-  const rInnerMax = radius - 18;
-
-  line(
-    centerX + rInnerMax * cos(maxAngle), centerY + rInnerMax * sin(maxAngle),
-    centerX + rOuterMax * cos(maxAngle), centerY + rOuterMax * sin(maxAngle)
-  );
-
-  // Ripristiniamo la linea continua per il resto dei disegni
-  drawingContext.setLineDash([]);
-  pop();
-
-  // --- Testo "Affluenza massima: 88.8% – 1946" ---
-  push();
-  textSize(14); // Stesso corpo di 0% e 100% (o leggermente più piccolo se serve spazio)
-  textStyle(BOLD); // O NORMAL, a seconda di come vuoi che appaia rispetto a 0%/100%
-  fill('#1E52A6'); // Blu
-  textAlign(LEFT, CENTER); // Allineato a sinistra rispetto al punto
-
-  // Calcolo posizione testo: un po' a destra e sopra la tacca
-  // Aggiungiamo un raggio extra per allontanarlo
-  const textRadius = rOuterMax + 15;
-  const textX = centerX + textRadius * cos(maxAngle) - 20; // +5 per staccare un po'
-  const textY = centerY + textRadius * sin(maxAngle) - 10; // -10 per alzarlo leggermente
-
-  if (typeof stixFont !== 'undefined') textFont(stixFont);
-  text("Massima: 88.8%", textX, textY);
-  pop();
-  // -----------------------------------------------------
-
-
-
-
-  // 6. Testi e Etichette
-
-  // Percentuale Grande al centro (anch'essa animata!)
+  
+  // 6. Testi e Etichette (Percentuale Grande al centro)
   push();
   noStroke();
   fill(cBlue);
@@ -4697,22 +4647,71 @@ function drawAffluenzaChart() {
   textSize(32);
   textStyle(BOLD);
   textAlign(CENTER, CENTER);
-  text(displayAffluenza.toFixed(1) + "%", centerX, centerY);
+  text(displayAffluenza.toFixed(1) + "%", centerX, centerY - 10);
   pop();
 
-  // Etichette 0% e 100% rimosse per uniformare la gerarchia visiva
+  // --- 7. BARRA GRADIENTE COSTANTE E TESTI ---
+  const barWidth = radius * 2.2; 
+  const barHeight = 15; 
+  const barX = centerX - barWidth / 2;
+  const barY = centerY + 18; 
 
-  // Titolo
+  // 7A. Disegno PRIMA le etichette
+  push();
+  fill(cBlue); 
+  noStroke();
+  textSize(14); 
+  textFont('STIX Two Text');
+  textStyle(BOLD); 
+  const textY = barY + barHeight + 5; 
+  textAlign(LEFT, TOP);
+  text("0%", barX, textY);
+  textAlign(RIGHT, TOP);
+  text("100%", barX + barWidth, textY);
+  pop();
+
+  // 7B. Disegno POI la barra sfumata
+  push();
+  noStroke();
+  drawingContext.save();
+  drawingContext.beginPath();
+  drawingContext.roundRect(barX, barY, barWidth, barHeight, barHeight / 2);
+  drawingContext.clip();
+
+  for (let i = 0; i <= barWidth; i++) {
+    const t = i / barWidth;
+    const col = lerpColor(cLightBlue, cBlue, t);
+    fill(col);
+    rect(barX + i, barY, 1.5, barHeight);
+  }
+  drawingContext.restore();
+  pop();
+
+  // 8. Titolo e Sottotitolo (AGGIORNATO)
   const titleX = chartAreaLeft + chartAreaWidth - bgPadding - 8;
   const titleY = windowTop + 8;
   push();
+  
+  // Titolo "AFFLUENZA"
   textAlign(RIGHT, TOP);
   textSize(20);
   fill("#1B4A95");
   textFont('STIX Two Text');
   text("AFFLUENZA", titleX, titleY);
+
+  // Sottotitolo (Nome Regione o Italia)
+  const subtitle = displayRegionName ? displayRegionName : "Italia";
+  textAlign(RIGHT, TOP);
+  textSize(16);
+  fill("#1B4A95"); // Stesso blu del titolo
+  // Posizionato subito sotto il titolo principale (offset +22 come nel pie chart)
+  text(subtitle, titleX, titleY + 22);
+
   pop();
 }
+
+
+
 
 
 

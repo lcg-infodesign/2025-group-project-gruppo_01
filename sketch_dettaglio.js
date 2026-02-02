@@ -5829,7 +5829,7 @@ function mouseWheel(event) {
   // Check if mouse is over quesiti area
   if (mouseX >= windowLeft + bgPadding && mouseX < windowLeft + windowWidth - bgPadding &&
     mouseY >= quesitiAreaTop && mouseY < quesitiAreaBottom) {
-    const scrollSpeed = 30;
+    const scrollSpeed = 5;
     quesitiScrollOffset += event.delta > 0 ? scrollSpeed : -scrollSpeed;
 
     // Calcolo altezze identico a drawQuesitiWindow (textSize 18, lineHeight 23, minQuesitoHeight 40)

@@ -29,10 +29,21 @@
         display: none !important;
         visibility: hidden !important;
       }
+
+      /* Padding navbar come in pagina dettaglio */
+      #navbar {
+        padding-bottom: 10px;
+      }
+      /* Linea inferiore un po' più vicina al titolo (non troppo) */
+      .linea-parallela-bottom {
+        margin-top: -2px !important;
+        top: -3px !important;
+        position: relative;
+      }
     </style>
   </head>
 
-  <body>
+  <body class="page-info">
 
     <div id="navbar">
       <div class="navbar-wrapper">
@@ -56,7 +67,9 @@
         <div class="navbar-bottom">
           <div class="navbar-title">AFFLUENZA dei REFERENDUM</div>
         </div>
-        <div class="linea-parallela-top"></div>
+
+        <!-- SECONDA LINEA BLU -->
+        <div class="linea-parallela-bottom"></div>
       
       </div>
     </div>

@@ -48,7 +48,7 @@
   height: 2px;
   background: var(--blue-color);
   width: 100%;
-  margin: 5px 0px;
+  margin: 2px 0px;
   z-index: -100px;
 }
 
@@ -56,7 +56,7 @@
   height: 2px;
   background: var(--blue-color);
   width: 100%;
-  margin: 5px 0px;
+  margin: 2px 0px;
 }
 
 .navbar-wrapper {
@@ -123,6 +123,7 @@
 /* ------------------------- */
 .navbar-bottom {
   text-align: center;
+  padding: 2px 0;
 }
 
 .navbar-title {

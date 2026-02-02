@@ -458,3 +458,23 @@
         /* Allinea a DESTRA (a filo coi grafici) */
         /* bottom: 38px è già settato dal JS, va bene così */
       }
+
+      /* Stile per il link che avvolge l'immagine */
+.album-item .album-link {
+  display: block; /* Rende il link un blocco per gestire bene l'immagine */
+  overflow: visible; /* Assicura che l'ingrandimento non venga tagliato */
+}
+
+/* Stile base dell'immagine */
+.album-item img {
+
+  height: auto;
+  transition: transform 0.3s ease; /* Animazione fluida (durata 0.3s) */
+  display: block;
+  cursor: pointer; /* Cambia il cursore in manina */
+}
+
+/* Effetto Hover: Ingrandisce l'immagine */
+.album-item .album-link:hover img {
+  transform: scale(1.2); /* Ingrandisce del 20% */
+}

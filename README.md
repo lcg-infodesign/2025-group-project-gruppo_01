@@ -1,4 +1,4 @@
-//ATENSIONISMOIN ITALIA//
+//ASTENSIONISMO IN ITALIA//
 
 
 Il sito nasce a fronte della sempre più bassa affluenza alle urne.  Spesso non ci rendiamo conto della portata di questo fenomeno, che si presenta specialmente ai referendum, lo strumento politico più tangibile per migliorare la vita quotidiana. Nella formula 50% +1 del quorum, anche il singolo fa la differenza:  se questo progetto dovesse far cambiare idea anche ad un solo astensionista, sarebbe già una vittoria.
